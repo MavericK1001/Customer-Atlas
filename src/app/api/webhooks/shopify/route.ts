@@ -1,0 +1,143 @@
+import { NextRequest, NextResponse } from "next/server";
+import { enqueueMetricsRecompute } from "@/lib/queue";
+import { prisma } from "@/lib/prisma";
+import { verifyShopifyWebhookHmac } from "@/lib/shopify";
+
+type ShopifyOrderPayload = {
+  id: number;
+  total_price: string;
+  created_at: string;
+  customer?: {
+    id: number;
+    email?: string | null;
+  } | null;
+  line_items?: Array<{ title?: string }>;
+};
+
+type ShopifyCustomerPayload = {
+  id: number;
+  email?: string | null;
+};
+
+export async function POST(request: NextRequest): Promise<NextResponse> {
+  const topic = request.headers.get("x-shopify-topic");
+  const shopDomain = request.headers.get("x-shopify-shop-domain");
+  const hmac = request.headers.get("x-shopify-hmac-sha256");
+
+  if (!topic || !shopDomain || !hmac) {
+    return NextResponse.json({ error: "Missing webhook headers." }, { status: 400 });
+  }
+
+  const payload = await request.text();
+
+  if (!verifyShopifyWebhookHmac(payload, hmac)) {
+    return NextResponse.json({ error: "Invalid webhook signature." }, { status: 401 });
+  }
+
+  try {
+    if (topic === "customers/create" || topic === "customers/update") {
+      const customer = JSON.parse(payload) as ShopifyCustomerPayload;
+
+      const stored = await prisma.customer.upsert({
+        where: {
+          shopDomain_shopifyCustomerId: {
+            shopDomain,
+            shopifyCustomerId: String(customer.id),
+          },
+        },
+        update: {
+          email: customer.email,
+        },
+        create: {
+          shopDomain,
+          shopifyCustomerId: String(customer.id),
+          email: customer.email,
+          totalSpent: 0,
+          averageOrderValue: 0,
+          predictedLtv: 0,
+        },
+      });
+
+      await enqueueMetricsRecompute({
+        shopDomain,
+        customerId: stored.id,
+      });
+    }
+
+    if (topic === "orders/create" || topic === "orders/updated") {
+      const order = JSON.parse(payload) as ShopifyOrderPayload;
+      const shopifyCustomerId = order.customer?.id ? String(order.customer.id) : null;
+
+      let customerId: number | null = null;
+      const productTitles = (order.line_items ?? [])
+        .map((line) => line.title)
+        .filter((title): title is string => typeof title === "string");
+
+      if (shopifyCustomerId) {
+        const customer = await prisma.customer.upsert({
+          where: {
+            shopDomain_shopifyCustomerId: {
+              shopDomain,
+              shopifyCustomerId,
+            },
+          },
+          update: {
+            email: order.customer?.email,
+          },
+          create: {
+            shopDomain,
+            shopifyCustomerId,
+            email: order.customer?.email,
+            totalSpent: 0,
+            averageOrderValue: 0,
+            predictedLtv: 0,
+          },
+        });
+
+        customerId = customer.id;
+      }
+
+      await prisma.order.upsert({
+        where: {
+          shopDomain_shopifyOrderId: {
+            shopDomain,
+            shopifyOrderId: String(order.id),
+          },
+        },
+        update: {
+          customerId,
+          orderValue: Number(order.total_price ?? 0),
+          products: productTitles,
+          createdAt: new Date(order.created_at),
+        },
+        create: {
+          shopDomain,
+          shopifyOrderId: String(order.id),
+          customerId,
+          orderValue: Number(order.total_price ?? 0),
+          products: productTitles,
+          createdAt: new Date(order.created_at),
+        },
+      });
+
+      if (customerId) {
+        await enqueueMetricsRecompute({
+          shopDomain,
+          customerId,
+        });
+      } else {
+        await enqueueMetricsRecompute({ shopDomain });
+      }
+    }
+
+    return NextResponse.json({ ok: true });
+  } catch (error) {
+    return NextResponse.json(
+      {
+        error: "Webhook processing failed",
+        details: (error as Error).message,
+      },
+      { status: 500 },
+    );
+  }
+}

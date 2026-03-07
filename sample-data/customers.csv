@@ -1,0 +1,16 @@
+First Name,Last Name,Email,Phone,Address1,City,Province,Country,Zip,Tags,Accepts Email Marketing
+Emma,Carter,emma.carter+ca@northstarlab.test,+1-415-555-0101,123 Market St,San Francisco,California,United States,94105,"repeat,skincare",yes
+Liam,Nguyen,liam.nguyen+ca@northstarlab.test,+1-415-555-0102,88 Mission St,San Francisco,California,United States,94103,"one-time,fitness",yes
+Olivia,Patel,olivia.patel+ny@northstarlab.test,+1-212-555-0103,450 Broadway,New York,New York,United States,10013,"vip,coffee",yes
+Noah,Johnson,noah.johnson+tx@northstarlab.test,+1-512-555-0104,77 Congress Ave,Austin,Texas,United States,78701,"repeat,fitness",no
+Ava,Kim,ava.kim+wa@northstarlab.test,+1-206-555-0105,501 Pine St,Seattle,Washington,United States,98101,"one-time,coffee",yes
+Elijah,Ramirez,elijah.ramirez+il@northstarlab.test,+1-312-555-0106,200 W Lake St,Chicago,Illinois,United States,60606,"churn-risk,skincare",yes
+Sophia,Clark,sophia.clark+fl@northstarlab.test,+1-305-555-0107,90 Biscayne Blvd,Miami,Florida,United States,33132,"repeat,skincare",yes
+James,Walker,james.walker+co@northstarlab.test,+1-303-555-0108,1700 Blake St,Denver,Colorado,United States,80202,"one-time,fitness",no
+Isabella,Lopez,isabella.lopez+az@northstarlab.test,+1-602-555-0109,1 E Washington St,Phoenix,Arizona,United States,85004,"vip,skincare",yes
+Benjamin,Hall,benjamin.hall+ga@northstarlab.test,+1-404-555-0110,600 Peachtree St,Atlanta,Georgia,United States,30308,"repeat,coffee",yes
+Mia,Allen,mia.allen+or@northstarlab.test,+1-503-555-0111,700 SW 5th Ave,Portland,Oregon,United States,97204,"one-time,skincare",yes
+Lucas,Young,lucas.young+ma@northstarlab.test,+1-617-555-0112,100 Summer St,Boston,Massachusetts,United States,02110,"churn-risk,fitness",no
+Charlotte,Scott,charlotte.scott+nc@northstarlab.test,+1-704-555-0113,300 S Tryon St,Charlotte,North Carolina,United States,28202,"repeat,coffee",yes
+Henry,Green,henry.green+pa@northstarlab.test,+1-267-555-0114,1200 Market St,Philadelphia,Pennsylvania,United States,19107,"one-time,fitness",yes
+Amelia,Baker,amelia.baker+mi@northstarlab.test,+1-313-555-0115,500 Woodward Ave,Detroit,Michigan,United States,48226,"vip,coffee",yes
