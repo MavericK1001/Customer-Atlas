@@ -78,14 +78,23 @@ export default function SettingsPage() {
   const [billingError, setBillingError] = useState<string | null>(null);
   const [isUpgrading, setIsUpgrading] = useState(false);
   const [isDowngrading, setIsDowngrading] = useState(false);
+  const [billingReturnState, setBillingReturnState] = useState<
+    "upgraded" | "not-active" | null
+  >(null);
 
   useEffect(() => {
-    const detectedShop = getShopFromSearchParams(
-      new URLSearchParams(window.location.search),
-    );
+    const searchParams = new URLSearchParams(window.location.search);
+    const detectedShop = getShopFromSearchParams(searchParams);
+    const billingStatus = searchParams.get("billing");
 
     if (detectedShop) {
       setShopDomain(detectedShop);
+    }
+
+    if (billingStatus === "upgraded") {
+      setBillingReturnState("upgraded");
+    } else if (billingStatus === "not-active") {
+      setBillingReturnState("not-active");
     }
   }, []);
 
@@ -264,6 +273,18 @@ export default function SettingsPage() {
           <Layout.Section>
             <Card>
               <BlockStack gap="300">
+                {billingReturnState === "upgraded" ? (
+                  <Banner tone="success">
+                    Pro plan activated successfully. Premium features are now
+                    unlocked.
+                  </Banner>
+                ) : null}
+                {billingReturnState === "not-active" ? (
+                  <Banner tone="warning">
+                    Billing confirmation did not complete. Your plan is still
+                    Free.
+                  </Banner>
+                ) : null}
                 <Text as="h3" variant="headingMd">
                   Billing
                 </Text>
