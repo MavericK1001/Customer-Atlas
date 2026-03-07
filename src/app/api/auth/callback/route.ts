@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requiredEnv } from "@/lib/env";
 import { prisma } from "@/lib/prisma";
+import { APP_SESSION_COOKIE_NAME } from "@/lib/auth-constants";
+import { createAppSessionToken, getAppSessionCookieOptions } from "@/lib/auth-session";
 import { exchangeShopifyCodeForToken, registerWebhookSubscription, verifyShopifyOAuthCallback } from "@/lib/shopify";
 import { syncShopData } from "@/lib/sync";
 
@@ -55,6 +57,11 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 
     const response = NextResponse.redirect(dashboardUrl.toString());
     response.cookies.delete("shopify_oauth_state");
+    response.cookies.set(
+      APP_SESSION_COOKIE_NAME,
+      createAppSessionToken(shop),
+      getAppSessionCookieOptions(),
+    );
     return response;
   } catch (error) {
     return NextResponse.json(

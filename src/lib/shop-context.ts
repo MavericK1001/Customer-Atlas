@@ -1,5 +1,7 @@
 import { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { APP_SESSION_COOKIE_NAME } from "@/lib/auth-constants";
+import { readAppSessionToken } from "@/lib/auth-session";
 import { normalizeShopDomain } from "@/lib/shop";
 
 type ResolvedShop = {
@@ -19,6 +21,18 @@ export async function resolveShopDomain(request: NextRequest): Promise<ResolveSh
   const fromQuery = normalizeShopDomain(request.nextUrl.searchParams.get("shop"));
   if (fromQuery) {
     return { ok: true, shopDomain: fromQuery };
+  }
+
+  const session = readAppSessionToken(request.cookies.get(APP_SESSION_COOKIE_NAME)?.value);
+  if (session) {
+    const installed = await prisma.appInstall.findUnique({
+      where: { shopDomain: session.shopDomain },
+      select: { shopDomain: true },
+    });
+
+    if (installed?.shopDomain) {
+      return { ok: true, shopDomain: installed.shopDomain };
+    }
   }
 
   const installs = await prisma.appInstall.findMany({
