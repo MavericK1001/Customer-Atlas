@@ -1,12 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { resolveShopDomain } from "@/lib/shop-context";
-
-type SegmentPreviewRules = {
-  minTotalSpent?: number;
-  minOrders?: number;
-  inactiveDays?: number;
-};
+import { buildCustomerWhereClause, parseSegmentRules } from "@/lib/segment-rules";
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
   const resolved = await resolveShopDomain(request);
@@ -18,35 +13,18 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
   const { shopDomain } = resolved;
 
   const body = (await request.json()) as {
-    rules?: SegmentPreviewRules;
+    rules?: unknown;
   };
 
-  const rules = body.rules ?? {};
+  const parsed = parseSegmentRules(body.rules);
+  if (!parsed.ok) {
+    return NextResponse.json({ error: parsed.error }, { status: 400 });
+  }
 
-  const minTotalSpent =
-    typeof rules.minTotalSpent === "number" && Number.isFinite(rules.minTotalSpent)
-      ? rules.minTotalSpent
-      : undefined;
-  const minOrders =
-    typeof rules.minOrders === "number" && Number.isFinite(rules.minOrders)
-      ? Math.max(0, Math.floor(rules.minOrders))
-      : undefined;
-  const inactiveDays =
-    typeof rules.inactiveDays === "number" && Number.isFinite(rules.inactiveDays)
-      ? Math.max(0, Math.floor(rules.inactiveDays))
-      : undefined;
-
-  const lastOrderBefore =
-    typeof inactiveDays === "number"
-      ? new Date(Date.now() - inactiveDays * 24 * 60 * 60 * 1000)
-      : undefined;
-
-  const whereClause = {
+  const whereClause = buildCustomerWhereClause({
     shopDomain,
-    ...(typeof minTotalSpent === "number" ? { totalSpent: { gte: minTotalSpent } } : {}),
-    ...(typeof minOrders === "number" ? { totalOrders: { gte: minOrders } } : {}),
-    ...(lastOrderBefore ? { lastOrderDate: { lt: lastOrderBefore } } : {}),
-  };
+    rules: parsed.rules,
+  });
 
   const [count, sampleCustomers] = await Promise.all([
     prisma.customer.count({ where: whereClause }),
@@ -66,10 +44,6 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     ok: true,
     matchCount: count,
     sampleCustomers,
-    appliedRules: {
-      minTotalSpent,
-      minOrders,
-      inactiveDays,
-    },
+    appliedRules: parsed.rules,
   });
 }
