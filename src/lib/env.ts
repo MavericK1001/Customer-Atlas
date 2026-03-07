@@ -13,6 +13,7 @@ export const env = {
     process.env.SHOPIFY_BILLING_PRO_PLAN_CURRENCY ?? "USD",
   SHOPIFY_BILLING_TRIAL_DAYS:
     process.env.SHOPIFY_BILLING_TRIAL_DAYS ?? "14",
+  BILLING_RECONCILE_SECRET: process.env.BILLING_RECONCILE_SECRET,
   REDIS_URL: process.env.REDIS_URL,
 };
 
