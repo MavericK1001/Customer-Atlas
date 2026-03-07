@@ -24,12 +24,19 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
   });
 
   return NextResponse.json({
-    segments: segments.map((segment) => ({
+    segments: segments.map(
+      (segment: {
+        id: number;
+        segmentName: string;
+        rules: unknown;
+        customerCount: number;
+      }) => ({
       id: segment.id,
       segmentName: segment.segmentName,
       rules: segment.rules,
       customerCount: segment.customerCount,
-    })),
+      }),
+    ),
   });
 }
 

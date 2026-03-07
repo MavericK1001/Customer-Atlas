@@ -1,9 +1,14 @@
-import { Prisma } from "@prisma/client";
-
 export type SegmentPreviewRules = {
   minTotalSpent?: number;
   minOrders?: number;
   inactiveDays?: number;
+};
+
+type CustomerWhereClause = {
+  shopDomain: string;
+  totalSpent?: { gte: number };
+  totalOrders?: { gte: number };
+  lastOrderDate?: { lt: Date };
 };
 
 export function parseSegmentRules(input: unknown): {
@@ -43,7 +48,7 @@ export function parseSegmentRules(input: unknown): {
 export function buildCustomerWhereClause(input: {
   shopDomain: string;
   rules: SegmentPreviewRules;
-}): Prisma.CustomerWhereInput {
+}): CustomerWhereClause {
   const lastOrderBefore =
     typeof input.rules.inactiveDays === "number"
       ? new Date(Date.now() - input.rules.inactiveDays * 24 * 60 * 60 * 1000)

@@ -73,7 +73,10 @@ export async function generateInsights(shopDomain: string): Promise<void> {
   ];
 
   const archivedSignatures = new Set(
-    archivedInsights.map((insight) => `${insight.insightType}::${insight.message}`),
+    archivedInsights.map(
+      (insight: { insightType: string; message: string }) =>
+        `${insight.insightType}::${insight.message}`,
+    ),
   );
 
   const activeInsights = insights.filter(

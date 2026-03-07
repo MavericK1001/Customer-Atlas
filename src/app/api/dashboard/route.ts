@@ -22,6 +22,14 @@ type PriorityCard = {
   ctaPath: string;
 };
 
+type InsightRow = {
+  id: number;
+  insightType: string;
+  message: string;
+  potentialRevenue: unknown;
+  createdAt: Date;
+};
+
 function getInsightUrgencyMultiplier(insightType: string): number {
   if (insightType === "retention") {
     return 1.35;
@@ -120,9 +128,11 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
         ) / customers.length
       : 0;
 
-  const todayPriorities = insights
-    .map((insight) => buildPriorityCard({ insight }))
-    .sort((a, b) => b.priorityScore - a.priorityScore)
+  const typedInsights = insights as InsightRow[];
+
+  const todayPriorities = typedInsights
+    .map((insight: InsightRow) => buildPriorityCard({ insight }))
+    .sort((a: PriorityCard, b: PriorityCard) => b.priorityScore - a.priorityScore)
     .slice(0, 3);
 
   return NextResponse.json({
@@ -133,7 +143,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       predictedLtv: Number(predictedLtv.toFixed(2)),
     },
     todayPriorities,
-    revenueInsights: insights.map((insight: { id: number; insightType: string; message: string; potentialRevenue: unknown; createdAt: Date }) => ({
+    revenueInsights: typedInsights.map((insight: InsightRow) => ({
       id: insight.id,
       type: insight.insightType,
       message: insight.message,
