@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { canUseFeature, getShopPlan } from "@/lib/plan";
 import { prisma } from "@/lib/prisma";
 import { resolveShopDomain } from "@/lib/shop-context";
 import { buildCustomerWhereClause, parseSegmentRules } from "@/lib/segment-rules";
@@ -26,6 +27,19 @@ export async function PATCH(
   }
 
   const { shopDomain } = resolved;
+  const shopPlan = await getShopPlan(shopDomain);
+  if (
+    !canUseFeature({
+      feature: "custom_segment_crud",
+      planTier: shopPlan.planTier,
+      billingStatus: shopPlan.billingStatus,
+    })
+  ) {
+    return NextResponse.json(
+      { error: "Upgrade to Pro to edit custom segments." },
+      { status: 402 },
+    );
+  }
 
   const existing = await prisma.segment.findFirst({
     where: { id: segmentId, shopDomain },
@@ -118,6 +132,19 @@ export async function DELETE(
   }
 
   const { shopDomain } = resolved;
+  const shopPlan = await getShopPlan(shopDomain);
+  if (
+    !canUseFeature({
+      feature: "custom_segment_crud",
+      planTier: shopPlan.planTier,
+      billingStatus: shopPlan.billingStatus,
+    })
+  ) {
+    return NextResponse.json(
+      { error: "Upgrade to Pro to delete custom segments." },
+      { status: 402 },
+    );
+  }
 
   const existing = await prisma.segment.findFirst({
     where: { id: segmentId, shopDomain },

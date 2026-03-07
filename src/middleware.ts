@@ -13,6 +13,7 @@ const PUBLIC_API_PREFIXES = [
   "/api/auth/shopify",
   "/api/auth/callback",
   "/api/auth/logout",
+  "/api/billing/confirm",
   "/api/webhooks/shopify",
 ];
 

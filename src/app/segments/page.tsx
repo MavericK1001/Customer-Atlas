@@ -23,6 +23,11 @@ type Segment = {
   customerCount: number;
 };
 
+type BillingState = {
+  planTier: "free" | "pro";
+  billingStatus: string;
+};
+
 export default function SegmentsPage() {
   const [segments, setSegments] = useState<Segment[]>([]);
   const [segmentName, setSegmentName] = useState("High Intent Segment");
@@ -48,6 +53,7 @@ export default function SegmentsPage() {
   const [segmentActionSuccess, setSegmentActionSuccess] = useState<
     string | null
   >(null);
+  const [billing, setBilling] = useState<BillingState | null>(null);
 
   const shop = useMemo(() => {
     if (typeof window === "undefined") return "";
@@ -57,10 +63,24 @@ export default function SegmentsPage() {
   useEffect(() => {
     async function loadSegments() {
       const query = shop ? `?shop=${encodeURIComponent(shop)}` : "";
-      const response = await fetch(`/api/segments${query}`);
-      if (!response.ok) return;
-      const json = (await response.json()) as { segments: Segment[] };
-      setSegments(json.segments);
+      const [segmentsResponse, billingResponse] = await Promise.all([
+        fetch(`/api/segments${query}`),
+        fetch(`/api/billing${query}`),
+      ]);
+
+      if (segmentsResponse.ok) {
+        const json = (await segmentsResponse.json()) as { segments: Segment[] };
+        setSegments(json.segments);
+      }
+
+      if (billingResponse.ok) {
+        const billingJson = (await billingResponse.json()) as {
+          billing?: BillingState;
+        };
+        if (billingJson.billing) {
+          setBilling(billingJson.billing);
+        }
+      }
     }
 
     loadSegments().catch(() => undefined);
@@ -131,6 +151,10 @@ export default function SegmentsPage() {
 
   async function handleCreateSegment(): Promise<void> {
     try {
+      if (billing?.planTier !== "pro") {
+        throw new Error("Upgrade to Pro to create custom segments.");
+      }
+
       setIsCreating(true);
       setSegmentActionError(null);
       setSegmentActionSuccess(null);
@@ -190,6 +214,10 @@ export default function SegmentsPage() {
 
   async function handleSaveSegment(segmentId: number): Promise<void> {
     try {
+      if (billing?.planTier !== "pro") {
+        throw new Error("Upgrade to Pro to edit custom segments.");
+      }
+
       setSavingSegmentId(segmentId);
       setSegmentActionError(null);
       setSegmentActionSuccess(null);
@@ -231,6 +259,10 @@ export default function SegmentsPage() {
 
   async function handleDeleteSegment(segmentId: number): Promise<void> {
     try {
+      if (billing?.planTier !== "pro") {
+        throw new Error("Upgrade to Pro to delete custom segments.");
+      }
+
       setDeletingSegmentId(segmentId);
       setSegmentActionError(null);
       setSegmentActionSuccess(null);
@@ -334,6 +366,7 @@ export default function SegmentsPage() {
                   <Button
                     tone="success"
                     loading={isCreating}
+                    disabled={billing?.planTier !== "pro"}
                     onClick={() => {
                       handleCreateSegment().catch(() => undefined);
                     }}
@@ -348,6 +381,12 @@ export default function SegmentsPage() {
                 ) : null}
                 {previewError ? (
                   <Banner tone="critical">{previewError}</Banner>
+                ) : null}
+                {billing?.planTier !== "pro" ? (
+                  <Banner tone="warning">
+                    Custom segment create/edit/delete is available on Pro. You
+                    can still preview segment match counts on the free plan.
+                  </Banner>
                 ) : null}
                 {segmentActionError ? (
                   <Banner tone="critical">{segmentActionError}</Banner>
@@ -407,6 +446,7 @@ export default function SegmentsPage() {
                         <InlineStack align="space-between">
                           <Button
                             variant="primary"
+                            disabled={billing?.planTier !== "pro"}
                             loading={savingSegmentId === segment.id}
                             onClick={() => {
                               handleSaveSegment(segment.id).catch(
@@ -444,6 +484,7 @@ export default function SegmentsPage() {
                         <InlineStack align="space-between">
                           <Button
                             variant="tertiary"
+                            disabled={billing?.planTier !== "pro"}
                             onClick={() => beginEditSegment(segment)}
                           >
                             Edit
@@ -451,6 +492,7 @@ export default function SegmentsPage() {
                           <Button
                             tone="critical"
                             variant="tertiary"
+                            disabled={billing?.planTier !== "pro"}
                             loading={deletingSegmentId === segment.id}
                             onClick={() => {
                               handleDeleteSegment(segment.id).catch(

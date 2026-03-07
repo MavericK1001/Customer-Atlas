@@ -16,6 +16,10 @@ model AppInstall {
   id             Int      @id @default(autoincrement())
   shopDomain     String   @unique
   accessToken    String
+  planTier       String   @default("free")
+  billingStatus  String   @default("active")
+  shopifySubscriptionId String?
+  trialEndsAt    DateTime?
   lastSyncAt     DateTime?
   lastSyncStatus String?
   lastSyncError  String?

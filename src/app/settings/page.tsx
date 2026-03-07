@@ -8,6 +8,7 @@ import {
   Button,
   Card,
   FormLayout,
+  InlineStack,
   Layout,
   List,
   Page,
@@ -42,6 +43,13 @@ type SyncHealth = {
   };
 };
 
+type BillingState = {
+  planTier: "free" | "pro";
+  billingStatus: string;
+  trialEndsAt: string | null;
+  shopifySubscriptionId: string | null;
+};
+
 function getStatusTone(
   status: string | null,
 ): "info" | "success" | "attention" | "critical" {
@@ -66,6 +74,10 @@ export default function SettingsPage() {
   const [syncResult, setSyncResult] = useState<SyncResult | null>(null);
   const [syncError, setSyncError] = useState<string | null>(null);
   const [syncHealth, setSyncHealth] = useState<SyncHealth | null>(null);
+  const [billing, setBilling] = useState<BillingState | null>(null);
+  const [billingError, setBillingError] = useState<string | null>(null);
+  const [isUpgrading, setIsUpgrading] = useState(false);
+  const [isDowngrading, setIsDowngrading] = useState(false);
 
   useEffect(() => {
     const detectedShop = getShopFromSearchParams(
@@ -78,27 +90,40 @@ export default function SettingsPage() {
   }, []);
 
   useEffect(() => {
-    async function loadSyncHealth(): Promise<void> {
+    async function loadSettingsData(): Promise<void> {
       const normalizedShop = normalizeShopDomain(shopDomain);
       const query = normalizedShop
         ? `?shop=${encodeURIComponent(normalizedShop)}`
         : "";
-      const response = await fetch(`/api/sync${query}`);
-      if (!response.ok) {
-        return;
+      const [syncResponse, billingResponse] = await Promise.all([
+        fetch(`/api/sync${query}`),
+        fetch(`/api/billing${query}`),
+      ]);
+
+      if (syncResponse.ok) {
+        const payload = (await syncResponse.json()) as {
+          ok?: boolean;
+          syncHealth?: SyncHealth;
+        };
+
+        if (payload.ok && payload.syncHealth) {
+          setSyncHealth(payload.syncHealth);
+        }
       }
 
-      const payload = (await response.json()) as {
-        ok?: boolean;
-        syncHealth?: SyncHealth;
-      };
+      if (billingResponse.ok) {
+        const payload = (await billingResponse.json()) as {
+          ok?: boolean;
+          billing?: BillingState;
+        };
 
-      if (payload.ok && payload.syncHealth) {
-        setSyncHealth(payload.syncHealth);
+        if (payload.ok && payload.billing) {
+          setBilling(payload.billing);
+        }
       }
     }
 
-    loadSyncHealth().catch(() => undefined);
+    loadSettingsData().catch(() => undefined);
   }, [shopDomain]);
 
   const helperText = useMemo(() => {
@@ -158,10 +183,133 @@ export default function SettingsPage() {
     }
   }
 
+  async function handleUpgradeToPro(): Promise<void> {
+    try {
+      setIsUpgrading(true);
+      setBillingError(null);
+
+      const normalizedShop = normalizeShopDomain(shopDomain);
+      const query = normalizedShop
+        ? `?shop=${encodeURIComponent(normalizedShop)}`
+        : "";
+
+      const response = await fetch(`/api/billing${query}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ planTier: "pro" }),
+      });
+
+      const payload = (await response.json()) as {
+        ok?: boolean;
+        error?: string;
+        confirmationUrl?: string;
+      };
+
+      if (!response.ok || !payload.ok || !payload.confirmationUrl) {
+        throw new Error(payload.error ?? "Unable to start upgrade flow.");
+      }
+
+      window.location.href = payload.confirmationUrl;
+    } catch (error) {
+      setBillingError((error as Error).message);
+    } finally {
+      setIsUpgrading(false);
+    }
+  }
+
+  async function handleSwitchToFree(): Promise<void> {
+    try {
+      setIsDowngrading(true);
+      setBillingError(null);
+
+      const normalizedShop = normalizeShopDomain(shopDomain);
+      const query = normalizedShop
+        ? `?shop=${encodeURIComponent(normalizedShop)}`
+        : "";
+
+      const response = await fetch(`/api/billing/cancel${query}`, {
+        method: "POST",
+      });
+
+      const payload = (await response.json()) as {
+        ok?: boolean;
+        error?: string;
+        planTier?: "free" | "pro";
+        billingStatus?: string;
+      };
+
+      if (!response.ok || !payload.ok) {
+        throw new Error(payload.error ?? "Unable to switch to free plan.");
+      }
+
+      setBilling((prev) => ({
+        planTier: payload.planTier ?? "free",
+        billingStatus: payload.billingStatus ?? "canceled",
+        trialEndsAt: prev?.trialEndsAt ?? null,
+        shopifySubscriptionId: null,
+      }));
+    } catch (error) {
+      setBillingError((error as Error).message);
+    } finally {
+      setIsDowngrading(false);
+    }
+  }
+
   return (
     <AppShell>
       <Page title="Settings">
         <Layout>
+          <Layout.Section>
+            <Card>
+              <BlockStack gap="300">
+                <Text as="h3" variant="headingMd">
+                  Billing
+                </Text>
+                <InlineStack align="space-between">
+                  <Text as="p" variant="bodyMd">
+                    Current plan
+                  </Text>
+                  <Badge tone={billing?.planTier === "pro" ? "success" : "info"}>
+                    {(billing?.planTier ?? "free").toUpperCase()}
+                  </Badge>
+                </InlineStack>
+                <Text as="p" variant="bodyMd">
+                  Billing status: {billing?.billingStatus ?? "unknown"}
+                </Text>
+                {billing?.trialEndsAt ? (
+                  <Text as="p" variant="bodyMd">
+                    Trial ends: {new Date(billing.trialEndsAt).toLocaleDateString()}
+                  </Text>
+                ) : null}
+                <InlineStack gap="200">
+                  <Button
+                    variant="primary"
+                    loading={isUpgrading}
+                    disabled={billing?.planTier === "pro"}
+                    onClick={() => {
+                      handleUpgradeToPro().catch(() => undefined);
+                    }}
+                  >
+                    Upgrade to Pro
+                  </Button>
+                  <Button
+                    variant="tertiary"
+                    tone="critical"
+                    loading={isDowngrading}
+                    disabled={billing?.planTier !== "pro"}
+                    onClick={() => {
+                      handleSwitchToFree().catch(() => undefined);
+                    }}
+                  >
+                    Switch to Free
+                  </Button>
+                </InlineStack>
+                {billingError ? <Banner tone="critical">{billingError}</Banner> : null}
+              </BlockStack>
+            </Card>
+          </Layout.Section>
           <Layout.Section>
             <Card>
               <BlockStack gap="400">

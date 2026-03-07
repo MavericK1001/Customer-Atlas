@@ -5,6 +5,14 @@ export const env = {
   APP_SESSION_SECRET: process.env.APP_SESSION_SECRET,
   SHOPIFY_SCOPES: process.env.SHOPIFY_SCOPES ?? "read_customers,read_orders",
   SHOPIFY_APP_URL: process.env.SHOPIFY_APP_URL,
+  SHOPIFY_BILLING_PRO_PLAN_NAME:
+    process.env.SHOPIFY_BILLING_PRO_PLAN_NAME ?? "CustomerAtlas Pro",
+  SHOPIFY_BILLING_PRO_PLAN_PRICE:
+    process.env.SHOPIFY_BILLING_PRO_PLAN_PRICE ?? "29.00",
+  SHOPIFY_BILLING_PRO_PLAN_CURRENCY:
+    process.env.SHOPIFY_BILLING_PRO_PLAN_CURRENCY ?? "USD",
+  SHOPIFY_BILLING_TRIAL_DAYS:
+    process.env.SHOPIFY_BILLING_TRIAL_DAYS ?? "14",
   REDIS_URL: process.env.REDIS_URL,
 };
 

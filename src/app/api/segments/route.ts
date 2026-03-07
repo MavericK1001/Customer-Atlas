@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { canUseFeature, getShopPlan } from "@/lib/plan";
 import { resolveShopDomain } from "@/lib/shop-context";
 import { buildCustomerWhereClause, parseSegmentRules } from "@/lib/segment-rules";
 
@@ -48,6 +49,20 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
   }
 
   const { shopDomain } = resolved;
+
+  const shopPlan = await getShopPlan(shopDomain);
+  if (
+    !canUseFeature({
+      feature: "custom_segment_crud",
+      planTier: shopPlan.planTier,
+      billingStatus: shopPlan.billingStatus,
+    })
+  ) {
+    return NextResponse.json(
+      { error: "Upgrade to Pro to create custom segments." },
+      { status: 402 },
+    );
+  }
 
   const body = (await request.json()) as {
     segmentName?: string;
