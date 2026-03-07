@@ -1,17 +1,17 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f7f2e8;
-  --foreground: #1d232f;
-  --surface-primary: rgba(255, 255, 255, 0.85);
-  --surface-secondary: rgba(255, 255, 255, 0.65);
-  --surface-emphasis: #fff9ef;
-  --brand-accent: #0d8a7e;
-  --brand-accent-strong: #0a6f65;
-  --risk: #d45135;
-  --success: #2b7a4b;
-  --text-muted: #586274;
-  --ring-soft: rgba(13, 138, 126, 0.14);
+  --background: #eef3fb;
+  --foreground: #0f172a;
+  --surface-primary: rgba(255, 255, 255, 0.9);
+  --surface-secondary: rgba(248, 251, 255, 0.86);
+  --surface-emphasis: #eff8ff;
+  --brand-accent: #0b7ee8;
+  --brand-accent-strong: #075fb3;
+  --risk: #dc3b4f;
+  --success: #0f9f72;
+  --text-muted: #4a5f78;
+  --ring-soft: rgba(11, 126, 232, 0.18);
 }
 
 @theme inline {
@@ -23,9 +23,9 @@
 
 body {
   background:
-    radial-gradient(circle at 12% 12%, #f7d3ab 0%, rgba(247, 211, 171, 0) 35%),
-    radial-gradient(circle at 86% 20%, #f7e0b8 0%, rgba(247, 224, 184, 0) 32%),
-    linear-gradient(135deg, #f5efe1 0%, #efe9d8 55%, #f7f3e8 100%);
+    radial-gradient(circle at 8% 10%, #bcd8ff 0%, rgba(188, 216, 255, 0) 32%),
+    radial-gradient(circle at 90% 18%, #cdefff 0%, rgba(205, 239, 255, 0) 34%),
+    linear-gradient(135deg, #edf4ff 0%, #e9f0fb 46%, #f4f8ff 100%);
   color: var(--foreground);
   font-family: var(--font-space-grotesk), sans-serif;
 }
@@ -133,10 +133,10 @@ body {
 
 .ca-opportunity-card {
   border-radius: 14px;
-  border: 1px solid rgba(43, 122, 75, 0.2);
+  border: 1px solid rgba(11, 126, 232, 0.2);
   background: var(--surface-emphasis);
   padding: 12px;
-  box-shadow: 0 8px 22px rgba(43, 122, 75, 0.08);
+  box-shadow: 0 8px 22px rgba(11, 126, 232, 0.12);
 }
 
 .ca-opportunity-type {
@@ -191,14 +191,28 @@ body {
 }
 
 .landing-hero {
-  border: 1px solid rgba(29, 35, 47, 0.1);
+  border: 1px solid rgba(12, 42, 80, 0.16);
   border-radius: 22px;
   padding: 30px;
   background:
-    radial-gradient(circle at 100% 0%, rgba(13, 138, 126, 0.16), rgba(13, 138, 126, 0) 42%),
-    radial-gradient(circle at 0% 100%, rgba(212, 81, 53, 0.13), rgba(212, 81, 53, 0) 45%),
-    rgba(255, 255, 255, 0.78);
-  box-shadow: 0 20px 52px rgba(24, 34, 42, 0.08);
+    radial-gradient(circle at 100% 0%, rgba(11, 126, 232, 0.2), rgba(11, 126, 232, 0) 44%),
+    radial-gradient(circle at 0% 100%, rgba(15, 23, 42, 0.11), rgba(15, 23, 42, 0) 50%),
+    linear-gradient(160deg, rgba(255, 255, 255, 0.82), rgba(240, 248, 255, 0.86));
+  box-shadow: 0 20px 52px rgba(12, 42, 80, 0.14);
+  position: relative;
+  overflow: hidden;
+}
+
+.landing-hero::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgba(11, 126, 232, 0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(11, 126, 232, 0.06) 1px, transparent 1px);
+  background-size: 30px 30px;
+  opacity: 0.35;
 }
 
 .landing-kicker {
@@ -209,8 +223,8 @@ body {
   font-size: 0.75rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: #0a6f65;
-  background: rgba(13, 138, 126, 0.14);
+  color: #075fb3;
+  background: rgba(11, 126, 232, 0.14);
 }
 
 .landing-title {
@@ -224,9 +238,26 @@ body {
 .landing-subtitle {
   margin: 14px 0 0;
   max-width: 58ch;
-  color: #4e5a6c;
+  color: #3f5370;
   font-size: 1.03rem;
   line-height: 1.52;
+}
+
+.landing-signal-row {
+  margin-top: 16px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.landing-signal-pill {
+  border: 1px solid rgba(11, 126, 232, 0.2);
+  border-radius: 999px;
+  padding: 4px 10px;
+  font-size: 0.74rem;
+  letter-spacing: 0.04em;
+  color: #1e3a5f;
+  background: rgba(255, 255, 255, 0.72);
 }
 
 .landing-cta-row {
@@ -253,7 +284,7 @@ body {
 .landing-button-primary {
   background: var(--brand-accent);
   color: #ffffff;
-  box-shadow: 0 8px 18px rgba(13, 138, 126, 0.28);
+  box-shadow: 0 8px 18px rgba(11, 126, 232, 0.32);
 }
 
 .landing-button-primary:hover {
@@ -263,7 +294,52 @@ body {
 .landing-button-secondary {
   background: rgba(255, 255, 255, 0.9);
   color: var(--foreground);
-  border: 1px solid rgba(29, 35, 47, 0.16);
+  border: 1px solid rgba(12, 42, 80, 0.2);
+}
+
+.landing-tech-panel {
+  margin-top: 16px;
+  border: 1px solid rgba(12, 42, 80, 0.2);
+  border-radius: 14px;
+  background: rgba(9, 18, 38, 0.94);
+  color: #d8e9ff;
+  overflow: hidden;
+}
+
+.landing-tech-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  border-bottom: 1px solid rgba(151, 188, 255, 0.22);
+  font-family: var(--font-ibm-plex-mono), monospace;
+  font-size: 0.75rem;
+}
+
+.landing-tech-status {
+  color: #44d3a7;
+}
+
+.landing-tech-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  padding: 12px;
+}
+
+.landing-tech-grid p {
+  margin: 0;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  opacity: 0.76;
+}
+
+.landing-tech-grid strong {
+  display: block;
+  margin-top: 5px;
+  font-size: 0.95rem;
+  letter-spacing: -0.01em;
 }
 
 .landing-grid {
@@ -276,9 +352,9 @@ body {
 .landing-card {
   border-radius: 16px;
   padding: 16px;
-  background: rgba(255, 255, 255, 0.72);
-  border: 1px solid rgba(29, 35, 47, 0.08);
-  box-shadow: 0 12px 30px rgba(24, 34, 42, 0.06);
+  background: rgba(255, 255, 255, 0.78);
+  border: 1px solid rgba(12, 42, 80, 0.13);
+  box-shadow: 0 12px 30px rgba(12, 42, 80, 0.1);
 }
 
 .landing-card h2 {
@@ -289,13 +365,13 @@ body {
 
 .landing-card p {
   margin: 8px 0 0;
-  color: #556071;
+  color: #425a76;
   line-height: 1.5;
 }
 
 .landing-footnote {
   margin-top: 14px;
-  color: #516070;
+  color: #3f5570;
   text-align: center;
   font-size: 0.95rem;
 }
@@ -318,6 +394,10 @@ body {
 
 @media (max-width: 900px) {
   .landing-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .landing-tech-grid {
     grid-template-columns: 1fr;
   }
 

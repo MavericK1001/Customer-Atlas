@@ -4,14 +4,19 @@ export default function HomePage() {
   return (
     <main className="landing-root">
       <section className="landing-hero landing-fade-up">
-        <p className="landing-kicker">CustomerAtlas for Shopify</p>
+        <p className="landing-kicker">CustomerAtlas Control Plane</p>
         <h1 className="landing-title">
-          Turn raw customer data into daily revenue decisions.
+          A technical growth console for Shopify customer intelligence.
         </h1>
         <p className="landing-subtitle">
-          Detect churn risk, launch high-impact segments, and prioritize actions
-          with clear upside before your next campaign goes live.
+          Stream customer and order signals into one workspace, rank revenue
+          moves by expected impact, and keep campaigns synced to live behavior.
         </p>
+        <div className="landing-signal-row">
+          <div className="landing-signal-pill">Realtime sync health</div>
+          <div className="landing-signal-pill">Smart segment builder</div>
+          <div className="landing-signal-pill">Action-ranked insights</div>
+        </div>
         <div className="landing-cta-row">
           <Link
             href="/install"
@@ -26,6 +31,26 @@ export default function HomePage() {
             Open Dashboard
           </Link>
         </div>
+        <div className="landing-tech-panel">
+          <div className="landing-tech-head">
+            <span>shopify://northstar-goods-lab</span>
+            <span className="landing-tech-status">pipeline healthy</span>
+          </div>
+          <div className="landing-tech-grid">
+            <div>
+              <p>event throughput</p>
+              <strong>12.4k / day</strong>
+            </div>
+            <div>
+              <p>at-risk cohort</p>
+              <strong>142 customers</strong>
+            </div>
+            <div>
+              <p>next best action</p>
+              <strong>win-back flow v3</strong>
+            </div>
+          </div>
+        </div>
       </section>
 
       <section className="landing-grid">
@@ -33,30 +58,30 @@ export default function HomePage() {
           className="landing-card landing-fade-up"
           style={{ animationDelay: "80ms" }}
         >
-          <h2>Revenue Priorities</h2>
+          <h2>Priority Engine</h2>
           <p>
-            Every morning starts with ranked opportunities, confidence signals,
-            and expected impact so your team knows where to focus first.
+            Score opportunities by potential revenue and confidence so teams act
+            on leverage, not guesswork.
           </p>
         </article>
         <article
           className="landing-card landing-fade-up"
           style={{ animationDelay: "140ms" }}
         >
-          <h2>Segment Intelligence</h2>
+          <h2>Segment Workbench</h2>
           <p>
-            Build and preview segments instantly using spend, frequency, and
-            inactivity rules. Save, tune, and deploy without spreadsheet loops.
+            Compose rule-based audiences with instant preview counts and iterate
+            without exporting to spreadsheets.
           </p>
         </article>
         <article
           className="landing-card landing-fade-up"
           style={{ animationDelay: "200ms" }}
         >
-          <h2>Sync Confidence</h2>
+          <h2>Data Reliability</h2>
           <p>
-            Keep your team aligned with visible sync freshness, webhook-backed
-            updates, and one-click recovery when data health drops.
+            Monitor freshness and recovery signals to keep dashboards aligned
+            with live store behavior.
           </p>
         </article>
       </section>
@@ -65,7 +90,7 @@ export default function HomePage() {
         className="landing-footnote landing-fade-up"
         style={{ animationDelay: "240ms" }}
       >
-        <p>Built for merchants who want momentum, not more dashboards.</p>
+        <p>Built for teams that ship experiments fast and learn even faster.</p>
       </section>
     </main>
   );
