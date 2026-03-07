@@ -271,7 +271,9 @@ export default function SettingsPage() {
                   <Text as="p" variant="bodyMd">
                     Current plan
                   </Text>
-                  <Badge tone={billing?.planTier === "pro" ? "success" : "info"}>
+                  <Badge
+                    tone={billing?.planTier === "pro" ? "success" : "info"}
+                  >
                     {(billing?.planTier ?? "free").toUpperCase()}
                   </Badge>
                 </InlineStack>
@@ -280,7 +282,8 @@ export default function SettingsPage() {
                 </Text>
                 {billing?.trialEndsAt ? (
                   <Text as="p" variant="bodyMd">
-                    Trial ends: {new Date(billing.trialEndsAt).toLocaleDateString()}
+                    Trial ends:{" "}
+                    {new Date(billing.trialEndsAt).toLocaleDateString()}
                   </Text>
                 ) : null}
                 <InlineStack gap="200">
@@ -306,7 +309,9 @@ export default function SettingsPage() {
                     Switch to Free
                   </Button>
                 </InlineStack>
-                {billingError ? <Banner tone="critical">{billingError}</Banner> : null}
+                {billingError ? (
+                  <Banner tone="critical">{billingError}</Banner>
+                ) : null}
               </BlockStack>
             </Card>
           </Layout.Section>
