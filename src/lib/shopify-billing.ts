@@ -5,6 +5,14 @@ type GraphQLResponse<T> = {
   errors?: Array<{ message: string }>;
 };
 
+function toFriendlyBillingError(message: string): string {
+  if (message.toLowerCase().includes("without a public distribution")) {
+    return "Billing API is unavailable: this app must use public distribution in Shopify Partner Dashboard before subscriptions can be created.";
+  }
+
+  return message;
+}
+
 async function shopifyAdminGraphQL<T>(input: {
   shop: string;
   accessToken: string;
@@ -33,7 +41,9 @@ async function shopifyAdminGraphQL<T>(input: {
   const payload = (await response.json()) as GraphQLResponse<T>;
 
   if (payload.errors && payload.errors.length > 0) {
-    throw new Error(payload.errors.map((error) => error.message).join(", "));
+    throw new Error(
+      toFriendlyBillingError(payload.errors.map((error) => error.message).join(", ")),
+    );
   }
 
   if (!payload.data) {
@@ -87,7 +97,7 @@ export async function createProSubscription(input: {
     appSubscriptionCreate: {
       confirmationUrl: string | null;
       appSubscription: { id: string; status: string } | null;
-      userErrors: Array<{ message: string }>;
+      userErrors: Array<{ field?: string[]; message: string }>;
     };
   }>({
     shop: input.shop,
@@ -115,7 +125,17 @@ export async function createProSubscription(input: {
 
   const userErrors = data.appSubscriptionCreate.userErrors ?? [];
   if (userErrors.length > 0) {
-    throw new Error(userErrors.map((error) => error.message).join(", "));
+    const formatted = userErrors
+      .map((error) => {
+        if (!error.field || error.field.length === 0) {
+          return error.message;
+        }
+
+        return `${error.field.join(".")}: ${error.message}`;
+      })
+      .join(", ");
+
+    throw new Error(toFriendlyBillingError(formatted));
   }
 
   const confirmationUrl = data.appSubscriptionCreate.confirmationUrl;
