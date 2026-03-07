@@ -1,7 +1,17 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { Card, Layout, Page, Text } from "@shopify/polaris";
+import {
+  Banner,
+  BlockStack,
+  Button,
+  Card,
+  FormLayout,
+  Layout,
+  Page,
+  Text,
+  TextField,
+} from "@shopify/polaris";
 import { AppShell } from "@/components/layout/AppShell";
 import { getShopFromSearchParams } from "@/lib/shop";
 
@@ -14,6 +24,12 @@ type Segment = {
 
 export default function SegmentsPage() {
   const [segments, setSegments] = useState<Segment[]>([]);
+  const [minTotalSpent, setMinTotalSpent] = useState("100");
+  const [minOrders, setMinOrders] = useState("2");
+  const [inactiveDays, setInactiveDays] = useState("30");
+  const [previewCount, setPreviewCount] = useState<number | null>(null);
+  const [previewError, setPreviewError] = useState<string | null>(null);
+  const [isPreviewing, setIsPreviewing] = useState(false);
 
   const shop = useMemo(() => {
     if (typeof window === "undefined") return "";
@@ -32,10 +48,87 @@ export default function SegmentsPage() {
     loadSegments().catch(() => undefined);
   }, [shop]);
 
+  async function handlePreview(): Promise<void> {
+    try {
+      setIsPreviewing(true);
+      setPreviewError(null);
+
+      const query = shop ? `?shop=${encodeURIComponent(shop)}` : "";
+      const response = await fetch(`/api/segments/preview${query}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          rules: {
+            minTotalSpent: Number(minTotalSpent),
+            minOrders: Number(minOrders),
+            inactiveDays: Number(inactiveDays),
+          },
+        }),
+      });
+
+      const payload = (await response.json()) as {
+        ok?: boolean;
+        error?: string;
+        matchCount?: number;
+      };
+
+      if (!response.ok || !payload.ok || typeof payload.matchCount !== "number") {
+        throw new Error(payload.error ?? "Unable to preview segment.");
+      }
+
+      setPreviewCount(payload.matchCount);
+    } catch (error) {
+      setPreviewError((error as Error).message);
+    } finally {
+      setIsPreviewing(false);
+    }
+  }
+
   return (
     <AppShell>
       <Page title="Customer Segments">
         <Layout>
+          <Layout.Section>
+            <Card>
+              <BlockStack gap="300">
+                <Text as="h3" variant="headingMd">
+                  Segment Rule Preview
+                </Text>
+                <FormLayout>
+                  <TextField
+                    label="Minimum total spend"
+                    type="number"
+                    value={minTotalSpent}
+                    onChange={setMinTotalSpent}
+                    autoComplete="off"
+                  />
+                  <TextField
+                    label="Minimum orders"
+                    type="number"
+                    value={minOrders}
+                    onChange={setMinOrders}
+                    autoComplete="off"
+                  />
+                  <TextField
+                    label="Inactive for at least (days)"
+                    type="number"
+                    value={inactiveDays}
+                    onChange={setInactiveDays}
+                    autoComplete="off"
+                  />
+                  <Button variant="primary" loading={isPreviewing} onClick={handlePreview}>
+                    Preview segment match count
+                  </Button>
+                </FormLayout>
+                {typeof previewCount === "number" ? (
+                  <Banner tone="info">Estimated matching customers: {previewCount}</Banner>
+                ) : null}
+                {previewError ? <Banner tone="critical">{previewError}</Banner> : null}
+              </BlockStack>
+            </Card>
+          </Layout.Section>
           <Layout.Section>
             {segments.map((segment) => (
               <Card key={segment.id}>
