@@ -82,7 +82,12 @@ export function verifyShopifyWebhookHmac(payload: string, hmacHeader: string): b
 export async function registerWebhookSubscription(input: {
   shop: string;
   accessToken: string;
-  topic: "orders/create" | "orders/updated" | "customers/create" | "customers/update";
+  topic:
+    | "orders/create"
+    | "orders/updated"
+    | "customers/create"
+    | "customers/update"
+    | "app_subscriptions/update";
 }): Promise<void> {
   const endpoint = `${requiredEnv("SHOPIFY_APP_URL")}/api/webhooks/shopify`;
 
@@ -102,6 +107,7 @@ export async function registerWebhookSubscription(input: {
     "orders/updated": "ORDERS_UPDATED",
     "customers/create": "CUSTOMERS_CREATE",
     "customers/update": "CUSTOMERS_UPDATE",
+    "app_subscriptions/update": "APP_SUBSCRIPTIONS_UPDATE",
   };
 
   const response = await fetch(`https://${input.shop}/admin/api/2025-01/graphql.json`, {

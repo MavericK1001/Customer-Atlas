@@ -19,6 +19,24 @@ type ShopifyCustomerPayload = {
   email?: string | null;
 };
 
+type ShopifyAppSubscriptionPayload = {
+  id?: string;
+  admin_graphql_api_id?: string;
+  status?: string;
+};
+
+function normalizeBillingStatus(status: string | undefined): string {
+  if (!status) {
+    return "inactive";
+  }
+
+  return status.toLowerCase();
+}
+
+function isProBillingStatus(status: string): boolean {
+  return status === "active" || status === "trialing";
+}
+
 export async function POST(request: NextRequest): Promise<NextResponse> {
   const topic = request.headers.get("x-shopify-topic");
   const shopDomain = request.headers.get("x-shopify-shop-domain");
@@ -128,6 +146,36 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       } else {
         await enqueueMetricsRecompute({ shopDomain });
       }
+    }
+
+    if (topic === "app_subscriptions/update") {
+      const subscription = JSON.parse(payload) as ShopifyAppSubscriptionPayload;
+      const subscriptionId =
+        subscription.admin_graphql_api_id ?? subscription.id ?? null;
+      const billingStatus = normalizeBillingStatus(subscription.status);
+
+      const install = await prisma.appInstall.findUnique({
+        where: { shopDomain },
+        select: {
+          shopDomain: true,
+          shopifySubscriptionId: true,
+        },
+      });
+
+      if (!install) {
+        return NextResponse.json({ ok: true });
+      }
+
+      await prisma.appInstall.update({
+        where: { shopDomain },
+        data: {
+          billingStatus,
+          planTier: isProBillingStatus(billingStatus) ? "pro" : "free",
+          shopifySubscriptionId: isProBillingStatus(billingStatus)
+            ? subscriptionId ?? install.shopifySubscriptionId
+            : null,
+        },
+      });
     }
 
     return NextResponse.json({ ok: true });

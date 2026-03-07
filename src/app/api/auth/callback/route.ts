@@ -6,7 +6,13 @@ import { createAppSessionToken, getAppSessionCookieOptions } from "@/lib/auth-se
 import { exchangeShopifyCodeForToken, registerWebhookSubscription, verifyShopifyOAuthCallback } from "@/lib/shopify";
 import { syncShopData } from "@/lib/sync";
 
-const WEBHOOK_TOPICS = ["orders/create", "orders/updated", "customers/create", "customers/update"] as const;
+const WEBHOOK_TOPICS = [
+  "orders/create",
+  "orders/updated",
+  "customers/create",
+  "customers/update",
+  "app_subscriptions/update",
+] as const;
 
 export async function GET(request: NextRequest): Promise<NextResponse> {
   const code = request.nextUrl.searchParams.get("code");
