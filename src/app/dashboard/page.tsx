@@ -31,9 +31,23 @@ type DashboardResponse = {
   }>;
 };
 
+type SyncHealthResponse = {
+  ok: boolean;
+  syncHealth: {
+    freshness: "fresh" | "aging" | "stale" | "unknown";
+    lastSyncStatus: string | null;
+    lastSyncAt: string | null;
+    recommendation: {
+      headline: string;
+      action: string;
+    };
+  };
+};
+
 export default function DashboardPage() {
   const [data, setData] = useState<DashboardResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [syncHealth, setSyncHealth] = useState<SyncHealthResponse["syncHealth"] | null>(null);
   const [dismissingInsightId, setDismissingInsightId] = useState<number | null>(
     null,
   );
@@ -55,6 +69,14 @@ export default function DashboardPage() {
 
       const json = (await response.json()) as DashboardResponse;
       setData(json);
+
+      const syncResponse = await fetch(`/api/sync${query}`);
+      if (syncResponse.ok) {
+        const syncJson = (await syncResponse.json()) as SyncHealthResponse;
+        if (syncJson.ok && syncJson.syncHealth) {
+          setSyncHealth(syncJson.syncHealth);
+        }
+      }
     }
 
     loadDashboard().catch(() => setError("Unable to load dashboard data."));
@@ -146,6 +168,43 @@ export default function DashboardPage() {
                     <div className="ca-kpi-value">
                       ${data?.customerOverview.predictedLtv ?? 0}
                     </div>
+                  </div>
+                </div>
+              </div>
+            </Card>
+          </Layout.Section>
+
+          <Layout.Section>
+            <Card>
+              <div className="ca-section-title">
+                <Text as="h3" variant="headingMd">
+                  Sync Health
+                </Text>
+              </div>
+              <div className="ca-priority-list">
+                <div className="ca-priority-card">
+                  <div className="ca-priority-row">
+                    <div className="ca-priority-title">
+                      <Text as="p" variant="headingSm">
+                        {syncHealth?.recommendation.headline ?? "Sync status unavailable"}
+                      </Text>
+                    </div>
+                    <span className="ca-priority-meta">
+                      {`status ${syncHealth?.lastSyncStatus ?? "unknown"}`}
+                    </span>
+                  </div>
+                  <div className="ca-muted">
+                    <Text as="p">
+                      {syncHealth?.recommendation.action ?? "Run a sync from Settings to initialize health checks."}
+                    </Text>
+                  </div>
+                  <div className="ca-muted">
+                    <Text as="p">
+                      Freshness: {syncHealth?.freshness ?? "unknown"}
+                      {syncHealth?.lastSyncAt
+                        ? ` | Last sync: ${new Date(syncHealth.lastSyncAt).toLocaleString()}`
+                        : ""}
+                    </Text>
                   </div>
                 </div>
               </div>

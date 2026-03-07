@@ -20,6 +20,20 @@ type Insight = {
   potentialRevenue: number;
 };
 
+type InsightLane = "high" | "medium" | "low";
+
+function getInsightLane(potentialRevenue: number): InsightLane {
+  if (potentialRevenue >= 500) return "high";
+  if (potentialRevenue >= 150) return "medium";
+  return "low";
+}
+
+function getLaneLabel(lane: InsightLane): string {
+  if (lane === "high") return "High urgency";
+  if (lane === "medium") return "Medium urgency";
+  return "Low urgency";
+}
+
 export default function InsightsPage() {
   const [insights, setInsights] = useState<Insight[]>([]);
   const [archivedInsights, setArchivedInsights] = useState<Insight[]>([]);
@@ -117,89 +131,126 @@ export default function InsightsPage() {
 
   return (
     <AppShell>
-      <Page title="Revenue Insights">
+      <Page
+        title="Revenue Insights"
+        subtitle="Focus high-impact opportunities first, archive low-signal items"
+      >
         <Layout>
           <Layout.Section>
             {error ? <Banner tone="critical">{error}</Banner> : null}
           </Layout.Section>
           <Layout.Section>
             <Card>
-              <Text as="h3" variant="headingMd">
-                Active Insights
-              </Text>
+              <div className="ca-section-title">
+                <Text as="h3" variant="headingMd">
+                  Active Insights
+                </Text>
+              </div>
               {insights.length === 0 ? (
-                <Text as="p" tone="subdued">
-                  No active insights right now.
-                </Text>
+                <div className="ca-muted">
+                  <Text as="p">No active insights right now.</Text>
+                </div>
               ) : null}
+              <div className="ca-opportunities">
+                {(["high", "medium", "low"] as InsightLane[]).map((lane) => {
+                  const laneInsights = insights.filter(
+                    (insight) => getInsightLane(insight.potentialRevenue) === lane,
+                  );
+
+                  return (
+                    <div key={lane} className="ca-opportunity-card">
+                      <div className="ca-opportunity-type">{getLaneLabel(lane)}</div>
+                      {laneInsights.length === 0 ? (
+                        <div className="ca-muted">
+                          <Text as="p">No insights in this lane.</Text>
+                        </div>
+                      ) : null}
+                      <div className="ca-priority-list">
+                        {laneInsights.map((insight) => (
+                          <div key={insight.id} className="ca-priority-card">
+                            <div className="ca-priority-title">
+                              <Text as="p" variant="headingSm">
+                                {insight.message}
+                              </Text>
+                            </div>
+                            <div className="ca-muted">
+                              <Text as="p">Type: {insight.insightType}</Text>
+                            </div>
+                            <div className="ca-priority-revenue">
+                              <Text as="p">
+                                Potential Revenue Gain: ${insight.potentialRevenue}
+                              </Text>
+                            </div>
+                            <InlineStack align="end">
+                              <Button
+                                tone="critical"
+                                variant="tertiary"
+                                loading={updatingInsightId === insight.id}
+                                onClick={() => {
+                                  updateInsightState({
+                                    insightId: insight.id,
+                                    action: "archive",
+                                  }).catch(() => undefined);
+                                }}
+                              >
+                                Archive
+                              </Button>
+                            </InlineStack>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
             </Card>
-          </Layout.Section>
-          <Layout.Section>
-            {insights.map((insight) => (
-              <Card key={insight.id}>
-                <Text as="h3" variant="headingSm">
-                  {insight.message}
-                </Text>
-                <Text as="p">Type: {insight.insightType}</Text>
-                <Text as="p" tone="success">
-                  Potential Revenue Gain: ${insight.potentialRevenue}
-                </Text>
-                <InlineStack align="end">
-                  <Button
-                    tone="critical"
-                    variant="tertiary"
-                    loading={updatingInsightId === insight.id}
-                    onClick={() => {
-                      updateInsightState({
-                        insightId: insight.id,
-                        action: "archive",
-                      }).catch(() => undefined);
-                    }}
-                  >
-                    Archive
-                  </Button>
-                </InlineStack>
-              </Card>
-            ))}
           </Layout.Section>
           <Layout.Section>
             <Card>
-              <Text as="h3" variant="headingMd">
-                Archived Insights
-              </Text>
+              <div className="ca-section-title">
+                <Text as="h3" variant="headingMd">
+                  Archived Insights
+                </Text>
+              </div>
               {archivedInsights.length === 0 ? (
-                <Text as="p" tone="subdued">
-                  No archived insights.
-                </Text>
+                <div className="ca-muted">
+                  <Text as="p">No archived insights.</Text>
+                </div>
               ) : null}
+              <div className="ca-priority-list">
+                {archivedInsights.map((insight) => (
+                  <div key={insight.id} className="ca-priority-card">
+                    <div className="ca-priority-title">
+                      <Text as="h3" variant="headingSm">
+                        {insight.message}
+                      </Text>
+                    </div>
+                    <div className="ca-muted">
+                      <Text as="p">Type: {insight.insightType}</Text>
+                    </div>
+                    <div className="ca-muted">
+                      <Text as="p">
+                        Potential Revenue Gain: ${insight.potentialRevenue}
+                      </Text>
+                    </div>
+                    <InlineStack align="end">
+                      <Button
+                        variant="tertiary"
+                        loading={updatingInsightId === insight.id}
+                        onClick={() => {
+                          updateInsightState({
+                            insightId: insight.id,
+                            action: "unarchive",
+                          }).catch(() => undefined);
+                        }}
+                      >
+                        Restore
+                      </Button>
+                    </InlineStack>
+                  </div>
+                ))}
+              </div>
             </Card>
-          </Layout.Section>
-          <Layout.Section>
-            {archivedInsights.map((insight) => (
-              <Card key={insight.id}>
-                <Text as="h3" variant="headingSm">
-                  {insight.message}
-                </Text>
-                <Text as="p">Type: {insight.insightType}</Text>
-                <Text as="p" tone="subdued">
-                  Potential Revenue Gain: ${insight.potentialRevenue}
-                </Text>
-                <InlineStack align="end">
-                  <Button
-                    variant="tertiary"
-                    loading={updatingInsightId === insight.id}
-                    onClick={() => {
-                      updateInsightState({
-                        insightId: insight.id,
-                        action: "unarchive",
-                      }).catch(() => undefined);
-                    }}
-                  >
-                    Restore
-                  </Button>
-                </InlineStack>
-              </Card>
-            ))}
           </Layout.Section>
         </Layout>
       </Page>

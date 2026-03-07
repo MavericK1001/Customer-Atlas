@@ -74,7 +74,11 @@ export default function SegmentsPage() {
         matchCount?: number;
       };
 
-      if (!response.ok || !payload.ok || typeof payload.matchCount !== "number") {
+      if (
+        !response.ok ||
+        !payload.ok ||
+        typeof payload.matchCount !== "number"
+      ) {
         throw new Error(payload.error ?? "Unable to preview segment.");
       }
 
@@ -88,14 +92,39 @@ export default function SegmentsPage() {
 
   return (
     <AppShell>
-      <Page title="Customer Segments">
+      <Page
+        title="Customer Segments"
+        subtitle="Design audience rules, preview impact, and monitor segment size"
+      >
         <Layout>
           <Layout.Section>
             <Card>
-              <BlockStack gap="300">
-                <Text as="h3" variant="headingMd">
-                  Segment Rule Preview
-                </Text>
+              <BlockStack gap="400">
+                <div className="ca-section-title">
+                  <Text as="h3" variant="headingMd">
+                    Segment Rule Builder
+                  </Text>
+                </div>
+                <div className="ca-opportunities" style={{ marginTop: 0 }}>
+                  <div className="ca-opportunity-card">
+                    <div className="ca-opportunity-type">Rule Chip</div>
+                    <Text as="p" variant="bodyMd">
+                      Spent &gt;= ${Number(minTotalSpent || 0)}
+                    </Text>
+                  </div>
+                  <div className="ca-opportunity-card">
+                    <div className="ca-opportunity-type">Rule Chip</div>
+                    <Text as="p" variant="bodyMd">
+                      Orders &gt;= {Number(minOrders || 0)}
+                    </Text>
+                  </div>
+                  <div className="ca-opportunity-card">
+                    <div className="ca-opportunity-type">Rule Chip</div>
+                    <Text as="p" variant="bodyMd">
+                      Inactive &gt;= {Number(inactiveDays || 0)} days
+                    </Text>
+                  </div>
+                </div>
                 <FormLayout>
                   <TextField
                     label="Minimum total spend"
@@ -118,29 +147,57 @@ export default function SegmentsPage() {
                     onChange={setInactiveDays}
                     autoComplete="off"
                   />
-                  <Button variant="primary" loading={isPreviewing} onClick={handlePreview}>
+                  <Button
+                    variant="primary"
+                    loading={isPreviewing}
+                    onClick={handlePreview}
+                  >
                     Preview segment match count
                   </Button>
                 </FormLayout>
                 {typeof previewCount === "number" ? (
-                  <Banner tone="info">Estimated matching customers: {previewCount}</Banner>
+                  <Banner tone="info">
+                    Estimated matching customers: {previewCount}
+                  </Banner>
                 ) : null}
-                {previewError ? <Banner tone="critical">{previewError}</Banner> : null}
+                {previewError ? (
+                  <Banner tone="critical">{previewError}</Banner>
+                ) : null}
               </BlockStack>
             </Card>
           </Layout.Section>
           <Layout.Section>
-            {segments.map((segment) => (
-              <Card key={segment.id}>
+            <Card>
+              <div className="ca-section-title">
                 <Text as="h3" variant="headingMd">
-                  {segment.segmentName}
+                  Existing Segments
                 </Text>
-                <Text as="p">Customers: {segment.customerCount}</Text>
-                <Text as="p" tone="subdued">
-                  Rules: {JSON.stringify(segment.rules)}
-                </Text>
-              </Card>
-            ))}
+              </div>
+              {segments.length === 0 ? (
+                <div className="ca-muted">
+                  <Text as="p">No segments available yet.</Text>
+                </div>
+              ) : null}
+              <div className="ca-priority-list">
+                {segments.map((segment) => (
+                  <div key={segment.id} className="ca-priority-card">
+                    <div className="ca-priority-row">
+                      <div className="ca-priority-title">
+                        <Text as="p" variant="headingSm">
+                          {segment.segmentName}
+                        </Text>
+                      </div>
+                      <span className="ca-priority-meta">
+                        {segment.customerCount} customers
+                      </span>
+                    </div>
+                    <div className="ca-muted">
+                      <Text as="p">Rules: {JSON.stringify(segment.rules)}</Text>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </Card>
           </Layout.Section>
         </Layout>
       </Page>
