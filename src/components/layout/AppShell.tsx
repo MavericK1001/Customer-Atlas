@@ -1,9 +1,9 @@
 "use client";
 
-import { Suspense } from "react";
+import { Suspense, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { Button, Frame, InlineStack, Navigation } from "@shopify/polaris";
+import { Button, Frame, InlineStack, Navigation, Text } from "@shopify/polaris";
 import { PolarisProvider } from "@/components/providers/PolarisProvider";
 
 const NAV_ITEMS = [
@@ -19,10 +19,26 @@ function AppShellInner({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const queryString = searchParams.toString();
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [logoutError, setLogoutError] = useState<string | null>(null);
 
   async function handleLogout(): Promise<void> {
-    await fetch("/api/auth/logout", { method: "POST" });
-    router.push("/install");
+    setIsLoggingOut(true);
+    setLogoutError(null);
+
+    try {
+      const response = await fetch("/api/auth/logout", { method: "POST" });
+
+      if (!response.ok) {
+        throw new Error("Unable to log out right now. Please try again.");
+      }
+
+      router.push("/install");
+    } catch {
+      setLogoutError("Unable to log out right now. Please try again.");
+    } finally {
+      setIsLoggingOut(false);
+    }
   }
 
   return (
@@ -47,10 +63,20 @@ function AppShellInner({ children }: { children: React.ReactNode }) {
               >
                 CustomerAtlas
               </Link>
-              <Button variant="tertiary" onClick={() => { handleLogout().catch(() => undefined); }}>
+              <Button
+                variant="tertiary"
+                loading={isLoggingOut}
+                disabled={isLoggingOut}
+                onClick={handleLogout}
+              >
                 Log out
               </Button>
             </InlineStack>
+            {logoutError ? (
+              <Text as="p" tone="critical" variant="bodyMd">
+                {logoutError}
+              </Text>
+            ) : null}
           </div>
           {children}
         </div>
