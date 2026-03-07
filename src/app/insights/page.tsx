@@ -154,12 +154,15 @@ export default function InsightsPage() {
               <div className="ca-opportunities">
                 {(["high", "medium", "low"] as InsightLane[]).map((lane) => {
                   const laneInsights = insights.filter(
-                    (insight) => getInsightLane(insight.potentialRevenue) === lane,
+                    (insight) =>
+                      getInsightLane(insight.potentialRevenue) === lane,
                   );
 
                   return (
                     <div key={lane} className="ca-opportunity-card">
-                      <div className="ca-opportunity-type">{getLaneLabel(lane)}</div>
+                      <div className="ca-opportunity-type">
+                        {getLaneLabel(lane)}
+                      </div>
                       {laneInsights.length === 0 ? (
                         <div className="ca-muted">
                           <Text as="p">No insights in this lane.</Text>
@@ -178,7 +181,8 @@ export default function InsightsPage() {
                             </div>
                             <div className="ca-priority-revenue">
                               <Text as="p">
-                                Potential Revenue Gain: ${insight.potentialRevenue}
+                                Potential Revenue Gain: $
+                                {insight.potentialRevenue}
                               </Text>
                             </div>
                             <InlineStack align="end">

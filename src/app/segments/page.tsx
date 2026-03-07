@@ -39,11 +39,15 @@ export default function SegmentsPage() {
   const [editMinOrders, setEditMinOrders] = useState("0");
   const [editInactiveDays, setEditInactiveDays] = useState("0");
   const [savingSegmentId, setSavingSegmentId] = useState<number | null>(null);
-  const [deletingSegmentId, setDeletingSegmentId] = useState<number | null>(null);
-  const [segmentActionError, setSegmentActionError] = useState<string | null>(null);
-  const [segmentActionSuccess, setSegmentActionSuccess] = useState<string | null>(
+  const [deletingSegmentId, setDeletingSegmentId] = useState<number | null>(
     null,
   );
+  const [segmentActionError, setSegmentActionError] = useState<string | null>(
+    null,
+  );
+  const [segmentActionSuccess, setSegmentActionSuccess] = useState<
+    string | null
+  >(null);
 
   const shop = useMemo(() => {
     if (typeof window === "undefined") return "";
@@ -62,9 +66,14 @@ export default function SegmentsPage() {
     loadSegments().catch(() => undefined);
   }, [shop]);
 
-  function parseRuleNumber(rules: Record<string, unknown>, key: string): string {
+  function parseRuleNumber(
+    rules: Record<string, unknown>,
+    key: string,
+  ): string {
     const value = rules[key];
-    return typeof value === "number" && Number.isFinite(value) ? String(value) : "0";
+    return typeof value === "number" && Number.isFinite(value)
+      ? String(value)
+      : "0";
   }
 
   async function reloadSegments(): Promise<void> {
@@ -400,7 +409,9 @@ export default function SegmentsPage() {
                             variant="primary"
                             loading={savingSegmentId === segment.id}
                             onClick={() => {
-                              handleSaveSegment(segment.id).catch(() => undefined);
+                              handleSaveSegment(segment.id).catch(
+                                () => undefined,
+                              );
                             }}
                           >
                             Save changes
@@ -426,7 +437,9 @@ export default function SegmentsPage() {
                           </span>
                         </div>
                         <div className="ca-muted">
-                          <Text as="p">Rules: {JSON.stringify(segment.rules)}</Text>
+                          <Text as="p">
+                            Rules: {JSON.stringify(segment.rules)}
+                          </Text>
                         </div>
                         <InlineStack align="space-between">
                           <Button
@@ -440,7 +453,9 @@ export default function SegmentsPage() {
                             variant="tertiary"
                             loading={deletingSegmentId === segment.id}
                             onClick={() => {
-                              handleDeleteSegment(segment.id).catch(() => undefined);
+                              handleDeleteSegment(segment.id).catch(
+                                () => undefined,
+                              );
                             }}
                           >
                             Delete

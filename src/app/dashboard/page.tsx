@@ -47,7 +47,9 @@ type SyncHealthResponse = {
 export default function DashboardPage() {
   const [data, setData] = useState<DashboardResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [syncHealth, setSyncHealth] = useState<SyncHealthResponse["syncHealth"] | null>(null);
+  const [syncHealth, setSyncHealth] = useState<
+    SyncHealthResponse["syncHealth"] | null
+  >(null);
   const [dismissingInsightId, setDismissingInsightId] = useState<number | null>(
     null,
   );
@@ -186,7 +188,8 @@ export default function DashboardPage() {
                   <div className="ca-priority-row">
                     <div className="ca-priority-title">
                       <Text as="p" variant="headingSm">
-                        {syncHealth?.recommendation.headline ?? "Sync status unavailable"}
+                        {syncHealth?.recommendation.headline ??
+                          "Sync status unavailable"}
                       </Text>
                     </div>
                     <span className="ca-priority-meta">
@@ -195,7 +198,8 @@ export default function DashboardPage() {
                   </div>
                   <div className="ca-muted">
                     <Text as="p">
-                      {syncHealth?.recommendation.action ?? "Run a sync from Settings to initialize health checks."}
+                      {syncHealth?.recommendation.action ??
+                        "Run a sync from Settings to initialize health checks."}
                     </Text>
                   </div>
                   <div className="ca-muted">
@@ -221,7 +225,8 @@ export default function DashboardPage() {
               {(data?.todayPriorities ?? []).length === 0 ? (
                 <div className="ca-muted">
                   <Text as="p">
-                    No priority actions yet. Run a sync to refresh recommendations.
+                    No priority actions yet. Run a sync to refresh
+                    recommendations.
                   </Text>
                 </div>
               ) : null}
@@ -234,7 +239,9 @@ export default function DashboardPage() {
                           {item.title}
                         </Text>
                       </div>
-                      <span className="ca-priority-meta">score {item.priorityScore}</span>
+                      <span className="ca-priority-meta">
+                        score {item.priorityScore}
+                      </span>
                     </div>
                     <div className="ca-muted">
                       <Text as="p" variant="bodyMd">
@@ -242,7 +249,9 @@ export default function DashboardPage() {
                       </Text>
                     </div>
                     <div className="ca-priority-revenue">
-                      <Text as="p">Potential Revenue: ${item.potentialRevenue}</Text>
+                      <Text as="p">
+                        Potential Revenue: ${item.potentialRevenue}
+                      </Text>
                     </div>
                     <div className="ca-muted">
                       <Text as="p">Confidence: {item.confidence}%</Text>
@@ -284,7 +293,10 @@ export default function DashboardPage() {
               </div>
               <div className="ca-opportunities">
                 {(data?.revenueInsights ?? []).map((insight) => (
-                  <div key={insight.id} className="ca-opportunity-card ca-fade-in">
+                  <div
+                    key={insight.id}
+                    className="ca-opportunity-card ca-fade-in"
+                  >
                     <div className="ca-opportunity-type">{insight.type}</div>
                     <Text as="p" variant="bodyMd">
                       {insight.message}
