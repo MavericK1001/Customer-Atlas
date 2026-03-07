@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { Button, Card, InlineGrid, Layout, Page, Text } from "@shopify/polaris";
+import { Button, Card, Layout, Page, Text } from "@shopify/polaris";
 import { AppShell } from "@/components/layout/AppShell";
 import { getShopFromSearchParams } from "@/lib/shop";
 
@@ -109,115 +109,137 @@ export default function DashboardPage() {
 
   return (
     <AppShell>
-      <Page title="Customer Overview">
+      <Page
+        title="Customer Intelligence"
+        subtitle="Revenue opportunities and retention priorities for today"
+      >
         <Layout>
           <Layout.Section>
             <Card>
-              <Text as="h3" variant="headingMd">
-                Today&apos;s Priorities
-              </Text>
-              {(data?.todayPriorities ?? []).length === 0 ? (
-                <Text as="p" tone="subdued">
-                  No priority actions yet. Run a sync to refresh
-                  recommendations.
-                </Text>
-              ) : null}
-              {(data?.todayPriorities ?? []).map((item) => (
-                <div key={item.id} style={{ marginTop: "12px" }}>
-                  <Text as="p" variant="headingSm">
-                    {item.title}
+              <div className="ca-fade-in">
+                <div className="ca-section-title">
+                  <Text as="h3" variant="headingMd">
+                    Portfolio Snapshot
                   </Text>
-                  <Text as="p" variant="bodyMd">
-                    {item.reason}
-                  </Text>
-                  <Text as="p" tone="subdued">
-                    Confidence: {item.confidence}% | Priority score:{" "}
-                    {item.priorityScore}
-                  </Text>
-                  <Text as="p" tone="success">
-                    Potential Revenue: ${item.potentialRevenue}
-                  </Text>
-                  <Link
-                    href={
-                      shop
-                        ? `${item.ctaPath}?shop=${encodeURIComponent(shop)}`
-                        : item.ctaPath
-                    }
-                  >
-                    {item.ctaLabel}
-                  </Link>
-                  <div style={{ marginTop: "8px" }}>
-                    <Button
-                      variant="tertiary"
-                      tone="critical"
-                      loading={dismissingInsightId === item.id}
-                      onClick={() => {
-                        handleDismissPriority(item.id).catch(() => undefined);
-                      }}
-                    >
-                      Dismiss
-                    </Button>
+                </div>
+                <div className="ca-kpi-grid">
+                  <div className="ca-kpi-card">
+                    <div className="ca-kpi-label">Total Customers</div>
+                    <div className="ca-kpi-value">
+                      {data?.customerOverview.totalCustomers ?? 0}
+                    </div>
+                  </div>
+                  <div className="ca-kpi-card">
+                    <div className="ca-kpi-label">Repeat Purchase Rate</div>
+                    <div className="ca-kpi-value">
+                      {data?.customerOverview.repeatPurchaseRate ?? 0}%
+                    </div>
+                  </div>
+                  <div className="ca-kpi-card">
+                    <div className="ca-kpi-label">Average Order Value</div>
+                    <div className="ca-kpi-value">
+                      ${data?.customerOverview.averageOrderValue ?? 0}
+                    </div>
+                  </div>
+                  <div className="ca-kpi-card">
+                    <div className="ca-kpi-label">Predicted LTV</div>
+                    <div className="ca-kpi-value">
+                      ${data?.customerOverview.predictedLtv ?? 0}
+                    </div>
                   </div>
                 </div>
-              ))}
+              </div>
             </Card>
-          </Layout.Section>
-          <Layout.Section>
-            <InlineGrid columns={{ xs: 1, md: 2, lg: 4 }} gap="400">
-              <Card>
-                <Text as="h3" variant="headingSm">
-                  Total Customers
-                </Text>
-                <Text as="p" variant="heading2xl">
-                  {data?.customerOverview.totalCustomers ?? 0}
-                </Text>
-              </Card>
-              <Card>
-                <Text as="h3" variant="headingSm">
-                  Repeat Purchase Rate
-                </Text>
-                <Text as="p" variant="heading2xl">
-                  {data?.customerOverview.repeatPurchaseRate ?? 0}%
-                </Text>
-              </Card>
-              <Card>
-                <Text as="h3" variant="headingSm">
-                  Average Order Value
-                </Text>
-                <Text as="p" variant="heading2xl">
-                  ${data?.customerOverview.averageOrderValue ?? 0}
-                </Text>
-              </Card>
-              <Card>
-                <Text as="h3" variant="headingSm">
-                  Predicted LTV
-                </Text>
-                <Text as="p" variant="heading2xl">
-                  ${data?.customerOverview.predictedLtv ?? 0}
-                </Text>
-              </Card>
-            </InlineGrid>
           </Layout.Section>
 
           <Layout.Section>
             <Card>
-              <Text as="h3" variant="headingMd">
-                Revenue Insights
-              </Text>
-              {(data?.revenueInsights ?? []).map((insight) => (
-                <div key={insight.id} style={{ marginTop: "12px" }}>
-                  <Text as="p" variant="bodyMd">
-                    {insight.message}
-                  </Text>
-                  <Text as="p" tone="success">
-                    Potential Revenue: ${insight.potentialRevenue}
+              <div className="ca-section-title">
+                <Text as="h3" variant="headingMd">
+                  Today&apos;s Priorities
+                </Text>
+              </div>
+              {(data?.todayPriorities ?? []).length === 0 ? (
+                <div className="ca-muted">
+                  <Text as="p">
+                    No priority actions yet. Run a sync to refresh recommendations.
                   </Text>
                 </div>
-              ))}
-              {error ? (
-                <Text as="p" tone="critical">
-                  {error}
+              ) : null}
+              <div className="ca-priority-list">
+                {(data?.todayPriorities ?? []).map((item) => (
+                  <div key={item.id} className="ca-priority-card ca-fade-in">
+                    <div className="ca-priority-row">
+                      <div className="ca-priority-title">
+                        <Text as="p" variant="headingSm">
+                          {item.title}
+                        </Text>
+                      </div>
+                      <span className="ca-priority-meta">score {item.priorityScore}</span>
+                    </div>
+                    <div className="ca-muted">
+                      <Text as="p" variant="bodyMd">
+                        {item.reason}
+                      </Text>
+                    </div>
+                    <div className="ca-priority-revenue">
+                      <Text as="p">Potential Revenue: ${item.potentialRevenue}</Text>
+                    </div>
+                    <div className="ca-muted">
+                      <Text as="p">Confidence: {item.confidence}%</Text>
+                    </div>
+                    <div className="ca-priority-actions">
+                      <Link
+                        className="ca-link"
+                        href={
+                          shop
+                            ? `${item.ctaPath}?shop=${encodeURIComponent(shop)}`
+                            : item.ctaPath
+                        }
+                      >
+                        {item.ctaLabel}
+                      </Link>
+                      <Button
+                        variant="tertiary"
+                        tone="critical"
+                        loading={dismissingInsightId === item.id}
+                        onClick={() => {
+                          handleDismissPriority(item.id).catch(() => undefined);
+                        }}
+                      >
+                        Dismiss
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </Card>
+          </Layout.Section>
+
+          <Layout.Section>
+            <Card>
+              <div className="ca-section-title">
+                <Text as="h3" variant="headingMd">
+                  Revenue Opportunities
                 </Text>
+              </div>
+              <div className="ca-opportunities">
+                {(data?.revenueInsights ?? []).map((insight) => (
+                  <div key={insight.id} className="ca-opportunity-card ca-fade-in">
+                    <div className="ca-opportunity-type">{insight.type}</div>
+                    <Text as="p" variant="bodyMd">
+                      {insight.message}
+                    </Text>
+                    <div className="ca-opportunity-revenue">
+                      +${insight.potentialRevenue}
+                    </div>
+                  </div>
+                ))}
+              </div>
+              {error ? (
+                <div className="ca-alert">
+                  <Text as="p">{error}</Text>
+                </div>
               ) : null}
             </Card>
           </Layout.Section>
