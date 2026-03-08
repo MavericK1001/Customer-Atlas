@@ -18,6 +18,7 @@ const PUBLIC_API_PREFIXES = [
   "/api/account/login",
   "/api/account/logout",
   "/api/account/session",
+  "/api/account/claim-status",
   "/api/billing/confirm",
   "/api/billing/reconcile",
   "/api/webhooks/shopify",

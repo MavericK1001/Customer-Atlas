@@ -1,9 +1,10 @@
 "use client";
 
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
+  Banner,
   Button,
   Frame,
   InlineStack,
@@ -32,6 +33,15 @@ function AppShellInner({ children }: { children: React.ReactNode }) {
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [logoutError, setLogoutError] = useState<string | null>(null);
   const [switchShopInput, setSwitchShopInput] = useState(currentShop);
+  const [claimStatus, setClaimStatus] = useState<{
+    accountLoggedIn: boolean;
+    ownership:
+      | "unclaimed"
+      | "owned-by-current-account"
+      | "owned-by-other-account";
+  } | null>(null);
+  const [isClaimingStore, setIsClaimingStore] = useState(false);
+  const [claimError, setClaimError] = useState<string | null>(null);
 
   const normalizedSwitchShop = normalizeShopDomain(switchShopInput);
   const canSwitchShop = normalizedSwitchShop.endsWith(".myshopify.com");
@@ -69,6 +79,55 @@ function AppShellInner({ children }: { children: React.ReactNode }) {
     router.push(`/api/auth/shopify?${target.toString()}`);
   }
 
+  const refreshClaimStatus = useCallback(async (): Promise<void> => {
+    const query = queryString ? `?${queryString}` : "";
+    const response = await fetch(`/api/account/claim-status${query}`);
+    const payload = (await response.json()) as {
+      ok?: boolean;
+      accountLoggedIn?: boolean;
+      ownership?:
+        | "unclaimed"
+        | "owned-by-current-account"
+        | "owned-by-other-account";
+    };
+
+    if (!response.ok || !payload.ok || !payload.ownership) {
+      setClaimStatus(null);
+      return;
+    }
+
+    setClaimStatus({
+      accountLoggedIn: !!payload.accountLoggedIn,
+      ownership: payload.ownership,
+    });
+  }, [queryString]);
+
+  async function handleClaimStore(): Promise<void> {
+    try {
+      setIsClaimingStore(true);
+      setClaimError(null);
+
+      const query = queryString ? `?${queryString}` : "";
+      const response = await fetch(`/api/account/claim-store${query}`, {
+        method: "POST",
+      });
+
+      const payload = (await response.json()) as {
+        ok?: boolean;
+        error?: string;
+      };
+      if (!response.ok || !payload.ok) {
+        throw new Error(payload.error ?? "Unable to claim this store.");
+      }
+
+      await refreshClaimStatus();
+    } catch (error) {
+      setClaimError((error as Error).message);
+    } finally {
+      setIsClaimingStore(false);
+    }
+  }
+
   useEffect(() => {
     if (typeof window === "undefined") {
       return;
@@ -103,7 +162,8 @@ function AppShellInner({ children }: { children: React.ReactNode }) {
       const base = window.location.origin;
       const parsedUrl = new URL(requestUrl, base);
       const isSameOriginApiCall =
-        parsedUrl.origin === window.location.origin && parsedUrl.pathname.startsWith("/api/");
+        parsedUrl.origin === window.location.origin &&
+        parsedUrl.pathname.startsWith("/api/");
 
       if (!isSameOriginApiCall) {
         return originalFetch(input, init);
@@ -125,6 +185,10 @@ function AppShellInner({ children }: { children: React.ReactNode }) {
       window.fetch = originalFetch;
     };
   }, []);
+
+  useEffect(() => {
+    refreshClaimStatus().catch(() => undefined);
+  }, [refreshClaimStatus]);
 
   return (
     <PolarisProvider>
@@ -184,6 +248,57 @@ function AppShellInner({ children }: { children: React.ReactNode }) {
             {logoutError ? (
               <Text as="p" tone="critical" variant="bodyMd">
                 {logoutError}
+              </Text>
+            ) : null}
+            {claimStatus?.ownership === "unclaimed" ? (
+              <div style={{ marginTop: "10px" }}>
+                <Banner
+                  tone="warning"
+                  title="This store is not linked to a CustomerAtlas account"
+                  action={
+                    claimStatus.accountLoggedIn
+                      ? {
+                          content: isClaimingStore
+                            ? "Claiming..."
+                            : "Claim store",
+                          onAction: () => {
+                            handleClaimStore().catch(() => undefined);
+                          },
+                          disabled: isClaimingStore,
+                        }
+                      : {
+                          content: "Sign in",
+                          url: queryString
+                            ? `/account/login?${queryString}`
+                            : "/account/login",
+                        }
+                  }
+                  secondaryAction={
+                    claimStatus.accountLoggedIn
+                      ? undefined
+                      : {
+                          content: "Create account",
+                          url: queryString
+                            ? `/account/signup?${queryString}`
+                            : "/account/signup",
+                        }
+                  }
+                >
+                  Link this Shopify store to your account to manage all stores
+                  in one workspace.
+                </Banner>
+              </div>
+            ) : null}
+            {claimStatus?.ownership === "owned-by-other-account" ? (
+              <div style={{ marginTop: "10px" }}>
+                <Banner tone="critical" title="Store linked to another account">
+                  This store is already linked to another CustomerAtlas account.
+                </Banner>
+              </div>
+            ) : null}
+            {claimError ? (
+              <Text as="p" tone="critical" variant="bodyMd">
+                {claimError}
               </Text>
             ) : null}
           </div>
