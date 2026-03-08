@@ -10,6 +10,7 @@
     "postinstall": "prisma generate",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
+    "release": "prisma migrate deploy",
     "worker": "node --import tsx src/workers/metrics-worker.ts"
   },
   "dependencies": {
