@@ -13,6 +13,7 @@ import {
   TextField,
 } from "@shopify/polaris";
 import { PolarisProvider } from "@/components/providers/PolarisProvider";
+import { buildAccountAuthUrl } from "@/lib/account-auth-url";
 import { normalizeShopDomain } from "@/lib/shop";
 
 const NAV_ITEMS = [
@@ -126,6 +127,27 @@ function AppShellInner({ children }: { children: React.ReactNode }) {
     } finally {
       setIsClaimingStore(false);
     }
+  }
+
+  function redirectToAccountAuth(intent: "login" | "signup"): void {
+    const authUrl = buildAccountAuthUrl({
+      intent,
+      shop: currentShop,
+      host: currentHost,
+      returnPath: queryString ? `/dashboard?${queryString}` : "/dashboard",
+    });
+
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    // Break out of Shopify iframe for account auth when needed.
+    if (window.top && window.top !== window) {
+      window.top.location.href = authUrl;
+      return;
+    }
+
+    window.location.href = authUrl;
   }
 
   useEffect(() => {
@@ -268,9 +290,9 @@ function AppShellInner({ children }: { children: React.ReactNode }) {
                         }
                       : {
                           content: "Sign in",
-                          url: queryString
-                            ? `/account/login?${queryString}`
-                            : "/account/login",
+                          onAction: () => {
+                            redirectToAccountAuth("login");
+                          },
                         }
                   }
                   secondaryAction={
@@ -278,9 +300,9 @@ function AppShellInner({ children }: { children: React.ReactNode }) {
                       ? undefined
                       : {
                           content: "Create account",
-                          url: queryString
-                            ? `/account/signup?${queryString}`
-                            : "/account/signup",
+                          onAction: () => {
+                            redirectToAccountAuth("signup");
+                          },
                         }
                   }
                 >

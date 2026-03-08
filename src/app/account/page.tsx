@@ -11,6 +11,7 @@ import {
   Text,
 } from "@shopify/polaris";
 import { PolarisProvider } from "@/components/providers/PolarisProvider";
+import { buildAccountAuthUrl } from "@/lib/account-auth-url";
 import { getShopFromSearchParams } from "@/lib/shop";
 
 type AccountPayload = {
@@ -36,6 +37,11 @@ export default function AccountPage() {
     return getShopFromSearchParams(new URLSearchParams(window.location.search));
   }, []);
 
+  const host = useMemo(() => {
+    if (typeof window === "undefined") return "";
+    return new URLSearchParams(window.location.search).get("host") ?? "";
+  }, []);
+
   useEffect(() => {
     async function loadSession(): Promise<void> {
       const response = await fetch("/api/account/session");
@@ -54,9 +60,12 @@ export default function AccountPage() {
         throw new Error("Unable to sign out from account.");
       }
 
-      window.location.href = shop
-        ? `/account/login?shop=${encodeURIComponent(shop)}`
-        : "/account/login";
+      window.location.href = buildAccountAuthUrl({
+        intent: "login",
+        shop,
+        host,
+        returnPath: "/account",
+      });
     } catch (logoutError) {
       setError((logoutError as Error).message);
     } finally {
@@ -64,12 +73,18 @@ export default function AccountPage() {
     }
   }
 
-  const loginHref = shop
-    ? `/account/login?shop=${encodeURIComponent(shop)}`
-    : "/account/login";
-  const signupHref = shop
-    ? `/account/signup?shop=${encodeURIComponent(shop)}`
-    : "/account/signup";
+  const loginHref = buildAccountAuthUrl({
+    intent: "login",
+    shop,
+    host,
+    returnPath: "/account",
+  });
+  const signupHref = buildAccountAuthUrl({
+    intent: "signup",
+    shop,
+    host,
+    returnPath: "/account",
+  });
 
   return (
     <PolarisProvider>
