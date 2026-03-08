@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import { requiredEnv } from "@/lib/env";
 import { prisma } from "@/lib/prisma";
 import { ACCOUNT_SESSION_COOKIE_NAME, APP_SESSION_COOKIE_NAME } from "@/lib/auth-constants";
 import { readAccountSessionToken } from "@/lib/account-session";
@@ -113,6 +112,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       await registerWebhookSubscription({
         shop,
         accessToken,
+        appBaseUrl: request.nextUrl.origin,
         topic,
       });
     }
@@ -127,7 +127,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     }
 
     const host = request.nextUrl.searchParams.get("host") ?? "";
-    const dashboardUrl = new URL("/dashboard", requiredEnv("SHOPIFY_APP_URL"));
+    const dashboardUrl = new URL("/dashboard", request.nextUrl.origin);
     dashboardUrl.searchParams.set("shop", shop);
     if (host) {
       dashboardUrl.searchParams.set("host", host);

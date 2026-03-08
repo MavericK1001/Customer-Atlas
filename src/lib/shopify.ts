@@ -13,6 +13,22 @@ export function buildShopifyInstallUrl(shop: string, state: string): string {
   return `https://${shop}/admin/oauth/authorize?${params.toString()}`;
 }
 
+export function buildShopifyInstallUrlForBase(
+  shop: string,
+  state: string,
+  appBaseUrl: string,
+): string {
+  const redirectUri = `${appBaseUrl.replace(/\/$/, "")}/api/auth/callback`;
+  const params = new URLSearchParams({
+    client_id: requiredEnv("SHOPIFY_API_KEY"),
+    scope: env.SHOPIFY_SCOPES,
+    redirect_uri: redirectUri,
+    state,
+  });
+
+  return `https://${shop}/admin/oauth/authorize?${params.toString()}`;
+}
+
 export async function exchangeShopifyCodeForToken(input: {
   shop: string;
   code: string;
@@ -112,6 +128,7 @@ export function verifyShopifyWebhookHmac(payload: string, hmacHeader: string): b
 export async function registerWebhookSubscription(input: {
   shop: string;
   accessToken: string;
+  appBaseUrl?: string;
   topic:
     | "orders/create"
     | "orders/updated"
@@ -122,7 +139,8 @@ export async function registerWebhookSubscription(input: {
     | "customers/redact"
     | "shop/redact";
 }): Promise<void> {
-  const endpoint = `${requiredEnv("SHOPIFY_APP_URL")}/api/webhooks/shopify`;
+  const endpointBase = input.appBaseUrl ?? requiredEnv("SHOPIFY_APP_URL");
+  const endpoint = `${endpointBase.replace(/\/$/, "")}/api/webhooks/shopify`;
 
   const mutation = `
     mutation webhookSubscriptionCreate($topic: WebhookSubscriptionTopic!, $callbackUrl: URL!) {

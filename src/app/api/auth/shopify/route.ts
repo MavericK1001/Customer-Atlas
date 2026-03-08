@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { buildShopifyInstallUrl } from "@/lib/shopify";
+import { buildShopifyInstallUrlForBase } from "@/lib/shopify";
 import { createShopifyOAuthStateToken } from "@/lib/shopify-oauth-state";
 
 function normalizeShopDomain(input: string | null): string | null {
@@ -35,7 +35,11 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
   }
 
   const state = createShopifyOAuthStateToken(shop);
-  const redirect = buildShopifyInstallUrl(shop, state);
+  const redirect = buildShopifyInstallUrlForBase(
+    shop,
+    state,
+    request.nextUrl.origin,
+  );
 
   const response = NextResponse.redirect(redirect);
   response.cookies.set("shopify_oauth_state", state, {
