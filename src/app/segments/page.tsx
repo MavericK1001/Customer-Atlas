@@ -47,6 +47,10 @@ export default function SegmentsPage() {
   const [deletingSegmentId, setDeletingSegmentId] = useState<number | null>(
     null,
   );
+  const [exportingSegmentId, setExportingSegmentId] = useState<number | null>(
+    null,
+  );
+  const [copyingSegmentId, setCopyingSegmentId] = useState<number | null>(null);
   const [segmentActionError, setSegmentActionError] = useState<string | null>(
     null,
   );
@@ -293,6 +297,96 @@ export default function SegmentsPage() {
     }
   }
 
+  async function handleExportCsv(segment: Segment): Promise<void> {
+    try {
+      setExportingSegmentId(segment.id);
+      setSegmentActionError(null);
+      setSegmentActionSuccess(null);
+
+      const params = new URLSearchParams();
+      if (shop) {
+        params.set("shop", shop);
+      }
+
+      const queryString = params.toString();
+      const endpoint = queryString
+        ? `/api/segments/${segment.id}/export?${queryString}`
+        : `/api/segments/${segment.id}/export`;
+
+      const response = await fetch(endpoint);
+      if (!response.ok) {
+        const payload = (await response.json().catch(() => ({}))) as {
+          error?: string;
+        };
+        throw new Error(payload.error ?? "Unable to export segment CSV.");
+      }
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      const safeName = segment.segmentName
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-+|-+$/g, "");
+
+      link.href = url;
+      link.download = `${safeName || "segment"}-export.csv`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+
+      setSegmentActionSuccess("Segment CSV export started.");
+    } catch (error) {
+      setSegmentActionError((error as Error).message);
+    } finally {
+      setExportingSegmentId(null);
+    }
+  }
+
+  async function handleCopyEmails(segment: Segment): Promise<void> {
+    try {
+      setCopyingSegmentId(segment.id);
+      setSegmentActionError(null);
+      setSegmentActionSuccess(null);
+
+      const params = new URLSearchParams();
+      params.set("format", "emails");
+      if (shop) {
+        params.set("shop", shop);
+      }
+
+      const response = await fetch(
+        `/api/segments/${segment.id}/export?${params.toString()}`,
+      );
+
+      const payload = (await response.json()) as {
+        ok?: boolean;
+        error?: string;
+        emailCount?: number;
+        emails?: string[];
+      };
+
+      if (!response.ok || !payload.ok || !Array.isArray(payload.emails)) {
+        throw new Error(payload.error ?? "Unable to copy segment emails.");
+      }
+
+      if (payload.emails.length === 0) {
+        setSegmentActionSuccess("No customer emails found for this segment.");
+        return;
+      }
+
+      await navigator.clipboard.writeText(payload.emails.join(", "));
+      setSegmentActionSuccess(
+        `Copied ${payload.emailCount ?? payload.emails.length} emails to clipboard.`,
+      );
+    } catch (error) {
+      setSegmentActionError((error as Error).message);
+    } finally {
+      setCopyingSegmentId(null);
+    }
+  }
+
   return (
     <AppShell>
       <Page
@@ -481,27 +575,49 @@ export default function SegmentsPage() {
                             Rules: {JSON.stringify(segment.rules)}
                           </Text>
                         </div>
-                        <InlineStack align="space-between">
-                          <Button
-                            variant="tertiary"
-                            disabled={billing?.planTier !== "pro"}
-                            onClick={() => beginEditSegment(segment)}
-                          >
-                            Edit
-                          </Button>
-                          <Button
-                            tone="critical"
-                            variant="tertiary"
-                            disabled={billing?.planTier !== "pro"}
-                            loading={deletingSegmentId === segment.id}
-                            onClick={() => {
-                              handleDeleteSegment(segment.id).catch(
-                                () => undefined,
-                              );
-                            }}
-                          >
-                            Delete
-                          </Button>
+                        <InlineStack align="space-between" blockAlign="center">
+                          <InlineStack gap="200">
+                            <Button
+                              variant="secondary"
+                              loading={exportingSegmentId === segment.id}
+                              onClick={() => {
+                                handleExportCsv(segment).catch(() => undefined);
+                              }}
+                            >
+                              Export CSV
+                            </Button>
+                            <Button
+                              variant="tertiary"
+                              loading={copyingSegmentId === segment.id}
+                              onClick={() => {
+                                handleCopyEmails(segment).catch(() => undefined);
+                              }}
+                            >
+                              Copy emails
+                            </Button>
+                          </InlineStack>
+                          <InlineStack gap="200">
+                            <Button
+                              variant="tertiary"
+                              disabled={billing?.planTier !== "pro"}
+                              onClick={() => beginEditSegment(segment)}
+                            >
+                              Edit
+                            </Button>
+                            <Button
+                              tone="critical"
+                              variant="tertiary"
+                              disabled={billing?.planTier !== "pro"}
+                              loading={deletingSegmentId === segment.id}
+                              onClick={() => {
+                                handleDeleteSegment(segment.id).catch(
+                                  () => undefined,
+                                );
+                              }}
+                            >
+                              Delete
+                            </Button>
+                          </InlineStack>
                         </InlineStack>
                       </>
                     )}
