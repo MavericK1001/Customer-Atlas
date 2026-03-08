@@ -51,6 +51,7 @@ export default function SegmentsPage() {
     null,
   );
   const [copyingSegmentId, setCopyingSegmentId] = useState<number | null>(null);
+  const [exportMinSpend, setExportMinSpend] = useState("0");
   const [segmentActionError, setSegmentActionError] = useState<string | null>(
     null,
   );
@@ -307,6 +308,10 @@ export default function SegmentsPage() {
       if (shop) {
         params.set("shop", shop);
       }
+      const minSpend = Number.parseFloat(exportMinSpend);
+      if (Number.isFinite(minSpend) && minSpend > 0) {
+        params.set("minSpend", String(minSpend));
+      }
 
       const queryString = params.toString();
       const endpoint = queryString
@@ -354,6 +359,10 @@ export default function SegmentsPage() {
       params.set("format", "emails");
       if (shop) {
         params.set("shop", shop);
+      }
+      const minSpend = Number.parseFloat(exportMinSpend);
+      if (Number.isFinite(minSpend) && minSpend > 0) {
+        params.set("minSpend", String(minSpend));
       }
 
       const response = await fetch(
@@ -498,6 +507,16 @@ export default function SegmentsPage() {
                   Existing Segments
                 </Text>
               </div>
+              <FormLayout>
+                <TextField
+                  label="Export filter: minimum total spend"
+                  type="number"
+                  value={exportMinSpend}
+                  onChange={setExportMinSpend}
+                  autoComplete="off"
+                  helpText="Exports and copied emails include only customers with an email address."
+                />
+              </FormLayout>
               {segments.length === 0 ? (
                 <div className="ca-muted">
                   <Text as="p">No segments available yet.</Text>
@@ -590,7 +609,9 @@ export default function SegmentsPage() {
                               variant="tertiary"
                               loading={copyingSegmentId === segment.id}
                               onClick={() => {
-                                handleCopyEmails(segment).catch(() => undefined);
+                                handleCopyEmails(segment).catch(
+                                  () => undefined,
+                                );
                               }}
                             >
                               Copy emails

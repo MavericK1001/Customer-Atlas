@@ -98,6 +98,23 @@ export async function GET(
     rules: parsed.rules,
   });
 
+  const exportMinSpendRaw = request.nextUrl.searchParams.get("minSpend");
+  const exportMinSpendParsed = exportMinSpendRaw
+    ? Number.parseFloat(exportMinSpendRaw)
+    : Number.NaN;
+
+  if (
+    exportMinSpendRaw &&
+    (!Number.isFinite(exportMinSpendParsed) || exportMinSpendParsed < 0)
+  ) {
+    return NextResponse.json(
+      { error: "minSpend must be a valid non-negative number." },
+      { status: 400 },
+    );
+  }
+
+  const exportMinSpend = exportMinSpendRaw ? exportMinSpendParsed : null;
+
   const customers = await prisma.customer.findMany({
     where: whereClause,
     orderBy: { totalSpent: "desc" },
@@ -111,6 +128,13 @@ export async function GET(
   });
 
   const rows: ExportRow[] = customers
+    .filter((customer) => {
+      if (exportMinSpend === null) {
+        return true;
+      }
+
+      return toNumber(customer.totalSpent) >= exportMinSpend;
+    })
     .filter((customer) => !!customer.email)
     .map((customer) => ({
       email: customer.email ?? "",
