@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { APP_SESSION_COOKIE_NAME } from "@/lib/auth-constants";
+import { readShopFromShopifySessionToken } from "@/lib/shopify-session-token";
 
 const PROTECTED_PAGE_PREFIXES = [
   "/dashboard",
@@ -42,7 +43,11 @@ export function proxy(request: NextRequest): NextResponse {
   }
 
   const sessionCookie = request.cookies.get(APP_SESSION_COOKIE_NAME)?.value;
-  if (sessionCookie) {
+  const sessionTokenShop = readShopFromShopifySessionToken(
+    request.headers.get("authorization"),
+  );
+
+  if (sessionCookie || sessionTokenShop) {
     return NextResponse.next();
   }
 

@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { APP_SESSION_COOKIE_NAME } from "@/lib/auth-constants";
 import { readAppSessionToken } from "@/lib/auth-session";
 import { normalizeShopDomain } from "@/lib/shop";
+import { readShopFromShopifySessionToken } from "@/lib/shopify-session-token";
 
 type ResolvedShop = {
   ok: true;
@@ -19,6 +20,32 @@ export type ResolveShopDomainResult = ResolvedShop | UnresolvedShop;
 
 export async function resolveShopDomain(request: NextRequest): Promise<ResolveShopDomainResult> {
   const fromQuery = normalizeShopDomain(request.nextUrl.searchParams.get("shop"));
+  const tokenShop = readShopFromShopifySessionToken(request.headers.get("authorization"));
+
+  if (tokenShop) {
+    if (fromQuery && fromQuery !== tokenShop) {
+      return {
+        ok: false,
+        status: 403,
+        error: "Store mismatch. Re-authenticate for the requested shop.",
+      };
+    }
+
+    const installed = await prisma.appInstall.findUnique({
+      where: { shopDomain: tokenShop },
+      select: { shopDomain: true },
+    });
+
+    if (installed?.shopDomain) {
+      return { ok: true, shopDomain: installed.shopDomain };
+    }
+
+    return {
+      ok: false,
+      status: 401,
+      error: "Token store is not installed. Reinstall or re-authenticate.",
+    };
+  }
 
   const session = readAppSessionToken(request.cookies.get(APP_SESSION_COOKIE_NAME)?.value);
   if (session) {

@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
@@ -68,6 +68,63 @@ function AppShellInner({ children }: { children: React.ReactNode }) {
 
     router.push(`/api/auth/shopify?${target.toString()}`);
   }
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    type ShopifyGlobal = {
+      idToken?: () => Promise<string>;
+    };
+
+    const shopify = (window as Window & { shopify?: ShopifyGlobal }).shopify;
+    if (!shopify?.idToken) {
+      return;
+    }
+    const getIdToken = shopify.idToken;
+
+    const originalFetch = window.fetch.bind(window);
+
+    window.fetch = async (
+      input: RequestInfo | URL,
+      init?: RequestInit,
+    ): Promise<Response> => {
+      let requestUrl = "";
+
+      if (typeof input === "string") {
+        requestUrl = input;
+      } else if (input instanceof URL) {
+        requestUrl = input.toString();
+      } else {
+        requestUrl = input.url;
+      }
+
+      const base = window.location.origin;
+      const parsedUrl = new URL(requestUrl, base);
+      const isSameOriginApiCall =
+        parsedUrl.origin === window.location.origin && parsedUrl.pathname.startsWith("/api/");
+
+      if (!isSameOriginApiCall) {
+        return originalFetch(input, init);
+      }
+
+      const headers = new Headers(init?.headers);
+      if (!headers.has("Authorization")) {
+        const token = await getIdToken();
+        headers.set("Authorization", `Bearer ${token}`);
+      }
+
+      return originalFetch(input, {
+        ...init,
+        headers,
+      });
+    };
+
+    return () => {
+      window.fetch = originalFetch;
+    };
+  }, []);
 
   return (
     <PolarisProvider>
