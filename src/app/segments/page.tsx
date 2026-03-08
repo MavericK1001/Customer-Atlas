@@ -103,6 +103,14 @@ export default function SegmentsPage() {
       : "0";
   }
 
+  function getRuleSummary(rules: Record<string, unknown>): string[] {
+    return [
+      `Spent >= $${parseRuleNumber(rules, "minTotalSpent")}`,
+      `Orders >= ${parseRuleNumber(rules, "minOrders")}`,
+      `Inactive >= ${parseRuleNumber(rules, "inactiveDays")} days`,
+    ];
+  }
+
   async function reloadSegments(): Promise<void> {
     const query = shop ? `?shop=${encodeURIComponent(shop)}` : "";
     const response = await fetch(`/api/segments${query}`);
@@ -410,6 +418,28 @@ export default function SegmentsPage() {
         title="Customer Segments"
         subtitle="Design audience rules, preview impact, and monitor segment size"
       >
+        <div className="ca-page-hero ca-fade-in">
+          <p className="ca-dashboard-kicker">Segment Studio</p>
+          <h2>Build campaign-ready audiences with confidence.</h2>
+          <p>
+            Preview reach instantly, then launch exports or email workflows from
+            the same workspace.
+          </p>
+          <div className="ca-hero-metrics">
+            <div className="ca-hero-metric-pill">
+              <span>Active segments</span>
+              <strong>{segments.length}</strong>
+            </div>
+            <div className="ca-hero-metric-pill">
+              <span>Plan</span>
+              <strong>{billing?.planTier?.toUpperCase() ?? "FREE"}</strong>
+            </div>
+            <div className="ca-hero-metric-pill">
+              <span>Status</span>
+              <strong>{billing?.billingStatus ?? "unknown"}</strong>
+            </div>
+          </div>
+        </div>
         <Layout>
           <Layout.Section>
             <Card>
@@ -537,7 +567,7 @@ export default function SegmentsPage() {
               ) : null}
               <div className="ca-priority-list">
                 {segments.map((segment) => (
-                  <div key={segment.id} className="ca-priority-card">
+                  <div key={segment.id} className="ca-priority-card ca-segment-card">
                     {editingSegmentId === segment.id ? (
                       <BlockStack gap="300">
                         <FormLayout>
@@ -602,10 +632,12 @@ export default function SegmentsPage() {
                             {segment.customerCount} customers
                           </span>
                         </div>
-                        <div className="ca-muted">
-                          <Text as="p">
-                            Rules: {JSON.stringify(segment.rules)}
-                          </Text>
+                        <div className="ca-segment-rule-grid">
+                          {getRuleSummary(segment.rules).map((rule) => (
+                            <span key={`${segment.id}-${rule}`} className="ca-rule-chip">
+                              {rule}
+                            </span>
+                          ))}
                         </div>
                         <InlineStack align="space-between" blockAlign="center">
                           <InlineStack gap="200">

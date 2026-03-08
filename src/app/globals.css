@@ -276,6 +276,129 @@ body {
   color: var(--text-muted);
 }
 
+.ca-page-hero {
+  margin-bottom: 14px;
+  padding: 18px;
+  border-radius: 18px;
+  border: 1px solid rgba(12, 124, 235, 0.22);
+  background:
+    radial-gradient(circle at 90% 8%, rgba(12, 124, 235, 0.18), rgba(12, 124, 235, 0) 34%),
+    linear-gradient(145deg, rgba(255, 255, 255, 0.93), rgba(230, 244, 255, 0.87));
+  box-shadow: var(--shadow-soft);
+}
+
+.ca-page-hero h2 {
+  margin: 10px 0 0;
+  font-size: clamp(1.3rem, 2.8vw, 1.9rem);
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+}
+
+.ca-page-hero p {
+  margin: 8px 0 0;
+  color: var(--text-muted);
+}
+
+.ca-hero-metrics {
+  margin-top: 12px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.ca-hero-metric-pill {
+  border-radius: 12px;
+  border: 1px solid rgba(12, 124, 235, 0.2);
+  background: rgba(255, 255, 255, 0.84);
+  padding: 8px 10px;
+  min-width: 150px;
+}
+
+.ca-hero-metric-pill span {
+  display: block;
+  font-size: 0.74rem;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.ca-hero-metric-pill strong {
+  display: block;
+  margin-top: 4px;
+  font-size: 1rem;
+  letter-spacing: -0.01em;
+}
+
+.ca-filter-bar {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.ca-filter-input {
+  min-width: 260px;
+  flex: 1;
+}
+
+.ca-customer-grid {
+  display: grid;
+  gap: 12px;
+}
+
+.ca-customer-card {
+  display: grid;
+  gap: 10px;
+}
+
+.ca-customer-metrics {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.ca-customer-metrics div {
+  border-radius: 12px;
+  border: 1px solid rgba(12, 124, 235, 0.16);
+  background: rgba(235, 247, 255, 0.72);
+  padding: 8px 10px;
+}
+
+.ca-customer-metrics p {
+  margin: 0;
+  font-size: 0.74rem;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--text-muted);
+}
+
+.ca-customer-metrics strong {
+  display: block;
+  margin-top: 4px;
+  font-size: 0.96rem;
+  letter-spacing: -0.01em;
+}
+
+.ca-segment-card {
+  border-left: 3px solid rgba(9, 94, 181, 0.35);
+}
+
+.ca-segment-rule-grid {
+  margin-top: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.ca-rule-chip {
+  border: 1px solid rgba(12, 124, 235, 0.2);
+  border-radius: 999px;
+  background: rgba(12, 124, 235, 0.1);
+  color: #0f3b73;
+  font-size: 0.74rem;
+  padding: 4px 10px;
+}
+
 @keyframes caFadeIn {
   from {
     opacity: 0;
@@ -306,6 +429,18 @@ body {
 
   .ca-auth-hero {
     padding: 14px;
+  }
+
+  .ca-page-hero {
+    padding: 14px;
+  }
+
+  .ca-filter-input {
+    min-width: 100%;
+  }
+
+  .ca-customer-metrics {
+    grid-template-columns: 1fr;
   }
 }
 
