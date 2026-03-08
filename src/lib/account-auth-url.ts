@@ -9,6 +9,15 @@ type BuildAccountAuthUrlOptions = {
   returnPath?: string;
 };
 
+function isEnabled(value: string | undefined): boolean {
+  const normalized = (value ?? "").trim().toLowerCase();
+  if (!normalized) {
+    return true;
+  }
+
+  return !["0", "false", "off", "no"].includes(normalized);
+}
+
 export function sanitizeInternalReturnPath(path: string | undefined): string {
   const trimmed = (path ?? "").trim();
 
@@ -45,8 +54,58 @@ function getAccountAuthBaseUrl(): string {
   return normalizeBaseUrl(configured);
 }
 
+export function isExternalAccountAuthEnabled(): boolean {
+  return isEnabled(
+    process.env.NEXT_PUBLIC_EXTERNAL_ACCOUNT_AUTH_ENABLED ??
+      process.env.EXTERNAL_ACCOUNT_AUTH_ENABLED,
+  );
+}
+
 export function hasExternalAccountAuth(): boolean {
-  return getAccountAuthBaseUrl().length > 0;
+  return isExternalAccountAuthEnabled() && getAccountAuthBaseUrl().length > 0;
+}
+
+export function buildAccountAuthStartUrl({
+  intent,
+  shop,
+  host,
+  returnPath = "/dashboard",
+}: BuildAccountAuthUrlOptions): string {
+  const normalizedShop = normalizeShopDomain(shop ?? "");
+  const normalizedHost = (host ?? "").trim();
+  const sanitizedReturnPath = sanitizeInternalReturnPath(returnPath);
+
+  const params = new URLSearchParams();
+  params.set("intent", intent);
+  if (normalizedShop) {
+    params.set("shop", normalizedShop);
+  }
+  if (normalizedHost) {
+    params.set("host", normalizedHost);
+  }
+  params.set("returnTo", sanitizedReturnPath);
+
+  return `/api/account/auth-start?${params.toString()}`;
+}
+
+export function buildExternalAccountProviderUrl(input: {
+  intent: AccountAuthIntent;
+  shop: string;
+  host: string;
+  returnTo: string;
+  callbackUrl: string;
+  state: string;
+}): string {
+  const externalUrl = new URL(getAccountAuthBaseUrl());
+  const basePath =
+    externalUrl.pathname === "/" ? "" : externalUrl.pathname.replace(/\/$/, "");
+  externalUrl.pathname = `${basePath}/${input.intent}`;
+  externalUrl.searchParams.set("shop", input.shop);
+  externalUrl.searchParams.set("host", input.host);
+  externalUrl.searchParams.set("returnTo", input.returnTo);
+  externalUrl.searchParams.set("callbackUrl", input.callbackUrl);
+  externalUrl.searchParams.set("state", input.state);
+  return externalUrl.toString();
 }
 
 export function buildAccountAuthUrl({
@@ -69,32 +128,16 @@ export function buildAccountAuthUrl({
   }
   internalParams.set("returnTo", sanitizedReturnPath);
 
-  const accountAuthBaseUrl = getAccountAuthBaseUrl();
-  if (!accountAuthBaseUrl) {
+  if (!hasExternalAccountAuth()) {
     return internalParams.toString()
       ? `${internalPath}?${internalParams.toString()}`
       : internalPath;
   }
 
-  let externalUrl: URL;
-  try {
-    externalUrl = new URL(accountAuthBaseUrl);
-  } catch {
-    return internalParams.toString()
-      ? `${internalPath}?${internalParams.toString()}`
-      : internalPath;
-  }
-
-  const basePath = externalUrl.pathname === "/" ? "" : externalUrl.pathname.replace(/\/$/, "");
-  externalUrl.pathname = `${basePath}/${intent}`;
-
-  if (normalizedShop) {
-    externalUrl.searchParams.set("shop", normalizedShop);
-  }
-  if (normalizedHost) {
-    externalUrl.searchParams.set("host", normalizedHost);
-  }
-  externalUrl.searchParams.set("returnTo", sanitizedReturnPath);
-
-  return externalUrl.toString();
+  return buildAccountAuthStartUrl({
+    intent,
+    shop: normalizedShop,
+    host: normalizedHost,
+    returnPath: sanitizedReturnPath,
+  });
 }
