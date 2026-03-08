@@ -42,25 +42,55 @@ export async function exchangeShopifyCodeForToken(input: {
   return data.access_token;
 }
 
-export function verifyShopifyOAuthCallback(queryParams: URLSearchParams): boolean {
-  const hmac = queryParams.get("hmac");
+function buildOAuthMessage(rawSearch: string): { hmac: string | null; message: string } {
+  const source = rawSearch.startsWith("?") ? rawSearch.slice(1) : rawSearch;
+  const pairs = source
+    .split("&")
+    .filter((segment) => segment.length > 0)
+    .map((segment) => {
+      const separatorIndex = segment.indexOf("=");
+      if (separatorIndex === -1) {
+        return { key: segment, value: "" };
+      }
+
+      return {
+        key: segment.slice(0, separatorIndex),
+        value: segment.slice(separatorIndex + 1),
+      };
+    });
+
+  const hmacPair = pairs.find((pair) => pair.key === "hmac");
+  const message = pairs
+    .filter((pair) => pair.key !== "hmac" && pair.key !== "signature")
+    .sort((a, b) => a.key.localeCompare(b.key))
+    .map((pair) => `${pair.key}=${pair.value}`)
+    .join("&");
+
+  return {
+    hmac: hmacPair?.value ?? null,
+    message,
+  };
+}
+
+export function verifyShopifyOAuthCallback(rawSearch: string): boolean {
+  const { hmac, message } = buildOAuthMessage(rawSearch);
 
   if (!hmac) {
     return false;
   }
-
-  const message = [...queryParams.entries()]
-    .filter(([key]) => key !== "hmac" && key !== "signature")
-    .sort(([a], [b]) => a.localeCompare(b))
-    .map(([key, value]) => `${key}=${value}`)
-    .join("&");
 
   const digest = crypto
     .createHmac("sha256", requiredEnv("SHOPIFY_API_SECRET"))
     .update(message)
     .digest("hex");
 
-  return crypto.timingSafeEqual(Buffer.from(digest), Buffer.from(hmac));
+  const provided = Buffer.from(hmac, "utf8");
+  const expected = Buffer.from(digest, "utf8");
+  if (provided.length !== expected.length) {
+    return false;
+  }
+
+  return crypto.timingSafeEqual(expected, provided);
 }
 
 export function verifyShopifyWebhookHmac(payload: string, hmacHeader: string): boolean {

@@ -25,7 +25,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
   const shop = normalizeShopDomain(request.nextUrl.searchParams.get("shop"));
   const state = request.nextUrl.searchParams.get("state");
   const stateCookie = request.cookies.get("shopify_oauth_state")?.value;
-  const isValidHmac = verifyShopifyOAuthCallback(request.nextUrl.searchParams);
+  const isValidHmac = verifyShopifyOAuthCallback(request.nextUrl.search);
   const parsedState = readShopifyOAuthStateToken(state);
 
   const stateMatchesCookie =
