@@ -19,6 +19,8 @@ const WEBHOOK_TOPICS = [
   "shop/redact",
 ] as const;
 
+const POST_INSTALL_SETUP_MAX_WAIT_MS = 4000;
+
 export async function GET(request: NextRequest): Promise<NextResponse> {
   const code = request.nextUrl.searchParams.get("code");
   const shop = normalizeShopDomain(request.nextUrl.searchParams.get("shop"));
@@ -127,22 +129,45 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       });
     }
 
-    for (const topic of WEBHOOK_TOPICS) {
-      await registerWebhookSubscription({
+    // Keep install UX snappy: run setup tasks in parallel and cap how long callback waits.
+    const postInstallSetup = Promise.allSettled([
+      ...WEBHOOK_TOPICS.map((topic) =>
+        registerWebhookSubscription({
+          shop,
+          accessToken,
+          appBaseUrl: request.nextUrl.origin,
+          topic,
+        }),
+      ),
+      syncShopData({
         shop,
         accessToken,
-        appBaseUrl: request.nextUrl.origin,
-        topic,
-      });
-    }
+      }),
+    ]);
 
-    try {
-      await syncShopData({
-        shop,
-        accessToken,
-      });
-    } catch (error) {
-      console.warn(`Initial data sync failed for ${shop}: ${(error as Error).message}`);
+    const setupResult = await Promise.race([
+      postInstallSetup.then(() => "completed" as const),
+      new Promise<"timeout">((resolve) => {
+        setTimeout(() => resolve("timeout"), POST_INSTALL_SETUP_MAX_WAIT_MS);
+      }),
+    ]);
+
+    if (setupResult === "timeout") {
+      console.warn(
+        `Post-install setup exceeded ${POST_INSTALL_SETUP_MAX_WAIT_MS}ms for ${shop}; redirecting early.`,
+      );
+      postInstallSetup
+        .then((results) => {
+          const rejected = results.filter((result) => result.status === "rejected");
+          if (rejected.length > 0) {
+            console.warn(
+              `Post-install setup completed with ${rejected.length} rejected task(s) for ${shop}.`,
+            );
+          }
+        })
+        .catch((error) => {
+          console.warn(`Post-install background setup failed for ${shop}: ${(error as Error).message}`);
+        });
     }
 
     return buildDashboardResponse(shop);
