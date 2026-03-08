@@ -29,7 +29,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
   });
 
   return NextResponse.json({
-    insights: insights.map((insight) => ({
+    insights: insights.map((insight: (typeof insights)[number]) => ({
       id: insight.id,
       insightType: insight.insightType,
       message: insight.message,

@@ -7,6 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "postinstall": "prisma generate",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "worker": "node --import tsx src/workers/metrics-worker.ts"
@@ -22,16 +23,16 @@
     "ioredis": "^5.10.0",
     "next": "16.1.6",
     "pg": "^8.20.0",
-    "react": "19.2.3",
-    "react-dom": "19.2.3",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
     "zod": "^4.3.6"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/pg": "^8.18.0",
-    "@types/react": "^19",
-    "@types/react-dom": "^19",
+    "@types/react": "^18.3.18",
+    "@types/react-dom": "^18.3.5",
     "eslint": "^9",
     "eslint-config-next": "16.1.6",
     "prisma": "^7.4.2",

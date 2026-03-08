@@ -26,7 +26,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
   });
 
   return NextResponse.json({
-    customers: customers.map((customer) => ({
+    customers: customers.map((customer: (typeof customers)[number]) => ({
       id: customer.id,
       shopifyCustomerId: customer.shopifyCustomerId,
       email: customer.email,

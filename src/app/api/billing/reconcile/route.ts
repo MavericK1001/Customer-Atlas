@@ -6,6 +6,13 @@ import { env } from "@/lib/env";
 import { prisma } from "@/lib/prisma";
 import { normalizeShopDomain } from "@/lib/shop";
 
+type ReconcileInput = {
+  shopDomain: string;
+  accessToken: string;
+};
+
+type ReconcileResult = Awaited<ReturnType<typeof reconcileInstallBilling>>;
+
 function hasValidCronSecret(request: NextRequest): boolean {
   const configured = env.BILLING_RECONCILE_SECRET;
   const provided = request.headers.get("x-billing-reconcile-secret");
@@ -49,40 +56,35 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       return reconcileSingleShop(shop);
     }
 
-    const installs = await prisma.appInstall.findMany({
+    const installs = (await prisma.appInstall.findMany({
       select: {
         shopDomain: true,
         accessToken: true,
       },
       orderBy: { createdAt: "desc" },
-    });
+    })) as ReconcileInput[];
 
-    const settled = await Promise.allSettled(
+    const settled: PromiseSettledResult<ReconcileResult>[] = await Promise.allSettled(
       installs.map((install) => reconcileInstallBilling(install)),
     );
 
-    const results = settled
-      .filter(
-        (entry): entry is PromiseFulfilledResult<Awaited<ReturnType<typeof reconcileInstallBilling>>> =>
-          entry.status === "fulfilled",
-      )
-      .map((entry) => entry.value);
+    const results: ReconcileResult[] = [];
+    const failures: Array<{ shopDomain: string; error: string }> = [];
 
-    const failures = settled
-      .map((entry, index) => ({ entry, install: installs[index] }))
-      .filter(
-        (item): item is {
-          entry: PromiseRejectedResult;
-          install: (typeof installs)[number];
-        } => item.entry.status === "rejected",
-      )
-      .map((item) => ({
-        shopDomain: item.install.shopDomain,
+    settled.forEach((entry, index) => {
+      if (entry.status === "fulfilled") {
+        results.push(entry.value);
+        return;
+      }
+
+      failures.push({
+        shopDomain: installs[index].shopDomain,
         error:
-          item.entry.reason instanceof Error
-            ? item.entry.reason.message
+          entry.reason instanceof Error
+            ? entry.reason.message
             : "Unknown reconcile failure",
-      }));
+      });
+    });
 
     return NextResponse.json({
       ok: true,
