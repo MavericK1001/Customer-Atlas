@@ -54,6 +54,21 @@ function getAccountAuthBaseUrl(): string {
   return normalizeBaseUrl(configured);
 }
 
+export function isAccountAuthOrigin(origin: string | undefined): boolean {
+  const candidate = (origin ?? "").trim();
+  if (!candidate) {
+    return false;
+  }
+
+  try {
+    const currentOrigin = new URL(candidate).origin;
+    const accountOrigin = new URL(getAccountAuthBaseUrl()).origin;
+    return currentOrigin === accountOrigin;
+  } catch {
+    return false;
+  }
+}
+
 export function isExternalAccountAuthEnabled(): boolean {
   return isEnabled(
     process.env.NEXT_PUBLIC_EXTERNAL_ACCOUNT_AUTH_ENABLED ??

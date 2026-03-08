@@ -15,6 +15,7 @@ import {
 import { PolarisProvider } from "@/components/providers/PolarisProvider";
 import {
   buildAccountAuthUrl,
+  isAccountAuthOrigin,
   isExternalAccountAuthEnabled,
 } from "@/lib/account-auth-url";
 
@@ -36,9 +37,19 @@ export default function AccountLoginPage() {
   const host = params.get("host") ?? "";
   const returnTo = params.get("returnTo") ?? "/dashboard";
   const externalAuthEnabled = isExternalAccountAuthEnabled();
+  const [isMounted, setIsMounted] = useState(false);
+  const shouldExternalRedirect =
+    externalAuthEnabled &&
+    (!isMounted ||
+      (typeof window !== "undefined" &&
+        !isAccountAuthOrigin(window.location.origin)));
 
   useEffect(() => {
-    if (!externalAuthEnabled) {
+    setIsMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!isMounted || !shouldExternalRedirect) {
       return;
     }
 
@@ -50,7 +61,7 @@ export default function AccountLoginPage() {
     });
 
     window.location.replace(authUrl);
-  }, [externalAuthEnabled, host, returnTo, shop]);
+  }, [host, isMounted, returnTo, shop, shouldExternalRedirect]);
 
   async function handleLogin(): Promise<void> {
     try {
@@ -93,7 +104,7 @@ export default function AccountLoginPage() {
     }
   }
 
-  if (externalAuthEnabled) {
+  if (shouldExternalRedirect) {
     return (
       <PolarisProvider>
         <Page title="Redirecting to sign in">
