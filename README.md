@@ -1,36 +1,77 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# CustomerAtlas
 
-## Getting Started
+CustomerAtlas is a Shopify embedded app built with Next.js, Prisma, and PostgreSQL.
 
-First, run the development server:
+## Local Development
+
+1. Install dependencies:
+
+```bash
+npm install
+```
+
+2. Create your environment file:
+
+```bash
+cp .env.example .env
+```
+
+3. Generate Prisma client and run local migrations:
+
+```bash
+npm run prisma:generate
+npm run prisma:migrate
+```
+
+4. Start the app:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+5. Optional: run queue worker in a second terminal when using Redis:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+npm run worker
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Production Build
 
-## Learn More
+1. Set all required environment variables (see `.env.example`).
+2. Apply production migrations:
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+npx prisma migrate deploy
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+3. Validate and compile:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```bash
+npm run lint
+npm run build
+```
 
-## Deploy on Vercel
+4. Start production server:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```bash
+npm run start
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Shopify Production Setup
+
+1. Configure a stable HTTPS app URL (for example `https://customeratlas.app`).
+2. Set Shopify app settings:
+- App URL: `https://customeratlas.app`
+- Redirect URL: `https://customeratlas.app/api/auth/callback`
+3. Ensure app distribution is set to Public before using Shopify Billing API.
+4. Configure reconcile cron to call:
+- `POST /api/billing/reconcile`
+- Header: `x-billing-reconcile-secret: <BILLING_RECONCILE_SECRET>`
+
+## Verification Checklist
+
+1. `npm run lint` and `npm run build` pass.
+2. Install flow works from `/install`.
+3. Webhooks are received at `/api/webhooks/shopify`.
+4. Billing upgrade and confirmation redirect work.
+5. Reconcile endpoint reports expected `reconciledCount`.
