@@ -3,8 +3,16 @@
 import { Suspense, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { Button, Frame, InlineStack, Navigation, Text } from "@shopify/polaris";
+import {
+  Button,
+  Frame,
+  InlineStack,
+  Navigation,
+  Text,
+  TextField,
+} from "@shopify/polaris";
 import { PolarisProvider } from "@/components/providers/PolarisProvider";
+import { normalizeShopDomain } from "@/lib/shop";
 
 const NAV_ITEMS = [
   { label: "Dashboard", path: "/dashboard" },
@@ -18,9 +26,15 @@ function AppShellInner({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const currentShop = searchParams.get("shop") ?? "";
+  const currentHost = searchParams.get("host") ?? "";
   const queryString = searchParams.toString();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [logoutError, setLogoutError] = useState<string | null>(null);
+  const [switchShopInput, setSwitchShopInput] = useState(currentShop);
+
+  const normalizedSwitchShop = normalizeShopDomain(switchShopInput);
+  const canSwitchShop = normalizedSwitchShop.endsWith(".myshopify.com");
 
   async function handleLogout(): Promise<void> {
     setIsLoggingOut(true);
@@ -39,6 +53,20 @@ function AppShellInner({ children }: { children: React.ReactNode }) {
     } finally {
       setIsLoggingOut(false);
     }
+  }
+
+  function handleSwitchStore(): void {
+    if (!canSwitchShop) {
+      return;
+    }
+
+    const target = new URLSearchParams();
+    target.set("shop", normalizedSwitchShop);
+    if (currentHost) {
+      target.set("host", currentHost);
+    }
+
+    router.push(`/api/auth/shopify?${target.toString()}`);
   }
 
   return (
@@ -63,14 +91,38 @@ function AppShellInner({ children }: { children: React.ReactNode }) {
               >
                 CustomerAtlas
               </Link>
-              <Button
-                variant="tertiary"
-                loading={isLoggingOut}
-                disabled={isLoggingOut}
-                onClick={handleLogout}
-              >
-                Log out
-              </Button>
+              <InlineStack gap="200" align="center">
+                {currentShop ? (
+                  <Text as="p" variant="bodyMd">
+                    Store: {currentShop}
+                  </Text>
+                ) : null}
+                <div style={{ minWidth: "260px" }}>
+                  <TextField
+                    label="Switch store"
+                    labelHidden
+                    placeholder="store-name.myshopify.com"
+                    autoComplete="off"
+                    value={switchShopInput}
+                    onChange={setSwitchShopInput}
+                  />
+                </div>
+                <Button
+                  variant="secondary"
+                  disabled={!canSwitchShop}
+                  onClick={handleSwitchStore}
+                >
+                  Switch
+                </Button>
+                <Button
+                  variant="tertiary"
+                  loading={isLoggingOut}
+                  disabled={isLoggingOut}
+                  onClick={handleLogout}
+                >
+                  Log out
+                </Button>
+              </InlineStack>
             </InlineStack>
             {logoutError ? (
               <Text as="p" tone="critical" variant="bodyMd">
