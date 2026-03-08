@@ -1,6 +1,6 @@
-import { randomUUID } from "crypto";
 import { NextRequest, NextResponse } from "next/server";
 import { buildShopifyInstallUrl } from "@/lib/shopify";
+import { createShopifyOAuthStateToken } from "@/lib/shopify-oauth-state";
 
 function normalizeShopDomain(input: string | null): string | null {
   if (!input) {
@@ -34,7 +34,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     return NextResponse.json({ error: "Valid shop parameter is required." }, { status: 400 });
   }
 
-  const state = randomUUID();
+  const state = createShopifyOAuthStateToken(shop);
   const redirect = buildShopifyInstallUrl(shop, state);
 
   const response = NextResponse.redirect(redirect);

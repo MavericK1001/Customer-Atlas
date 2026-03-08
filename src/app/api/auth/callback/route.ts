@@ -4,6 +4,8 @@ import { prisma } from "@/lib/prisma";
 import { ACCOUNT_SESSION_COOKIE_NAME, APP_SESSION_COOKIE_NAME } from "@/lib/auth-constants";
 import { readAccountSessionToken } from "@/lib/account-session";
 import { createAppSessionToken, getAppSessionCookieOptions } from "@/lib/auth-session";
+import { readShopifyOAuthStateToken } from "@/lib/shopify-oauth-state";
+import { normalizeShopDomain } from "@/lib/shop";
 import { exchangeShopifyCodeForToken, registerWebhookSubscription, verifyShopifyOAuthCallback } from "@/lib/shopify";
 import { syncShopData } from "@/lib/sync";
 
@@ -20,12 +22,26 @@ const WEBHOOK_TOPICS = [
 
 export async function GET(request: NextRequest): Promise<NextResponse> {
   const code = request.nextUrl.searchParams.get("code");
-  const shop = request.nextUrl.searchParams.get("shop");
+  const shop = normalizeShopDomain(request.nextUrl.searchParams.get("shop"));
   const state = request.nextUrl.searchParams.get("state");
   const stateCookie = request.cookies.get("shopify_oauth_state")?.value;
   const isValidHmac = verifyShopifyOAuthCallback(request.nextUrl.searchParams);
+  const parsedState = readShopifyOAuthStateToken(state);
 
-  if (!code || !shop || !state || state !== stateCookie || !isValidHmac) {
+  const stateMatchesCookie =
+    !!state &&
+    !!stateCookie &&
+    state.length === stateCookie.length &&
+    state === stateCookie;
+
+  // Cookie may be blocked in embedded contexts, so signed state token is primary validation.
+  const isValidState =
+    !!parsedState &&
+    !!shop &&
+    parsedState.shopDomain === shop &&
+    (!stateCookie || stateMatchesCookie);
+
+  if (!code || !shop || !isValidHmac || !isValidState) {
     return NextResponse.json({ error: "Invalid OAuth callback request." }, { status: 400 });
   }
 
