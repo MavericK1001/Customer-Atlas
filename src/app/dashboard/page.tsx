@@ -131,16 +131,30 @@ export default function DashboardPage() {
     }
   }
 
+  const currency = new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+    maximumFractionDigits: 0,
+  });
+
   return (
     <AppShell>
       <Page
         title="Customer Intelligence"
         subtitle="Revenue opportunities and retention priorities for today"
       >
+        <div className="ca-dashboard-hero ca-fade-in">
+          <p className="ca-dashboard-kicker">Daily Command Center</p>
+          <h2>Focus the highest revenue moves first.</h2>
+          <p>
+            Prioritize at-risk cohorts and quick-win campaigns from a single
+            operating view tailored for your store.
+          </p>
+        </div>
         <Layout>
           <Layout.Section>
             <Card>
-              <div className="ca-fade-in">
+              <div className="ca-fade-in ca-stagger-1">
                 <div className="ca-section-title">
                   <Text as="h3" variant="headingMd">
                     Portfolio Snapshot
@@ -162,13 +176,13 @@ export default function DashboardPage() {
                   <div className="ca-kpi-card">
                     <div className="ca-kpi-label">Average Order Value</div>
                     <div className="ca-kpi-value">
-                      ${data?.customerOverview.averageOrderValue ?? 0}
+                      {currency.format(data?.customerOverview.averageOrderValue ?? 0)}
                     </div>
                   </div>
                   <div className="ca-kpi-card">
                     <div className="ca-kpi-label">Predicted LTV</div>
                     <div className="ca-kpi-value">
-                      ${data?.customerOverview.predictedLtv ?? 0}
+                      {currency.format(data?.customerOverview.predictedLtv ?? 0)}
                     </div>
                   </div>
                 </div>
@@ -178,7 +192,7 @@ export default function DashboardPage() {
 
           <Layout.Section>
             <Card>
-              <div className="ca-section-title">
+              <div className="ca-section-title ca-stagger-2">
                 <Text as="h3" variant="headingMd">
                   Sync Health
                 </Text>
@@ -217,7 +231,7 @@ export default function DashboardPage() {
 
           <Layout.Section>
             <Card>
-              <div className="ca-section-title">
+              <div className="ca-section-title ca-stagger-3">
                 <Text as="h3" variant="headingMd">
                   Today&apos;s Priorities
                 </Text>
@@ -250,7 +264,7 @@ export default function DashboardPage() {
                     </div>
                     <div className="ca-priority-revenue">
                       <Text as="p">
-                        Potential Revenue: ${item.potentialRevenue}
+                        Potential Revenue: {currency.format(item.potentialRevenue)}
                       </Text>
                     </div>
                     <div className="ca-muted">
@@ -286,7 +300,7 @@ export default function DashboardPage() {
 
           <Layout.Section>
             <Card>
-              <div className="ca-section-title">
+              <div className="ca-section-title ca-stagger-4">
                 <Text as="h3" variant="headingMd">
                   Revenue Opportunities
                 </Text>
@@ -302,7 +316,7 @@ export default function DashboardPage() {
                       {insight.message}
                     </Text>
                     <div className="ca-opportunity-revenue">
-                      +${insight.potentialRevenue}
+                      +{currency.format(insight.potentialRevenue)}
                     </div>
                   </div>
                 ))}

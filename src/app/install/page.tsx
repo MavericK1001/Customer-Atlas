@@ -41,9 +41,21 @@ export default function InstallPage() {
       <Page title="Install CustomerAtlas">
         <Layout>
           <Layout.Section>
+            <div className="ca-auth-hero ca-fade-in">
+              <BrandMark
+                subtitle="Connect your Shopify store in under a minute"
+                size={40}
+              />
+              <h2>Bring your customer data into one command center.</h2>
+              <p>
+                Install CustomerAtlas to unlock retention signals, growth
+                opportunities, and actionable segments for your team.
+              </p>
+            </div>
+          </Layout.Section>
+          <Layout.Section>
             <Card>
               <BlockStack gap="300">
-                <BrandMark subtitle="Connect your Shopify store in seconds" size={40} />
                 <FormLayout>
                   <TextField
                     label="Shop domain"
@@ -52,7 +64,7 @@ export default function InstallPage() {
                     onChange={setShop}
                     helpText="Example: your-store.myshopify.com"
                   />
-                  <a href={installUrl}>
+                  <a className="ca-link" href={installUrl}>
                     <Button variant="primary" disabled={!isValidShop}>
                       Connect Shopify Store
                     </Button>

@@ -21,22 +21,25 @@ export const metadata: Metadata = {
   description:
     "Shopify customer intelligence platform for insights, segmentation, and LTV prediction.",
   icons: {
-    icon: "/logo/customeratlaslogo.png",
-    shortcut: "/logo/customeratlaslogo.png",
+    icon: [
+      { url: "/logo/customeratlas-icon.svg", type: "image/svg+xml" },
+      { url: "/logo/customeratlaslogo.png", type: "image/png" },
+    ],
+    shortcut: "/logo/customeratlas-icon.svg",
     apple: "/logo/customeratlaslogo.png",
   },
   openGraph: {
     title: "CustomerAtlas",
     description:
       "Shopify customer intelligence platform for insights, segmentation, and LTV prediction.",
-    images: ["/logo/customeratlaslogo.png"],
+    images: ["/logo/customeratlas-logo.svg"],
   },
   twitter: {
     card: "summary",
     title: "CustomerAtlas",
     description:
       "Shopify customer intelligence platform for insights, segmentation, and LTV prediction.",
-    images: ["/logo/customeratlaslogo.png"],
+    images: ["/logo/customeratlas-logo.svg"],
   },
 };
 

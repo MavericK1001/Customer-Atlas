@@ -1,17 +1,19 @@
 @import "tailwindcss";
 
 :root {
-  --background: #eef3fb;
-  --foreground: #0f172a;
-  --surface-primary: rgba(255, 255, 255, 0.9);
-  --surface-secondary: rgba(248, 251, 255, 0.86);
-  --surface-emphasis: #eff8ff;
-  --brand-accent: #0b7ee8;
-  --brand-accent-strong: #075fb3;
+  --background: #eaf2ff;
+  --foreground: #0e1d35;
+  --surface-primary: rgba(255, 255, 255, 0.94);
+  --surface-secondary: rgba(245, 250, 255, 0.9);
+  --surface-emphasis: #e5f1ff;
+  --brand-accent: #0c7ceb;
+  --brand-accent-strong: #095eb5;
+  --brand-accent-ink: #0a2f64;
   --risk: #dc3b4f;
-  --success: #0f9f72;
-  --text-muted: #4a5f78;
-  --ring-soft: rgba(11, 126, 232, 0.18);
+  --success: #129a72;
+  --text-muted: #4c6280;
+  --ring-soft: rgba(11, 126, 232, 0.22);
+  --shadow-soft: 0 12px 30px rgba(13, 47, 94, 0.1);
 }
 
 @theme inline {
@@ -23,11 +25,13 @@
 
 body {
   background:
-    radial-gradient(circle at 8% 10%, #bcd8ff 0%, rgba(188, 216, 255, 0) 32%),
-    radial-gradient(circle at 90% 18%, #cdefff 0%, rgba(205, 239, 255, 0) 34%),
-    linear-gradient(135deg, #edf4ff 0%, #e9f0fb 46%, #f4f8ff 100%);
+    radial-gradient(circle at 5% 6%, rgba(95, 163, 255, 0.45), rgba(95, 163, 255, 0) 34%),
+    radial-gradient(circle at 94% 14%, rgba(127, 210, 255, 0.4), rgba(127, 210, 255, 0) 35%),
+    radial-gradient(circle at 30% 94%, rgba(13, 124, 236, 0.15), rgba(13, 124, 236, 0) 42%),
+    linear-gradient(145deg, #ecf4ff 0%, #e7f1ff 42%, #f4f8ff 100%);
   color: var(--foreground);
   font-family: var(--font-space-grotesk), sans-serif;
+  min-height: 100vh;
 }
 
 .ca-section-title {
@@ -167,6 +171,111 @@ body {
   animation: caFadeIn 420ms ease-out;
 }
 
+.ca-stagger-1 {
+  animation-delay: 40ms;
+}
+
+.ca-stagger-2 {
+  animation-delay: 100ms;
+}
+
+.ca-stagger-3 {
+  animation-delay: 160ms;
+}
+
+.ca-stagger-4 {
+  animation-delay: 220ms;
+}
+
+.ca-shell-page {
+  padding: 18px;
+}
+
+.ca-shell-header {
+  margin-bottom: 14px;
+  border-radius: 16px;
+  border: 1px solid var(--ring-soft);
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.92), rgba(244, 250, 255, 0.88));
+  box-shadow: var(--shadow-soft);
+  padding: 12px;
+}
+
+.ca-shell-brand-link {
+  text-decoration: none;
+}
+
+.ca-shell-switch-input {
+  min-width: 260px;
+}
+
+.ca-shell-banner-wrap {
+  margin-top: 10px;
+}
+
+.ca-shell-content {
+  animation: caFadeIn 520ms ease-out;
+}
+
+.ca-dashboard-hero {
+  margin-bottom: 14px;
+  padding: 16px;
+  border-radius: 18px;
+  border: 1px solid rgba(12, 124, 235, 0.24);
+  background:
+    radial-gradient(circle at 82% 14%, rgba(12, 124, 235, 0.22), rgba(12, 124, 235, 0) 36%),
+    linear-gradient(145deg, rgba(255, 255, 255, 0.93), rgba(233, 244, 255, 0.84));
+  box-shadow: var(--shadow-soft);
+}
+
+.ca-dashboard-kicker {
+  margin: 0;
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgba(12, 124, 235, 0.15);
+  color: var(--brand-accent-ink);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+  font-weight: 620;
+}
+
+.ca-dashboard-hero h2 {
+  margin: 10px 0 0;
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+  font-size: clamp(1.28rem, 2.8vw, 1.85rem);
+}
+
+.ca-dashboard-hero p {
+  margin: 9px 0 0;
+  max-width: 68ch;
+  color: var(--text-muted);
+}
+
+.ca-auth-hero {
+  padding: 18px;
+  border-radius: 18px;
+  border: 1px solid rgba(12, 124, 235, 0.2);
+  background:
+    radial-gradient(circle at 88% 12%, rgba(12, 124, 235, 0.18), rgba(12, 124, 235, 0) 34%),
+    linear-gradient(145deg, rgba(255, 255, 255, 0.94), rgba(235, 246, 255, 0.86));
+  box-shadow: var(--shadow-soft);
+}
+
+.ca-auth-hero h2 {
+  margin: 10px 0 0;
+  font-size: clamp(1.26rem, 2.7vw, 1.7rem);
+  letter-spacing: -0.025em;
+  line-height: 1.12;
+}
+
+.ca-auth-hero p {
+  margin: 8px 0 0;
+  color: var(--text-muted);
+}
+
 @keyframes caFadeIn {
   from {
     opacity: 0;
@@ -181,6 +290,33 @@ body {
 @media (max-width: 768px) {
   .ca-kpi-value {
     font-size: 1.45rem;
+  }
+
+  .ca-shell-page {
+    padding: 12px;
+  }
+
+  .ca-shell-switch-input {
+    min-width: 180px;
+  }
+
+  .ca-dashboard-hero {
+    padding: 14px;
+  }
+
+  .ca-auth-hero {
+    padding: 14px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 1ms !important;
+    scroll-behavior: auto !important;
   }
 }
 

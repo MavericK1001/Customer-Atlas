@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 import {
   Banner,
   BlockStack,
@@ -12,6 +13,7 @@ import {
   Text,
   TextField,
 } from "@shopify/polaris";
+import { BrandMark } from "@/components/brand/BrandMark";
 import { PolarisProvider } from "@/components/providers/PolarisProvider";
 import {
   buildAccountAuthUrl,
@@ -128,8 +130,15 @@ export default function AccountSignupPage() {
       <Page title="Create CustomerAtlas account">
         <Layout>
           <Layout.Section>
+            <div className="ca-auth-hero ca-fade-in">
+              <BrandMark subtitle="Shopify intelligence operating system" size={36} />
+              <h2>Create your account.</h2>
+              <p>Set up secure access once and manage all connected stores in one workspace.</p>
+            </div>
+          </Layout.Section>
+          <Layout.Section>
             <Card>
-              <BlockStack gap="300">
+              <BlockStack gap="300" inlineAlign="start">
                 <FormLayout>
                   <TextField
                     label="Name (optional)"
@@ -164,7 +173,10 @@ export default function AccountSignupPage() {
                 </FormLayout>
                 {error ? <Banner tone="critical">{error}</Banner> : null}
                 <Text as="p" variant="bodyMd">
-                  Already have an account? <a href={loginHref}>Sign in</a>
+                  Already have an account?{" "}
+                  <Link className="ca-link" href={loginHref}>
+                    Sign in
+                  </Link>
                 </Text>
               </BlockStack>
             </Card>

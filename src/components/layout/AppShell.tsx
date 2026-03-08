@@ -227,22 +227,22 @@ function AppShellInner({ children }: { children: React.ReactNode }) {
           </Navigation>
         }
       >
-        <div style={{ padding: "16px" }}>
-          <div style={{ marginBottom: "10px", fontSize: "12px", opacity: 0.9 }}>
+        <div className="ca-shell-page">
+          <div className="ca-shell-header ca-fade-in">
             <InlineStack align="space-between">
               <Link
                 href={queryString ? `/dashboard?${queryString}` : "/dashboard"}
-                style={{ textDecoration: "none" }}
+                className="ca-shell-brand-link"
               >
-                <BrandMark compact size={28} />
+                <BrandMark compact size={30} />
               </Link>
               <InlineStack gap="200" align="center">
                 {currentShop ? (
-                  <Text as="p" variant="bodyMd">
+                  <Text as="p" variant="bodyMd" tone="subdued">
                     Store: {currentShop}
                   </Text>
                 ) : null}
-                <div style={{ minWidth: "260px" }}>
+                <div className="ca-shell-switch-input">
                   <TextField
                     label="Switch store"
                     labelHidden
@@ -275,7 +275,7 @@ function AppShellInner({ children }: { children: React.ReactNode }) {
               </Text>
             ) : null}
             {claimStatus?.ownership === "unclaimed" ? (
-              <div style={{ marginTop: "10px" }}>
+              <div className="ca-shell-banner-wrap">
                 <Banner
                   tone="warning"
                   title="This store is not linked to a CustomerAtlas account"
@@ -314,7 +314,7 @@ function AppShellInner({ children }: { children: React.ReactNode }) {
               </div>
             ) : null}
             {claimStatus?.ownership === "owned-by-other-account" ? (
-              <div style={{ marginTop: "10px" }}>
+              <div className="ca-shell-banner-wrap">
                 <Banner tone="critical" title="Store linked to another account">
                   This store is already linked to another CustomerAtlas account.
                 </Banner>
@@ -326,7 +326,7 @@ function AppShellInner({ children }: { children: React.ReactNode }) {
               </Text>
             ) : null}
           </div>
-          {children}
+          <div className="ca-shell-content">{children}</div>
         </div>
       </Frame>
     </PolarisProvider>

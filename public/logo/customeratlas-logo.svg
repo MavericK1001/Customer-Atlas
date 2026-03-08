@@ -1,0 +1,17 @@
+<svg width="940" height="256" viewBox="0 0 940 256" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="caBg" x1="24" y1="20" x2="236" y2="236" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#1F8CFF"/>
+      <stop offset="1" stop-color="#0A4DA8"/>
+    </linearGradient>
+    <linearGradient id="caAtlas" x1="76" y1="66" x2="180" y2="188" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#E6F2FF"/>
+      <stop offset="1" stop-color="#B8DAFF"/>
+    </linearGradient>
+  </defs>
+  <rect x="16" y="16" width="224" height="224" rx="52" fill="url(#caBg)"/>
+  <path d="M127.5 48L183.5 88.5V167.5L127.5 208L71.5 167.5V88.5L127.5 48Z" fill="url(#caAtlas)" fill-opacity="0.95"/>
+  <path d="M127.5 76L161.5 100.5V148L127.5 172L93.5 148V100.5L127.5 76Z" fill="#0B63C9" fill-opacity="0.92"/>
+  <circle cx="127.5" cy="124" r="18" fill="#EAF4FF"/>
+  <text x="276" y="148" fill="#0B1C36" font-size="88" font-family="'Space Grotesk', 'Segoe UI', sans-serif" font-weight="700" letter-spacing="-2">CustomerAtlas</text>
+</svg>
