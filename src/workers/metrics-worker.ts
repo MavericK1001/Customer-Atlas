@@ -14,3 +14,7 @@ worker.on("ready", () => {
 worker.on("failed", (job, error) => {
   console.error("Metrics job failed", { jobId: job?.id, error: error.message });
 });
+
+worker.on("error", (error) => {
+  console.error("Metrics worker connection error", { error: error.message });
+});

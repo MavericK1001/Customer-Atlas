@@ -42,7 +42,15 @@ function getRedisConnectionOptions(): {
 
 const redisConnection = getRedisConnectionOptions();
 
-const metricsQueue = redisConnection ? new Queue<MetricsJob>(queueName, { connection: redisConnection }) : null;
+const metricsQueue = redisConnection
+  ? new Queue<MetricsJob>(queueName, { connection: redisConnection })
+  : null;
+
+if (metricsQueue) {
+  metricsQueue.on("error", (error) => {
+    console.warn(`BullMQ queue connection issue: ${error.message}`);
+  });
+}
 
 export async function enqueueMetricsRecompute(job: MetricsJob): Promise<void> {
   if (!metricsQueue) {
@@ -50,10 +58,17 @@ export async function enqueueMetricsRecompute(job: MetricsJob): Promise<void> {
     return;
   }
 
-  await metricsQueue.add("recompute", job, {
-    removeOnComplete: 100,
-    removeOnFail: 100,
-  });
+  try {
+    await metricsQueue.add("recompute", job, {
+      removeOnComplete: 100,
+      removeOnFail: 100,
+    });
+  } catch (error) {
+    console.warn(
+      `Unable to enqueue metrics job (${(error as Error).message}). Running inline fallback.`,
+    );
+    await processMetricsJob(job);
+  }
 }
 
 export async function processMetricsJob(job: MetricsJob): Promise<void> {
@@ -79,11 +94,17 @@ export function startMetricsWorker(): Worker<MetricsJob> | null {
     return null;
   }
 
-  return new Worker<MetricsJob>(
+  const worker = new Worker<MetricsJob>(
     queueName,
     async (bullJob) => {
       await processMetricsJob(bullJob.data);
     },
     { connection: redisConnection },
   );
+
+  worker.on("error", (error) => {
+    console.warn(`BullMQ worker connection issue: ${error.message}`);
+  });
+
+  return worker;
 }
