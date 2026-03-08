@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requiredEnv } from "@/lib/env";
 import { prisma } from "@/lib/prisma";
-import { APP_SESSION_COOKIE_NAME } from "@/lib/auth-constants";
+import { ACCOUNT_SESSION_COOKIE_NAME, APP_SESSION_COOKIE_NAME } from "@/lib/auth-constants";
+import { readAccountSessionToken } from "@/lib/account-session";
 import { createAppSessionToken, getAppSessionCookieOptions } from "@/lib/auth-session";
 import { exchangeShopifyCodeForToken, registerWebhookSubscription, verifyShopifyOAuthCallback } from "@/lib/shopify";
 import { syncShopData } from "@/lib/sync";
@@ -34,11 +35,42 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       shop,
     });
 
-    await prisma.appInstall.upsert({
+    const accountSession = readAccountSessionToken(
+      request.cookies.get(ACCOUNT_SESSION_COOKIE_NAME)?.value,
+    );
+
+    const existingInstall = await prisma.appInstall.findUnique({
       where: { shopDomain: shop },
-      update: { accessToken },
-      create: { shopDomain: shop, accessToken },
+      select: {
+        shopDomain: true,
+        merchantUserId: true,
+      },
     });
+
+    if (existingInstall) {
+      const shouldLinkToCurrentAccount =
+        !!accountSession &&
+        (!existingInstall.merchantUserId ||
+          existingInstall.merchantUserId === accountSession.merchantUserId);
+
+      await prisma.appInstall.update({
+        where: { shopDomain: shop },
+        data: {
+          accessToken,
+          ...(shouldLinkToCurrentAccount
+            ? { merchantUserId: accountSession.merchantUserId }
+            : {}),
+        },
+      });
+    } else {
+      await prisma.appInstall.create({
+        data: {
+          shopDomain: shop,
+          accessToken,
+          merchantUserId: accountSession?.merchantUserId ?? null,
+        },
+      });
+    }
 
     for (const topic of WEBHOOK_TOPICS) {
       await registerWebhookSubscription({

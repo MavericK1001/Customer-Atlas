@@ -16,6 +16,8 @@ model AppInstall {
   id             Int      @id @default(autoincrement())
   shopDomain     String   @unique
   accessToken    String
+  merchantUserId Int?
+  merchantUser   MerchantUser? @relation(fields: [merchantUserId], references: [id], onDelete: SetNull)
   planTier       String   @default("free")
   billingStatus  String   @default("active")
   shopifySubscriptionId String?
@@ -25,6 +27,18 @@ model AppInstall {
   lastSyncError  String?
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
+
+  @@index([merchantUserId])
+}
+
+model MerchantUser {
+  id           Int         @id @default(autoincrement())
+  email        String      @unique
+  passwordHash String
+  name         String?
+  installs     AppInstall[]
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
 }
 
 model Customer {
