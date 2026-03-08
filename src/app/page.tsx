@@ -3,99 +3,92 @@ import { BrandMark } from "@/components/brand/BrandMark";
 
 export default function HomePage() {
   return (
-    <main className="landing-root">
-      <section className="landing-hero landing-fade-up">
-        <div style={{ marginBottom: "12px" }}>
-          <BrandMark subtitle="Shopify Intelligence Platform" size={36} />
-        </div>
-        <p className="landing-kicker">CustomerAtlas Control Plane</p>
-        <h1 className="landing-title">
-          A technical growth console for Shopify customer intelligence.
-        </h1>
-        <p className="landing-subtitle">
-          Stream customer and order signals into one workspace, rank revenue
-          moves by expected impact, and keep campaigns synced to live behavior.
-        </p>
-        <div className="landing-signal-row">
-          <div className="landing-signal-pill">Realtime sync health</div>
-          <div className="landing-signal-pill">Smart segment builder</div>
-          <div className="landing-signal-pill">Action-ranked insights</div>
-        </div>
-        <div className="landing-cta-row">
-          <Link
-            href="/install"
-            className="landing-button-link landing-button-primary"
-          >
-            Install on Shopify
-          </Link>
-          <Link
-            href="/dashboard"
-            className="landing-button-link landing-button-secondary"
-          >
-            Open Dashboard
-          </Link>
-        </div>
-        <div className="landing-tech-panel">
-          <div className="landing-tech-head">
-            <span>shopify://northstar-goods-lab</span>
-            <span className="landing-tech-status">pipeline healthy</span>
+    <main className="ca-landing-root">
+      <section className="ca-landing-hero ca-fade-in">
+        <div className="ca-landing-hero-left">
+          <div className="ca-landing-brand-chip">
+            <BrandMark subtitle="Shopify Intelligence Platform" size={40} />
           </div>
-          <div className="landing-tech-grid">
+          <p className="ca-landing-kicker">CustomerAtlas Growth OS</p>
+          <h1 className="ca-landing-title">
+            Make every customer signal immediately actionable.
+          </h1>
+          <p className="ca-landing-subtitle">
+            CustomerAtlas turns raw Shopify behavior into ranked priorities,
+            high-value cohorts, and campaign-ready exports your team can execute
+            this week.
+          </p>
+          <div className="ca-landing-pill-row">
+            <span className="ca-landing-pill">Revenue-ranked priorities</span>
+            <span className="ca-landing-pill">Live segment previews</span>
+            <span className="ca-landing-pill">Store sync confidence</span>
+          </div>
+          <div className="ca-landing-cta-row">
+            <Link href="/install" className="ca-landing-cta-primary">
+              Install on Shopify
+            </Link>
+            <Link href="/dashboard" className="ca-landing-cta-secondary">
+              Explore dashboard
+            </Link>
+          </div>
+        </div>
+
+        <div className="ca-landing-signal-card">
+          <div className="ca-landing-logo-panel">
+            <BrandMark iconOnly size={78} />
             <div>
-              <p>event throughput</p>
-              <strong>12.4k / day</strong>
+              <p>Active Store</p>
+              <strong>northstar-goods-lab.myshopify.com</strong>
+            </div>
+          </div>
+          <div className="ca-landing-signal-grid">
+            <div>
+              <p>Opportunity score</p>
+              <strong>86 / 100</strong>
             </div>
             <div>
-              <p>at-risk cohort</p>
-              <strong>142 customers</strong>
+              <p>At-risk customers</p>
+              <strong>142 profiles</strong>
             </div>
             <div>
-              <p>next best action</p>
-              <strong>win-back flow v3</strong>
+              <p>Projected revenue lift</p>
+              <strong>$12.8k</strong>
+            </div>
+            <div>
+              <p>Sync freshness</p>
+              <strong>Healthy</strong>
             </div>
           </div>
         </div>
       </section>
 
-      <section className="landing-grid">
-        <article
-          className="landing-card landing-fade-up"
-          style={{ animationDelay: "80ms" }}
-        >
+      <section className="ca-landing-feature-grid">
+        <article className="ca-landing-feature-card ca-fade-in">
           <h2>Priority Engine</h2>
           <p>
-            Score opportunities by potential revenue and confidence so teams act
-            on leverage, not guesswork.
+            CustomerAtlas scores tasks by expected impact, confidence, and time
+            to value, so your team moves from list view to action quickly.
           </p>
         </article>
-        <article
-          className="landing-card landing-fade-up"
-          style={{ animationDelay: "140ms" }}
-        >
+        <article className="ca-landing-feature-card ca-fade-in">
           <h2>Segment Workbench</h2>
           <p>
-            Compose rule-based audiences with instant preview counts and iterate
-            without exporting to spreadsheets.
+            Build audience logic in minutes, preview matches instantly, and
+            activate campaigns without spreadsheet detours.
           </p>
         </article>
-        <article
-          className="landing-card landing-fade-up"
-          style={{ animationDelay: "200ms" }}
-        >
-          <h2>Data Reliability</h2>
+        <article className="ca-landing-feature-card ca-fade-in">
+          <h2>Reliability Layer</h2>
           <p>
-            Monitor freshness and recovery signals to keep dashboards aligned
-            with live store behavior.
+            Monitor sync health, ownership status, and freshness so teams trust
+            every number before they launch changes.
           </p>
         </article>
       </section>
 
-      <section
-        className="landing-footnote landing-fade-up"
-        style={{ animationDelay: "240ms" }}
-      >
-        <p>Built for teams that ship experiments fast and learn even faster.</p>
-      </section>
+      <p className="ca-landing-footnote">
+        Built for Shopify operators who want clearer priorities and faster wins.
+      </p>
     </main>
   );
 }
