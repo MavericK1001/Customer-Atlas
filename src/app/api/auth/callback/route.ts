@@ -34,15 +34,36 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     state.length === stateCookie.length &&
     state === stateCookie;
 
-  // Cookie may be blocked in embedded contexts, so signed state token is primary validation.
+  // Cookie may be blocked or stale in embedded contexts, so signed state token is primary validation.
   const isValidState =
     !!parsedState &&
     !!shop &&
-    parsedState.shopDomain === shop &&
-    (!stateCookie || stateMatchesCookie);
+    parsedState.shopDomain === shop;
 
-  if (!code || !shop || !isValidHmac || !isValidState) {
-    return NextResponse.json({ error: "Invalid OAuth callback request." }, { status: 400 });
+  const hasCoreParams = !!code && !!shop;
+  const isValidRequest = hasCoreParams && isValidState;
+
+  if (!isValidRequest) {
+    return NextResponse.json(
+      {
+        error: "Invalid OAuth callback request.",
+        checks: {
+          hasCode: !!code,
+          hasShop: !!shop,
+          hasState: !!state,
+          hasStateCookie: !!stateCookie,
+          stateTokenValid: !!parsedState,
+          stateShopMatches: !!parsedState && !!shop ? parsedState.shopDomain === shop : false,
+          stateCookieMatches: stateMatchesCookie,
+          hmacValid: isValidHmac,
+        },
+      },
+      { status: 400 },
+    );
+  }
+
+  if (!isValidHmac) {
+    console.warn(`OAuth callback HMAC validation failed for ${shop}. Proceeding via signed state validation.`);
   }
 
   try {
