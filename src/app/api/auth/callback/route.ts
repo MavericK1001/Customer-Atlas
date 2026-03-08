@@ -65,6 +65,25 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     console.warn(`OAuth callback HMAC validation failed for ${shop}. Proceeding via signed state validation.`);
   }
 
+  function buildDashboardResponse(targetShop: string): NextResponse {
+    const host = request.nextUrl.searchParams.get("host") ?? "";
+    const dashboardUrl = new URL("/dashboard", request.nextUrl.origin);
+    dashboardUrl.searchParams.set("shop", targetShop);
+    if (host) {
+      dashboardUrl.searchParams.set("host", host);
+    }
+
+    const response = NextResponse.redirect(dashboardUrl.toString());
+    response.cookies.delete("shopify_oauth_state");
+    response.cookies.set(
+      APP_SESSION_COOKIE_NAME,
+      createAppSessionToken(targetShop),
+      getAppSessionCookieOptions(),
+    );
+
+    return response;
+  }
+
   try {
     const accessToken = await exchangeShopifyCodeForToken({
       code,
@@ -126,24 +145,27 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       console.warn(`Initial data sync failed for ${shop}: ${(error as Error).message}`);
     }
 
-    const host = request.nextUrl.searchParams.get("host") ?? "";
-    const dashboardUrl = new URL("/dashboard", request.nextUrl.origin);
-    dashboardUrl.searchParams.set("shop", shop);
-    if (host) {
-      dashboardUrl.searchParams.set("host", host);
+    return buildDashboardResponse(shop);
+  } catch (error) {
+    const message = (error as Error).message;
+
+    // Shopify can hit callback twice; second call sees consumed code (400).
+    if (message.includes("OAuth token exchange failed: 400")) {
+      const install = await prisma.appInstall.findUnique({
+        where: { shopDomain: shop },
+        select: { shopDomain: true },
+      });
+
+      if (install?.shopDomain) {
+        console.warn(
+          `OAuth token exchange 400 for ${shop}; using existing install and continuing.`,
+        );
+        return buildDashboardResponse(install.shopDomain);
+      }
     }
 
-    const response = NextResponse.redirect(dashboardUrl.toString());
-    response.cookies.delete("shopify_oauth_state");
-    response.cookies.set(
-      APP_SESSION_COOKIE_NAME,
-      createAppSessionToken(shop),
-      getAppSessionCookieOptions(),
-    );
-    return response;
-  } catch (error) {
     return NextResponse.json(
-      { error: "OAuth setup failed", details: (error as Error).message },
+      { error: "OAuth setup failed", details: message },
       { status: 500 },
     );
   }

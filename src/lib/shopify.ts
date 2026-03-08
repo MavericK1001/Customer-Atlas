@@ -46,7 +46,9 @@ export async function exchangeShopifyCodeForToken(input: {
   });
 
   if (!response.ok) {
-    throw new Error(`OAuth token exchange failed: ${response.status}`);
+    const details = await response.text().catch(() => "");
+    const suffix = details ? ` (${details.slice(0, 300)})` : "";
+    throw new Error(`OAuth token exchange failed: ${response.status}${suffix}`);
   }
 
   const data = (await response.json()) as { access_token?: string };
