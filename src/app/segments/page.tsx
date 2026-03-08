@@ -6,6 +6,7 @@ import {
   BlockStack,
   Button,
   Card,
+  Checkbox,
   FormLayout,
   InlineStack,
   Layout,
@@ -52,6 +53,7 @@ export default function SegmentsPage() {
   );
   const [copyingSegmentId, setCopyingSegmentId] = useState<number | null>(null);
   const [exportMinSpend, setExportMinSpend] = useState("0");
+  const [exportRepeatOnly, setExportRepeatOnly] = useState(false);
   const [segmentActionError, setSegmentActionError] = useState<string | null>(
     null,
   );
@@ -312,6 +314,9 @@ export default function SegmentsPage() {
       if (Number.isFinite(minSpend) && minSpend > 0) {
         params.set("minSpend", String(minSpend));
       }
+      if (exportRepeatOnly) {
+        params.set("repeatOnly", "true");
+      }
 
       const queryString = params.toString();
       const endpoint = queryString
@@ -363,6 +368,9 @@ export default function SegmentsPage() {
       const minSpend = Number.parseFloat(exportMinSpend);
       if (Number.isFinite(minSpend) && minSpend > 0) {
         params.set("minSpend", String(minSpend));
+      }
+      if (exportRepeatOnly) {
+        params.set("repeatOnly", "true");
       }
 
       const response = await fetch(
@@ -515,6 +523,11 @@ export default function SegmentsPage() {
                   onChange={setExportMinSpend}
                   autoComplete="off"
                   helpText="Exports and copied emails include only customers with an email address."
+                />
+                <Checkbox
+                  label="Only include repeat customers (2+ orders)"
+                  checked={exportRepeatOnly}
+                  onChange={setExportRepeatOnly}
                 />
               </FormLayout>
               {segments.length === 0 ? (

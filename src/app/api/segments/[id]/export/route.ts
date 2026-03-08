@@ -114,6 +114,7 @@ export async function GET(
   }
 
   const exportMinSpend = exportMinSpendRaw ? exportMinSpendParsed : null;
+  const repeatOnly = request.nextUrl.searchParams.get("repeatOnly") === "true";
 
   const customers = await prisma.customer.findMany({
     where: whereClause,
@@ -134,6 +135,13 @@ export async function GET(
       }
 
       return toNumber(customer.totalSpent) >= exportMinSpend;
+    })
+    .filter((customer) => {
+      if (!repeatOnly) {
+        return true;
+      }
+
+      return customer.totalOrders >= 2;
     })
     .filter((customer) => !!customer.email)
     .map((customer) => ({
