@@ -12,6 +12,9 @@ const WEBHOOK_TOPICS = [
   "customers/create",
   "customers/update",
   "app_subscriptions/update",
+  "customers/data_request",
+  "customers/redact",
+  "shop/redact",
 ] as const;
 
 export async function GET(request: NextRequest): Promise<NextResponse> {

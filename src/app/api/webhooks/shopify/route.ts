@@ -25,6 +25,18 @@ type ShopifyAppSubscriptionPayload = {
   status?: string;
 };
 
+type ShopifyCustomerDataRequestPayload = {
+  customer?: {
+    id?: number;
+  };
+};
+
+type ShopifyCustomerRedactPayload = {
+  customer?: {
+    id?: number;
+  };
+};
+
 function normalizeBillingStatus(status: string | undefined): string {
   if (!status) {
     return "inactive";
@@ -176,6 +188,68 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
             : null,
         },
       });
+    }
+
+    if (topic === "customers/data_request") {
+      // App has no separate export pipeline yet; acknowledge request for review compliance.
+      const requestPayload = JSON.parse(payload) as ShopifyCustomerDataRequestPayload;
+      const requestedCustomerId = requestPayload.customer?.id;
+
+      if (requestedCustomerId) {
+        await prisma.customer.findUnique({
+          where: {
+            shopDomain_shopifyCustomerId: {
+              shopDomain,
+              shopifyCustomerId: String(requestedCustomerId),
+            },
+          },
+          select: { id: true },
+        });
+      }
+    }
+
+    if (topic === "customers/redact") {
+      const redactPayload = JSON.parse(payload) as ShopifyCustomerRedactPayload;
+      const redactCustomerId = redactPayload.customer?.id;
+
+      if (redactCustomerId) {
+        const customer = await prisma.customer.findUnique({
+          where: {
+            shopDomain_shopifyCustomerId: {
+              shopDomain,
+              shopifyCustomerId: String(redactCustomerId),
+            },
+          },
+          select: { id: true },
+        });
+
+        if (customer) {
+          await prisma.order.deleteMany({
+            where: {
+              shopDomain,
+              customerId: customer.id,
+            },
+          });
+
+          await prisma.customer.delete({
+            where: { id: customer.id },
+          });
+        }
+      }
+    }
+
+    if (topic === "shop/redact") {
+      await prisma.segmentMembership.deleteMany({
+        where: {
+          customer: { shopDomain },
+        },
+      });
+
+      await prisma.order.deleteMany({ where: { shopDomain } });
+      await prisma.segment.deleteMany({ where: { shopDomain } });
+      await prisma.insight.deleteMany({ where: { shopDomain } });
+      await prisma.customer.deleteMany({ where: { shopDomain } });
+      await prisma.appInstall.deleteMany({ where: { shopDomain } });
     }
 
     return NextResponse.json({ ok: true });

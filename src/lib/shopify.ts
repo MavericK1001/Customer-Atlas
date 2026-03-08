@@ -87,7 +87,10 @@ export async function registerWebhookSubscription(input: {
     | "orders/updated"
     | "customers/create"
     | "customers/update"
-    | "app_subscriptions/update";
+    | "app_subscriptions/update"
+    | "customers/data_request"
+    | "customers/redact"
+    | "shop/redact";
 }): Promise<void> {
   const endpoint = `${requiredEnv("SHOPIFY_APP_URL")}/api/webhooks/shopify`;
 
@@ -108,6 +111,9 @@ export async function registerWebhookSubscription(input: {
     "customers/create": "CUSTOMERS_CREATE",
     "customers/update": "CUSTOMERS_UPDATE",
     "app_subscriptions/update": "APP_SUBSCRIPTIONS_UPDATE",
+    "customers/data_request": "CUSTOMERS_DATA_REQUEST",
+    "customers/redact": "CUSTOMERS_REDACT",
+    "shop/redact": "SHOP_REDACT",
   };
 
   const response = await fetch(`https://${input.shop}/admin/api/2025-01/graphql.json`, {
