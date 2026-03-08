@@ -49,7 +49,7 @@ function getAccountAuthBaseUrl(): string {
   const configured =
     process.env.NEXT_PUBLIC_ACCOUNT_AUTH_BASE_URL ??
     process.env.ACCOUNT_AUTH_BASE_URL ??
-    "https://login.customeratlas.com";
+    "https://login.customeratlas.app";
 
   return normalizeBaseUrl(configured);
 }
