@@ -191,6 +191,21 @@ export async function registerWebhookSubscription(input: {
 
   const errors = json.data?.webhookSubscriptionCreate?.userErrors ?? [];
   if (errors.length > 0) {
-    throw new Error(errors.map((e) => e.message).join(", "));
+    const messages = errors.map((e) => e.message);
+    const hasOnlyDuplicateAddressErrors = messages.every((message) => {
+      const normalized = message.toLowerCase();
+      return (
+        normalized.includes("address") &&
+        normalized.includes("already") &&
+        normalized.includes("taken")
+      );
+    });
+
+    // Shopify returns this when the webhook already exists for this topic+address.
+    if (hasOnlyDuplicateAddressErrors) {
+      return;
+    }
+
+    throw new Error(messages.join(", "));
   }
 }
