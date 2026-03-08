@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import {
+  BlockStack,
   Button,
   Card,
   FormLayout,
@@ -9,6 +10,7 @@ import {
   Page,
   TextField,
 } from "@shopify/polaris";
+import { BrandMark } from "@/components/brand/BrandMark";
 import { PolarisProvider } from "@/components/providers/PolarisProvider";
 
 function normalizeShopDomain(input: string): string {
@@ -40,20 +42,23 @@ export default function InstallPage() {
         <Layout>
           <Layout.Section>
             <Card>
-              <FormLayout>
-                <TextField
-                  label="Shop domain"
-                  autoComplete="off"
-                  value={shop}
-                  onChange={setShop}
-                  helpText="Example: your-store.myshopify.com"
-                />
-                <a href={installUrl}>
-                  <Button variant="primary" disabled={!isValidShop}>
-                    Connect Shopify Store
-                  </Button>
-                </a>
-              </FormLayout>
+              <BlockStack gap="300">
+                <BrandMark subtitle="Connect your Shopify store in seconds" size={40} />
+                <FormLayout>
+                  <TextField
+                    label="Shop domain"
+                    autoComplete="off"
+                    value={shop}
+                    onChange={setShop}
+                    helpText="Example: your-store.myshopify.com"
+                  />
+                  <a href={installUrl}>
+                    <Button variant="primary" disabled={!isValidShop}>
+                      Connect Shopify Store
+                    </Button>
+                  </a>
+                </FormLayout>
+              </BlockStack>
             </Card>
           </Layout.Section>
         </Layout>

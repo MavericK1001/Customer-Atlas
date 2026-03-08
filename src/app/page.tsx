@@ -1,9 +1,13 @@
 import Link from "next/link";
+import { BrandMark } from "@/components/brand/BrandMark";
 
 export default function HomePage() {
   return (
     <main className="landing-root">
       <section className="landing-hero landing-fade-up">
+        <div style={{ marginBottom: "12px" }}>
+          <BrandMark subtitle="Shopify Intelligence Platform" size={36} />
+        </div>
         <p className="landing-kicker">CustomerAtlas Control Plane</p>
         <h1 className="landing-title">
           A technical growth console for Shopify customer intelligence.

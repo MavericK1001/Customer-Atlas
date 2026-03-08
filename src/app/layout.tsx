@@ -15,9 +15,29 @@ const ibmPlexMono = IBM_Plex_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.SHOPIFY_APP_URL ?? "http://localhost:3000"),
   title: "CustomerAtlas",
+  applicationName: "CustomerAtlas",
   description:
     "Shopify customer intelligence platform for insights, segmentation, and LTV prediction.",
+  icons: {
+    icon: "/logo/customeratlaslogo.png",
+    shortcut: "/logo/customeratlaslogo.png",
+    apple: "/logo/customeratlaslogo.png",
+  },
+  openGraph: {
+    title: "CustomerAtlas",
+    description:
+      "Shopify customer intelligence platform for insights, segmentation, and LTV prediction.",
+    images: ["/logo/customeratlaslogo.png"],
+  },
+  twitter: {
+    card: "summary",
+    title: "CustomerAtlas",
+    description:
+      "Shopify customer intelligence platform for insights, segmentation, and LTV prediction.",
+    images: ["/logo/customeratlaslogo.png"],
+  },
 };
 
 export default function RootLayout({

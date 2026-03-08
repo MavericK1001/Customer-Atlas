@@ -12,6 +12,7 @@ import {
   Text,
   TextField,
 } from "@shopify/polaris";
+import { BrandMark } from "@/components/brand/BrandMark";
 import { PolarisProvider } from "@/components/providers/PolarisProvider";
 import { buildAccountAuthUrl } from "@/lib/account-auth-url";
 import { normalizeShopDomain } from "@/lib/shop";
@@ -231,8 +232,9 @@ function AppShellInner({ children }: { children: React.ReactNode }) {
             <InlineStack align="space-between">
               <Link
                 href={queryString ? `/dashboard?${queryString}` : "/dashboard"}
+                style={{ textDecoration: "none" }}
               >
-                CustomerAtlas
+                <BrandMark compact size={28} />
               </Link>
               <InlineStack gap="200" align="center">
                 {currentShop ? (
