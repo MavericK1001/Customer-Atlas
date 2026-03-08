@@ -13,7 +13,7 @@ export function BrandMark({
   size = 32,
   subtitle,
   iconOnly = false,
-  iconSrc = "/logo/customeratlas-icon.svg",
+  iconSrc = "/logo/CustomerAtlasLogo.png",
 }: BrandMarkProps) {
   return (
     <span
