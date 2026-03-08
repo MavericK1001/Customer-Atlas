@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { requiredEnv } from "@/lib/env";
 import { buildShopifyInstallUrlForBase } from "@/lib/shopify";
 import { createShopifyOAuthStateToken } from "@/lib/shopify-oauth-state";
 
@@ -38,7 +39,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
   const redirect = buildShopifyInstallUrlForBase(
     shop,
     state,
-    request.nextUrl.origin,
+    requiredEnv("SHOPIFY_APP_URL"),
   );
 
   const response = NextResponse.redirect(redirect);
