@@ -28,10 +28,14 @@ export function BrandMark({
         alt="CustomerAtlas logo"
         width={size}
         height={size}
+        unoptimized
         priority
         style={{
+          display: "block",
           borderRadius: "8px",
           objectFit: "cover",
+          background: "#ffffff",
+          border: "1px solid rgba(11, 106, 207, 0.2)",
           boxShadow: "0 8px 18px rgba(11, 106, 207, 0.28)",
         }}
       />
