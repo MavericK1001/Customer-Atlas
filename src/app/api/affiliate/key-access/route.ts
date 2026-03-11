@@ -5,7 +5,15 @@ import { prisma } from "@/lib/prisma";
 export async function GET(request: NextRequest): Promise<NextResponse> {
   const keyAuth = await resolveAffiliateByApiKey(request);
   if (!keyAuth.ok) {
-    return NextResponse.json({ error: keyAuth.error }, { status: keyAuth.status });
+    const headers = new Headers();
+    if (keyAuth.status === 429) {
+      headers.set("Retry-After", "60");
+    }
+
+    return NextResponse.json(
+      { error: keyAuth.error },
+      { status: keyAuth.status, headers },
+    );
   }
 
   const [links, referrals, payouts] = await Promise.all([

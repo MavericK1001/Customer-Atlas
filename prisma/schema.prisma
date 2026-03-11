@@ -156,6 +156,7 @@ model AffiliateProfile {
   links          AffiliateReferralLink[]
   referrals      AffiliateReferral[]
   apiKeys        AffiliateApiKey[]
+  apiKeyEvents   AffiliateApiKeyEvent[]
   payouts        AffiliatePayout[]
 
   @@index([status])
@@ -212,9 +213,27 @@ model AffiliateApiKey {
   expiresAt   DateTime?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+  events      AffiliateApiKeyEvent[]
 
   @@index([affiliateId])
   @@index([affiliateId, revokedAt])
+}
+
+model AffiliateApiKeyEvent {
+  id          Int      @id @default(autoincrement())
+  affiliateId Int?
+  affiliate   AffiliateProfile? @relation(fields: [affiliateId], references: [id], onDelete: SetNull)
+  apiKeyId    Int?
+  apiKey      AffiliateApiKey? @relation(fields: [apiKeyId], references: [id], onDelete: SetNull)
+  eventType   String
+  ipAddress   String?
+  userAgent   String?
+  details     Json?
+  createdAt   DateTime @default(now())
+
+  @@index([affiliateId, createdAt])
+  @@index([apiKeyId, createdAt])
+  @@index([eventType, createdAt])
 }
 
 model AffiliatePayout {

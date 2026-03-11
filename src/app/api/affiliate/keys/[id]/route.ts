@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAccountUserFromRequest } from "@/lib/account-user";
+import { recordAffiliateApiKeyEvent } from "@/lib/affiliate-key-security";
 import { canUseFeature, getShopPlan } from "@/lib/plan";
 import { prisma } from "@/lib/prisma";
 import { revokeAffiliateApiKey } from "@/lib/services/affiliate-keys";
@@ -54,8 +55,22 @@ export async function DELETE(
   });
 
   if (!revoked) {
+    await recordAffiliateApiKeyEvent({
+      affiliateId: profile.id,
+      apiKeyId: keyId,
+      eventType: "key.revoke_failed",
+      request,
+    });
+
     return NextResponse.json({ error: "Key not found." }, { status: 404 });
   }
+
+  await recordAffiliateApiKeyEvent({
+    affiliateId: profile.id,
+    apiKeyId: keyId,
+    eventType: "key.revoked",
+    request,
+  });
 
   return NextResponse.json({ ok: true });
 }

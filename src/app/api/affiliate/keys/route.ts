@@ -1,9 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAccountUserFromRequest } from "@/lib/account-user";
+import { recordAffiliateApiKeyEvent } from "@/lib/affiliate-key-security";
 import { canUseFeature, getShopPlan } from "@/lib/plan";
 import { prisma } from "@/lib/prisma";
 import { createAffiliateApiKey } from "@/lib/services/affiliate-keys";
 import { resolveShopDomain } from "@/lib/shop-context";
+
+const MAX_ACTIVE_KEYS_PER_AFFILIATE = 5;
 
 async function getAffiliateContext(request: NextRequest): Promise<
   | {
@@ -99,6 +102,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
   const body = (await request.json().catch(() => ({}))) as {
     name?: string;
+    expiresInDays?: number | null;
   };
 
   const keyName = (body.name ?? "New API Key").trim();
@@ -106,9 +110,57 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     return NextResponse.json({ error: "Key name is too short." }, { status: 400 });
   }
 
+  const activeKeyCount = await prisma.affiliateApiKey.count({
+    where: {
+      affiliateId: ctx.affiliateId,
+      revokedAt: null,
+    },
+  });
+
+  if (activeKeyCount >= MAX_ACTIVE_KEYS_PER_AFFILIATE) {
+    return NextResponse.json(
+      {
+        error: `You can have up to ${MAX_ACTIVE_KEYS_PER_AFFILIATE} active keys. Revoke one before creating a new key.`,
+      },
+      { status: 409 },
+    );
+  }
+
+  let expiresAt: Date | null = null;
+  if (typeof body.expiresInDays === "number") {
+    if (!Number.isFinite(body.expiresInDays) || body.expiresInDays < 1) {
+      return NextResponse.json(
+        { error: "expiresInDays must be a positive number." },
+        { status: 400 },
+      );
+    }
+
+    if (body.expiresInDays > 365) {
+      return NextResponse.json(
+        { error: "expiresInDays cannot exceed 365 days." },
+        { status: 400 },
+      );
+    }
+
+    const nowMs = Date.now();
+    expiresAt = new Date(nowMs + body.expiresInDays * 24 * 60 * 60 * 1000);
+  }
+
   const created = await createAffiliateApiKey({
     affiliateId: ctx.affiliateId,
     name: keyName,
+    expiresAt,
+  });
+
+  await recordAffiliateApiKeyEvent({
+    affiliateId: ctx.affiliateId,
+    apiKeyId: created.id,
+    eventType: "key.created",
+    request,
+    details: {
+      keyName,
+      expiresAt: expiresAt?.toISOString() ?? null,
+    },
   });
 
   return NextResponse.json({
@@ -117,6 +169,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       id: created.id,
       keyPrefix: created.keyPrefix,
       plainTextKey: created.plainTextKey,
+      expiresAt,
     },
   });
 }

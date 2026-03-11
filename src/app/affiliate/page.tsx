@@ -10,6 +10,7 @@ import {
   InlineStack,
   Layout,
   Page,
+  Select,
   Text,
   TextField,
 } from "@shopify/polaris";
@@ -31,7 +32,20 @@ type AffiliateResponse = {
       label: string | null;
       isDefault: boolean;
     }>;
-    apiKeys: Array<{ id: number; name: string; keyPrefix: string }>;
+    apiKeys: Array<{
+      id: number;
+      name: string;
+      keyPrefix: string;
+      createdAt: string;
+      expiresAt: string | null;
+      lastUsedAt: string | null;
+    }>;
+    apiKeyEvents: Array<{
+      id: number;
+      eventType: string;
+      ipAddress: string | null;
+      createdAt: string;
+    }>;
     referrals: Array<{
       id: number;
       referredShopDomain: string;
@@ -49,7 +63,9 @@ export default function AffiliatePage() {
   const [error, setError] = useState<string | null>(null);
   const [linkLabel, setLinkLabel] = useState("");
   const [keyName, setKeyName] = useState("Partner API Key");
+  const [keyExpiryDays, setKeyExpiryDays] = useState("90");
   const [newKeyValue, setNewKeyValue] = useState<string | null>(null);
+  const [isSubmittingKey, setIsSubmittingKey] = useState(false);
 
   const shop = useMemo(() => {
     if (typeof window === "undefined") return "";
@@ -99,11 +115,16 @@ export default function AffiliatePage() {
   }
 
   async function createApiKey(): Promise<void> {
+    setIsSubmittingKey(true);
     const query = shop ? `?shop=${encodeURIComponent(shop)}` : "";
+
+    const expiresInDays =
+      keyExpiryDays === "never" ? null : Number.parseInt(keyExpiryDays, 10);
+
     const response = await fetch(`/api/affiliate/keys${query}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name: keyName }),
+      body: JSON.stringify({ name: keyName, expiresInDays }),
     });
 
     const payload = (await response.json()) as {
@@ -113,10 +134,26 @@ export default function AffiliatePage() {
     };
 
     if (!response.ok || !payload.ok) {
+      setIsSubmittingKey(false);
       throw new Error(payload.error ?? "Unable to create key.");
     }
 
     setNewKeyValue(payload.key?.plainTextKey ?? null);
+    await loadAffiliate();
+    setIsSubmittingKey(false);
+  }
+
+  async function revokeApiKey(id: number): Promise<void> {
+    const query = shop ? `?shop=${encodeURIComponent(shop)}` : "";
+    const response = await fetch(`/api/affiliate/keys/${id}${query}`, {
+      method: "DELETE",
+    });
+
+    const payload = (await response.json()) as { ok?: boolean; error?: string };
+    if (!response.ok || !payload.ok) {
+      throw new Error(payload.error ?? "Unable to revoke key.");
+    }
+
     await loadAffiliate();
   }
 
@@ -225,10 +262,24 @@ export default function AffiliatePage() {
                         value={keyName}
                         onChange={setKeyName}
                       />
+                      <Select
+                        label="Key expiry"
+                        options={[
+                          { label: "30 days", value: "30" },
+                          { label: "90 days", value: "90" },
+                          { label: "180 days", value: "180" },
+                          { label: "365 days", value: "365" },
+                          { label: "No expiry", value: "never" },
+                        ]}
+                        value={keyExpiryDays}
+                        onChange={setKeyExpiryDays}
+                      />
                       <Button
                         variant="primary"
+                        loading={isSubmittingKey}
                         onClick={() => {
                           createApiKey().catch((createError) => {
+                            setIsSubmittingKey(false);
                             setError((createError as Error).message);
                           });
                         }}
@@ -236,16 +287,66 @@ export default function AffiliatePage() {
                         Generate key
                       </Button>
                     </FormLayout>
+                    <Text as="p" tone="subdued">
+                      Security policy: keep at most 5 active keys and rotate on a
+                      fixed schedule.
+                    </Text>
                     {newKeyValue ? (
                       <Banner tone="success">
                         New key (copy now, shown once): {newKeyValue}
                       </Banner>
                     ) : null}
                     {data.affiliate.apiKeys.map((key) => (
-                      <Text as="p" key={key.id}>
-                        {key.name}: {key.keyPrefix}...
-                      </Text>
+                      <Card key={key.id}>
+                        <BlockStack gap="200">
+                          <Text as="p" variant="headingSm">
+                            {key.name}
+                          </Text>
+                          <Text as="p">Prefix: {key.keyPrefix}...</Text>
+                          <Text as="p">
+                            Last used: {key.lastUsedAt ? new Date(key.lastUsedAt).toLocaleString() : "Never"}
+                          </Text>
+                          <Text as="p">
+                            Expires: {key.expiresAt ? new Date(key.expiresAt).toLocaleDateString() : "No expiry"}
+                          </Text>
+                          <InlineStack gap="200">
+                            <Button
+                              tone="critical"
+                              variant="secondary"
+                              onClick={() => {
+                                revokeApiKey(key.id).catch((revokeError) => {
+                                  setError((revokeError as Error).message);
+                                });
+                              }}
+                            >
+                              Revoke
+                            </Button>
+                          </InlineStack>
+                        </BlockStack>
+                      </Card>
                     ))}
+                  </BlockStack>
+                </Card>
+              </Layout.Section>
+
+              <Layout.Section>
+                <Card>
+                  <BlockStack gap="300">
+                    <div className="ca-section-title">
+                      <Text as="h3" variant="headingMd">
+                        Key Activity
+                      </Text>
+                    </div>
+                    {data.affiliate.apiKeyEvents.length === 0 ? (
+                      <Text as="p">No key activity yet.</Text>
+                    ) : (
+                      data.affiliate.apiKeyEvents.map((event) => (
+                        <Text as="p" key={event.id}>
+                          {new Date(event.createdAt).toLocaleString()} - {event.eventType}
+                          {event.ipAddress ? ` (${event.ipAddress})` : ""}
+                        </Text>
+                      ))
+                    )}
                   </BlockStack>
                 </Card>
               </Layout.Section>

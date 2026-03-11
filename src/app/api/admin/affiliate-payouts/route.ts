@@ -2,6 +2,13 @@ import { NextRequest, NextResponse } from "next/server";
 import { getAccountUserFromRequest } from "@/lib/account-user";
 import { prisma } from "@/lib/prisma";
 
+const PAYOUT_STATUSES = new Set([
+  "calculated",
+  "pending-transfer",
+  "paid",
+  "canceled",
+]);
+
 async function requireAdmin(request: NextRequest): Promise<
   | { ok: true }
   | { ok: false; response: NextResponse }
@@ -31,6 +38,11 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
   }
 
   const status = request.nextUrl.searchParams.get("status") ?? "pending-transfer";
+  if (!PAYOUT_STATUSES.has(status)) {
+    return NextResponse.json({ error: "Invalid status filter." }, { status: 400 });
+  }
+
+  const includeAffiliates = request.nextUrl.searchParams.get("includeAffiliates") === "1";
 
   const payouts = await prisma.affiliatePayout.findMany({
     where: { status },
@@ -59,13 +71,42 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     },
   });
 
-  return NextResponse.json({
+  const responseBody: {
+    ok: true;
+    payouts: Array<Record<string, unknown>>;
+    affiliates?: Array<{ id: number; email: string; name: string | null }>;
+  } = {
     ok: true,
     payouts: payouts.map((payout) => ({
       ...payout,
       amount: Number(payout.amount),
     })),
-  });
+  };
+
+  if (includeAffiliates) {
+    const affiliates = await prisma.affiliateProfile.findMany({
+      where: { status: "active" },
+      orderBy: { id: "asc" },
+      take: 500,
+      select: {
+        id: true,
+        merchantUser: {
+          select: {
+            email: true,
+            name: true,
+          },
+        },
+      },
+    });
+
+    responseBody.affiliates = affiliates.map((affiliate) => ({
+      id: affiliate.id,
+      email: affiliate.merchantUser.email,
+      name: affiliate.merchantUser.name,
+    }));
+  }
+
+  return NextResponse.json(responseBody);
 }
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
@@ -95,12 +136,41 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     );
   }
 
+  const periodStart = new Date(body.periodStart);
+  const periodEnd = new Date(body.periodEnd);
+
+  if (Number.isNaN(periodStart.getTime()) || Number.isNaN(periodEnd.getTime())) {
+    return NextResponse.json(
+      { error: "periodStart and periodEnd must be valid ISO date values." },
+      { status: 400 },
+    );
+  }
+
+  if (periodEnd < periodStart) {
+    return NextResponse.json(
+      { error: "periodEnd must be on or after periodStart." },
+      { status: 400 },
+    );
+  }
+
+  const affiliate = await prisma.affiliateProfile.findUnique({
+    where: { id: body.affiliateId },
+    select: { id: true, status: true },
+  });
+
+  if (!affiliate || affiliate.status !== "active") {
+    return NextResponse.json(
+      { error: "Affiliate must be active before creating payouts." },
+      { status: 404 },
+    );
+  }
+
   const payout = await prisma.affiliatePayout.create({
     data: {
       affiliateId: body.affiliateId,
       amount: body.amount,
-      periodStart: new Date(body.periodStart),
-      periodEnd: new Date(body.periodEnd),
+      periodStart,
+      periodEnd,
       status: "calculated",
       notes: body.notes?.trim() || null,
     },

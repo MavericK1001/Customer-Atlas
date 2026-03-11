@@ -61,6 +61,16 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
           lastUsedAt: true,
         },
       },
+      apiKeyEvents: {
+        orderBy: { createdAt: "desc" },
+        take: 50,
+        select: {
+          id: true,
+          eventType: true,
+          ipAddress: true,
+          createdAt: true,
+        },
+      },
       referrals: {
         orderBy: { createdAt: "desc" },
         take: 50,
@@ -107,6 +117,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
         ...referral,
         commissionAmount: Number(referral.commissionAmount),
       })),
+      apiKeyEvents: affiliate.apiKeyEvents,
       payouts: affiliate.payouts.map((payout) => ({
         ...payout,
         amount: Number(payout.amount),

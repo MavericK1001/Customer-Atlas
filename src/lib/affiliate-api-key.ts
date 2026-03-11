@@ -1,5 +1,12 @@
 import crypto from "crypto";
 import { NextRequest } from "next/server";
+import {
+  consumeAffiliateKeyRateLimit,
+  getClientIpAddress,
+} from "@/lib/affiliate-key-rate-limit";
+import {
+  recordAffiliateApiKeyEvent,
+} from "@/lib/affiliate-key-security";
 import { prisma } from "@/lib/prisma";
 
 function hashKey(rawKey: string): string {
@@ -40,6 +47,10 @@ export async function resolveAffiliateByApiKey(request: NextRequest): Promise<
 > {
   const rawKey = readRawApiKey(request);
   if (!rawKey) {
+    await recordAffiliateApiKeyEvent({
+      eventType: "auth.missing_key",
+      request,
+    });
     return { ok: false, status: 401, error: "Missing API key." };
   }
 
@@ -67,12 +78,42 @@ export async function resolveAffiliateByApiKey(request: NextRequest): Promise<
   });
 
   if (!keyRecord) {
+    await recordAffiliateApiKeyEvent({
+      eventType: "auth.invalid_key",
+      request,
+    });
     return { ok: false, status: 401, error: "Invalid or expired API key." };
+  }
+
+  const rateLimitResult = consumeAffiliateKeyRateLimit({
+    apiKeyId: keyRecord.id,
+    ipAddress: getClientIpAddress(request),
+  });
+
+  if (!rateLimitResult.ok) {
+    await recordAffiliateApiKeyEvent({
+      affiliateId: keyRecord.affiliate.id,
+      apiKeyId: keyRecord.id,
+      eventType: "auth.rate_limited",
+      request,
+      details: {
+        retryAfterSeconds: rateLimitResult.retryAfterSeconds,
+      },
+    });
+
+    return { ok: false, status: 429, error: "Rate limit exceeded for this API key." };
   }
 
   await prisma.affiliateApiKey.update({
     where: { id: keyRecord.id },
     data: { lastUsedAt: now },
+  });
+
+  await recordAffiliateApiKeyEvent({
+    affiliateId: keyRecord.affiliate.id,
+    apiKeyId: keyRecord.id,
+    eventType: "auth.success",
+    request,
   });
 
   return {
