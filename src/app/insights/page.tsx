@@ -37,6 +37,7 @@ function getLaneLabel(lane: InsightLane): string {
 export default function InsightsPage() {
   const [insights, setInsights] = useState<Insight[]>([]);
   const [archivedInsights, setArchivedInsights] = useState<Insight[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [updatingInsightId, setUpdatingInsightId] = useState<number | null>(
     null,
@@ -49,6 +50,8 @@ export default function InsightsPage() {
 
   useEffect(() => {
     async function loadInsights() {
+      setIsLoading(true);
+      setError(null);
       const query = shop ? `?shop=${encodeURIComponent(shop)}` : "";
       const [activeResponse, archivedResponse] = await Promise.all([
         fetch(`/api/insights${query}`),
@@ -70,9 +73,13 @@ export default function InsightsPage() {
 
       setInsights(activeJson.insights);
       setArchivedInsights(archivedJson.insights);
+      setIsLoading(false);
     }
 
-    loadInsights().catch((loadError) => setError((loadError as Error).message));
+    loadInsights().catch((loadError) => {
+      setError((loadError as Error).message);
+      setIsLoading(false);
+    });
   }, [shop]);
 
   async function updateInsightState(input: {
@@ -137,6 +144,9 @@ export default function InsightsPage() {
       >
         <Layout>
           <Layout.Section>
+            {isLoading ? (
+              <Banner tone="info">Loading insights...</Banner>
+            ) : null}
             {error ? <Banner tone="critical">{error}</Banner> : null}
           </Layout.Section>
           <Layout.Section>
@@ -191,6 +201,14 @@ export default function InsightsPage() {
                                 variant="tertiary"
                                 loading={updatingInsightId === insight.id}
                                 onClick={() => {
+                                  const confirmed = window.confirm(
+                                    "Archive this insight? You can restore it from Archived Insights.",
+                                  );
+
+                                  if (!confirmed) {
+                                    return;
+                                  }
+
                                   updateInsightState({
                                     insightId: insight.id,
                                     action: "archive",

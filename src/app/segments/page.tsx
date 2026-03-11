@@ -694,6 +694,14 @@ export default function SegmentsPage() {
                               disabled={billing?.planTier !== "pro"}
                               loading={deletingSegmentId === segment.id}
                               onClick={() => {
+                                const confirmed = window.confirm(
+                                  `Delete segment \"${segment.segmentName}\"? This cannot be undone.`,
+                                );
+
+                                if (!confirmed) {
+                                  return;
+                                }
+
                                 handleDeleteSegment(segment.id).catch(
                                   () => undefined,
                                 );

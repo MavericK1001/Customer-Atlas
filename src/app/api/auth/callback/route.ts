@@ -21,6 +21,12 @@ const WEBHOOK_TOPICS = [
 
 const POST_INSTALL_SETUP_MAX_WAIT_MS = 4000;
 
+type SetupTaskResult = {
+  name: string;
+  ok: boolean;
+  error?: string;
+};
+
 export async function GET(request: NextRequest): Promise<NextResponse> {
   const code = request.nextUrl.searchParams.get("code");
   const shop = normalizeShopDomain(request.nextUrl.searchParams.get("shop"));
@@ -129,21 +135,41 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       });
     }
 
-    // Keep install UX snappy: run setup tasks in parallel and cap how long callback waits.
-    const postInstallSetup = Promise.allSettled([
-      ...WEBHOOK_TOPICS.map((topic) =>
-        registerWebhookSubscription({
-          shop,
-          accessToken,
-          appBaseUrl: request.nextUrl.origin,
-          topic,
+    const setupTasks = [
+      ...WEBHOOK_TOPICS.map((topic) => ({
+        name: `webhook:${topic}`,
+        run: () =>
+          registerWebhookSubscription({
+            shop,
+            accessToken,
+            appBaseUrl: request.nextUrl.origin,
+            topic,
+          }),
+      })),
+      {
+        name: "sync:initial",
+        run: () =>
+          syncShopData({
+            shop,
+            accessToken,
+          }),
+      },
+    ] as const;
+
+    const postInstallSetup = Promise.allSettled(setupTasks.map((task) => task.run())).then(
+      (results): SetupTaskResult[] =>
+        results.map((result, index) => {
+          if (result.status === "fulfilled") {
+            return { name: setupTasks[index].name, ok: true };
+          }
+
+          return {
+            name: setupTasks[index].name,
+            ok: false,
+            error: (result.reason as Error)?.message ?? String(result.reason),
+          };
         }),
-      ),
-      syncShopData({
-        shop,
-        accessToken,
-      }),
-    ]);
+    );
 
     const setupResult = await Promise.race([
       postInstallSetup.then(() => "completed" as const),
@@ -157,17 +183,51 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
         `Post-install setup exceeded ${POST_INSTALL_SETUP_MAX_WAIT_MS}ms for ${shop}; redirecting early.`,
       );
       postInstallSetup
-        .then((results) => {
-          const rejected = results.filter((result) => result.status === "rejected");
-          if (rejected.length > 0) {
+        .then(async (results) => {
+          const failed = results.filter((result) => !result.ok);
+          if (failed.length > 0) {
+            const failedSummary = failed
+              .map((item) => `${item.name}: ${item.error ?? "unknown error"}`)
+              .join(" | ");
+
             console.warn(
-              `Post-install setup completed with ${rejected.length} rejected task(s) for ${shop}.`,
+              `Post-install setup completed with ${failed.length} rejected task(s) for ${shop}. ${failedSummary}`,
             );
+
+            await prisma.appInstall.update({
+              where: { shopDomain: shop },
+              data: {
+                lastSyncStatus: "setup-partial",
+                lastSyncError: failedSummary,
+              },
+            });
           }
         })
         .catch((error) => {
           console.warn(`Post-install background setup failed for ${shop}: ${(error as Error).message}`);
         });
+
+      return buildDashboardResponse(shop);
+    }
+
+    const setupResults = await postInstallSetup;
+    const failedSetupTasks = setupResults.filter((task) => !task.ok);
+    if (failedSetupTasks.length > 0) {
+      const failedSummary = failedSetupTasks
+        .map((item) => `${item.name}: ${item.error ?? "unknown error"}`)
+        .join(" | ");
+
+      await prisma.appInstall.update({
+        where: { shopDomain: shop },
+        data: {
+          lastSyncStatus: "setup-partial",
+          lastSyncError: failedSummary,
+        },
+      });
+
+      console.warn(
+        `Post-install setup completed with failures for ${shop}. ${failedSummary}`,
+      );
     }
 
     return buildDashboardResponse(shop);

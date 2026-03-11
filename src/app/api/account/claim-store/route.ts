@@ -47,10 +47,31 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     return NextResponse.json({ ok: true, status: "already-claimed" });
   }
 
-  await prisma.appInstall.update({
-    where: { shopDomain: install.shopDomain },
-    data: { merchantUserId: accountSession.merchantUserId },
+  const claimResult = await prisma.appInstall.updateMany({
+    where: {
+      shopDomain: install.shopDomain,
+      merchantUserId: null,
+    },
+    data: {
+      merchantUserId: accountSession.merchantUserId,
+    },
   });
+
+  if (claimResult.count === 0) {
+    const latest = await prisma.appInstall.findUnique({
+      where: { shopDomain: install.shopDomain },
+      select: { merchantUserId: true },
+    });
+
+    if (latest?.merchantUserId === accountSession.merchantUserId) {
+      return NextResponse.json({ ok: true, status: "already-claimed" });
+    }
+
+    return NextResponse.json(
+      { error: "This store was claimed by another account just now." },
+      { status: 409 },
+    );
+  }
 
   return NextResponse.json({ ok: true, status: "claimed" });
 }

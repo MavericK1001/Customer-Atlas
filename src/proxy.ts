@@ -21,6 +21,7 @@ const PUBLIC_API_PREFIXES = [
   "/api/account/auth-start",
   "/api/account/auth-return",
   "/api/account/claim-status",
+  "/api/health",
   "/api/billing/confirm",
   "/api/billing/reconcile",
   "/api/webhooks/shopify",
@@ -70,5 +71,5 @@ export function proxy(request: NextRequest): NextResponse {
 }
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"],
+  matcher: ["/((?!_next/static|_next/image|favicon.ico|logo|docs).*)"],
 };

@@ -64,6 +64,16 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     return NextResponse.json({ error: "Invalid webhook signature." }, { status: 401 });
   }
 
+  const install = await prisma.appInstall.findUnique({
+    where: { shopDomain },
+    select: { id: true },
+  });
+
+  if (!install) {
+    // Acknowledge unknown shops to prevent retry storms while keeping data isolated.
+    return NextResponse.json({ ok: true, ignored: true });
+  }
+
   try {
     if (topic === "customers/create" || topic === "customers/update") {
       const customer = JSON.parse(payload) as ShopifyCustomerPayload;
