@@ -1,118 +1,154 @@
+import type { Metadata } from "next";
 import Link from "next/link";
-import { BrandMark } from "@/components/brand/BrandMark";
+import {
+  MarketingFooter,
+  MarketingHeader,
+  MarketingPageFrame,
+} from "@/components/marketing/MarketingChrome";
+
+export const metadata: Metadata = {
+  title: "Docs | CustomerAtlas",
+  description:
+    "Documentation for installing, validating, and operating CustomerAtlas in production.",
+};
 
 export default function DocsPage() {
   return (
-    <main className="ca-docs-root">
-      <header className="ca-site-header ca-fade-in">
-        <Link href="/" className="ca-site-brand">
-          <BrandMark subtitle="Documentation" size={32} />
-        </Link>
-        <nav className="ca-site-nav">
-          <a href="#getting-started">Getting Started</a>
-          <a href="#features">Features</a>
-          <a href="#guides">Guides</a>
-          <a href="#faq">FAQ</a>
-        </nav>
-        <div className="ca-site-cta">
-          <Link href="/install" className="ca-landing-cta-secondary">
-            Install
-          </Link>
-        </div>
-      </header>
+    <MarketingPageFrame>
+      <div className="relative isolate overflow-hidden bg-[linear-gradient(180deg,#fbfcff_0%,#f0f5ff_48%,#ffffff_100%)]">
+        <div
+          className="ca-marketing-orb ca-marketing-orb-top"
+          aria-hidden="true"
+        />
+        <MarketingHeader />
 
-      <section className="ca-page-hero ca-fade-in" id="getting-started">
-        <p className="ca-dashboard-kicker">Getting Started</p>
-        <h2>Set up CustomerAtlas in minutes.</h2>
-        <p>
-          Install the app, authenticate your Shopify store, and run your first
-          sync to populate dashboards.
-        </p>
-      </section>
+        <section className="px-4 pb-12 pt-8 sm:px-6 lg:px-8">
+          <div
+            className="ca-marketing-shell grid gap-5"
+            id="main-content"
+            data-reveal
+          >
+            <span className="ca-eyebrow">Documentation</span>
+            <h1 className="max-w-[10ch] text-[clamp(3rem,6vw,5.1rem)] font-bold leading-[0.95] tracking-[-0.06em] text-[#081b36]">
+              Install quickly. Operate cleanly.
+            </h1>
+            <p className="max-w-[58ch] text-lg leading-8 text-[#506684]">
+              Public docs should feel like part of the same premium site. This
+              page keeps the information dense, but the presentation consistent
+              with the new marketing surface.
+            </p>
+          </div>
+        </section>
 
-      <section className="ca-docs-grid" id="features">
-        <article className="ca-docs-card">
-          <h3>Core Features</h3>
-          <ul>
-            <li>Dashboard with priorities and revenue opportunities</li>
-            <li>Customers portfolio with value-based filters</li>
-            <li>Segment builder with preview and export</li>
-            <li>Sync health monitoring and recovery guidance</li>
-          </ul>
-        </article>
+        <section className="px-4 py-10 sm:px-6 lg:px-8">
+          <div className="ca-marketing-shell grid gap-4 lg:grid-cols-3">
+            <article
+              className="ca-surface-card"
+              id="getting-started"
+              data-reveal
+            >
+              <span className="ca-card-eyebrow">Getting started</span>
+              <h2 className="mt-4 text-2xl font-semibold tracking-[-0.04em] text-[#0b2143]">
+                Setup path
+              </h2>
+              <ul className="mt-4 grid gap-3 text-sm leading-6 text-[#203e65]">
+                <li className="ca-list-check">
+                  Install the app and authenticate your Shopify store
+                </li>
+                <li className="ca-list-check">
+                  Run the first sync to populate dashboards
+                </li>
+                <li className="ca-list-check">
+                  Confirm billing state and sync health in Settings
+                </li>
+              </ul>
+            </article>
 
-        <article className="ca-docs-card" id="guides">
-          <h3>How-To Guides</h3>
-          <ul>
-            <li>Create a custom segment and preview match count</li>
-            <li>Export segment CSV or copy target emails</li>
-            <li>Interpret opportunity score and confidence</li>
-            <li>Troubleshoot stale sync or webhook issues</li>
-          </ul>
-        </article>
+            <article className="ca-surface-card" id="features" data-reveal>
+              <span className="ca-card-eyebrow">Core features</span>
+              <h2 className="mt-4 text-2xl font-semibold tracking-[-0.04em] text-[#0b2143]">
+                What ships today
+              </h2>
+              <ul className="mt-4 grid gap-3 text-sm leading-6 text-[#203e65]">
+                <li className="ca-list-check">
+                  Dashboard with priorities and revenue opportunities
+                </li>
+                <li className="ca-list-check">
+                  Customers portfolio with value-based filters
+                </li>
+                <li className="ca-list-check">
+                  Segment builder with preview and export
+                </li>
+                <li className="ca-list-check">
+                  Affiliate, payout, and sync health workflows
+                </li>
+              </ul>
+            </article>
 
-        <article className="ca-docs-card">
-          <h3>Reference</h3>
-          <ul>
-            <li>
-              Route aliases: <code>/login</code> and <code>/signup</code>
-            </li>
-            <li>
-              App routes: <code>/dashboard</code>, <code>/customers</code>,{" "}
-              <code>/segments</code>
-            </li>
-            <li>
-              API routes under <code>/api/*</code> for auth, sync, insights, and
-              segments
-            </li>
-            <li>Plan gating: custom segment actions require Pro plan</li>
-          </ul>
-        </article>
-      </section>
+            <article className="ca-surface-card" id="guides" data-reveal>
+              <span className="ca-card-eyebrow">Validation</span>
+              <h2 className="mt-4 text-2xl font-semibold tracking-[-0.04em] text-[#0b2143]">
+                Build checks
+              </h2>
+              <div className="mt-4 rounded-[22px] border border-[#0c4da31a] bg-[linear-gradient(180deg,#f9fbff,#eef5ff)] p-4">
+                <pre className="overflow-x-auto text-sm leading-7 text-[#183b63]">{`npm install\nnpm run dev\n\nnpm run lint\nnpm run build`}</pre>
+              </div>
+            </article>
+          </div>
+        </section>
 
-      <section className="ca-docs-setup-card ca-fade-in">
-        <h3>Local Setup</h3>
-        <pre>{`npm install\nnpm run dev`}</pre>
-        <h3>Build and Validation</h3>
-        <pre>{`npm run lint\nnpm run build`}</pre>
-        <h3>Production Checklist</h3>
-        <ul>
-          <li>Set Shopify app URL and callback domain correctly</li>
-          <li>
-            Run migrations during release: <code>prisma migrate deploy</code>
-          </li>
-          <li>Confirm webhook registration and sync health after deploy</li>
-        </ul>
-      </section>
+        <section className="px-4 py-16 sm:px-6 lg:px-8">
+          <div className="ca-marketing-shell grid gap-4 lg:grid-cols-[1.1fr_0.9fr]">
+            <article className="ca-surface-card" data-reveal>
+              <span className="ca-card-eyebrow">Reference</span>
+              <h2 className="mt-4 text-2xl font-semibold tracking-[-0.04em] text-[#0b2143]">
+                Production checklist
+              </h2>
+              <ul className="mt-4 grid gap-3 text-sm leading-6 text-[#203e65]">
+                <li className="ca-list-check">
+                  Set the Shopify app URL and callback domain correctly
+                </li>
+                <li className="ca-list-check">
+                  Run database migrations during release
+                </li>
+                <li className="ca-list-check">
+                  Confirm webhook registration after deploy
+                </li>
+                <li className="ca-list-check">
+                  Validate billing upgrade and redirect flow
+                </li>
+                <li className="ca-list-check">
+                  Review affiliate payout automation schedule and secret
+                  configuration
+                </li>
+              </ul>
+            </article>
 
-      <section className="ca-docs-card" id="faq">
-        <h3>FAQ</h3>
-        <p>
-          <strong>How often is data updated?</strong> Sync freshness depends on
-          Shopify events plus manual sync actions from Settings.
-        </p>
-        <p>
-          <strong>Why are segment actions disabled?</strong> Create, edit, and
-          delete are available on Pro tier.
-        </p>
-        <p>
-          <strong>Need support?</strong> Use in-app sync diagnostics first, then
-          share logs and store domain with your support contact.
-        </p>
-      </section>
+            <article className="ca-surface-card" id="faq" data-reveal>
+              <span className="ca-card-eyebrow">Quick links</span>
+              <h2 className="mt-4 text-2xl font-semibold tracking-[-0.04em] text-[#0b2143]">
+                Useful routes
+              </h2>
+              <div className="mt-4 grid gap-3 text-sm">
+                <Link href="/product" className="ca-footer-link">
+                  Product overview
+                </Link>
+                <Link href="/pricing" className="ca-footer-link">
+                  Pricing
+                </Link>
+                <Link href="/install" className="ca-footer-link">
+                  Install flow
+                </Link>
+                <Link href="/dashboard" className="ca-footer-link">
+                  Dashboard
+                </Link>
+              </div>
+            </article>
+          </div>
+        </section>
 
-      <footer className="ca-site-footer">
-        <div>
-          <BrandMark compact size={26} />
-          <p>CustomerAtlas documentation for operators and analysts.</p>
-        </div>
-        <div>
-          <h4>Quick Links</h4>
-          <Link href="/">Home</Link>
-          <Link href="/install">Install</Link>
-          <Link href="/dashboard">Dashboard</Link>
-        </div>
-      </footer>
-    </main>
+        <MarketingFooter />
+      </div>
+    </MarketingPageFrame>
   );
 }
