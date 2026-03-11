@@ -1,118 +1,198 @@
 import Link from "next/link";
 import Image from "next/image";
 import { BrandMark } from "@/components/brand/BrandMark";
+import { LandingScrollSystem } from "@/components/landing/LandingScrollSystem";
 
 export default function HomePage() {
   return (
-    <main className="ca-landing-root">
+    <main className="mx-auto max-w-6xl px-5 pb-16 pt-5">
+      <LandingScrollSystem />
+      <div className="ca-scroll-progress" aria-hidden="true" />
+
       <a href="#hero" className="ca-skip-link">
         Skip to main content
       </a>
 
-      <header className="ca-site-header ca-fade-in">
-        <Link href="/" className="ca-site-brand">
+      <header
+        className="sticky top-3 z-20 mb-4 flex flex-wrap items-center justify-between gap-3 rounded-3xl border border-[#0b316617] bg-white/95 px-4 py-3 shadow-[0_18px_36px_rgba(8,30,69,0.09)] backdrop-blur"
+        data-reveal
+      >
+        <Link href="/" className="no-underline">
           <BrandMark subtitle="Revenue Intelligence for Shopify" size={34} />
         </Link>
-        <nav className="ca-site-nav" aria-label="Primary">
-          <a href="#models">Models</a>
-          <a href="#showcase">Showcase</a>
-          <a href="#pricing">Pricing</a>
-          <a href="#faq">FAQ</a>
-          <a href="#contact">Contact</a>
+        <nav className="flex flex-wrap items-center gap-2" aria-label="Primary">
+          <a
+            className="rounded-full px-3 py-2 text-sm font-semibold text-[#153a72] transition hover:bg-[#124a951c]"
+            href="#models"
+          >
+            Models
+          </a>
+          <a
+            className="rounded-full px-3 py-2 text-sm font-semibold text-[#153a72] transition hover:bg-[#124a951c]"
+            href="#showcase"
+          >
+            Showcase
+          </a>
+          <a
+            className="rounded-full px-3 py-2 text-sm font-semibold text-[#153a72] transition hover:bg-[#124a951c]"
+            href="#pricing"
+          >
+            Pricing
+          </a>
+          <a
+            className="rounded-full px-3 py-2 text-sm font-semibold text-[#153a72] transition hover:bg-[#124a951c]"
+            href="#faq"
+          >
+            FAQ
+          </a>
+          <a
+            className="rounded-full px-3 py-2 text-sm font-semibold text-[#153a72] transition hover:bg-[#124a951c]"
+            href="#contact"
+          >
+            Contact
+          </a>
         </nav>
-        <div className="ca-site-cta">
-          <Link href="/login" className="ca-site-link">
+        <div className="flex items-center gap-2">
+          <Link
+            href="/login"
+            className="rounded-full border border-[#0d3c772f] bg-white px-3 py-2 text-sm font-semibold text-[#123b74] no-underline"
+          >
             Sign in
           </Link>
-          <Link href="/install" className="ca-landing-cta-primary">
+          <Link
+            href="/install"
+            className="rounded-full bg-gradient-to-br from-[#0b3f84] to-[#0e2f62] px-4 py-2 text-sm font-semibold text-white no-underline shadow-[0_12px_24px_rgba(10,39,84,0.34)] transition hover:-translate-y-0.5"
+          >
             Install app
           </Link>
         </div>
       </header>
 
       <section
-        className="ca-landing-hero ca-fade-in ca-stagger-1"
+        className="grid gap-4 rounded-3xl border border-[#0b2c621f] bg-gradient-to-br from-white to-[#f6faff] p-6 shadow-[0_22px_48px_rgba(8,35,76,0.12)] md:grid-cols-[1.2fr_0.8fr]"
         id="hero"
         aria-labelledby="hero-title"
+        data-reveal
       >
-        <div className="ca-landing-hero-left">
-          <p className="ca-landing-kicker">CustomerAtlas Intelligence Stack</p>
-          <h1 className="ca-landing-title" id="hero-title">
+        <div className="grid gap-3">
+          <p className="m-0 text-xs font-bold uppercase tracking-[0.12em] text-[#0d4a96]">
+            CustomerAtlas Intelligence Stack
+          </p>
+          <h1
+            className="m-0 max-w-[15ch] text-[clamp(2rem,4.4vw,3.35rem)] font-bold leading-[1] tracking-[-0.04em] text-[#081f43]"
+            id="hero-title"
+          >
             One command center for customer signals, growth decisions, and
             execution.
           </h1>
-          <p className="ca-landing-subtitle">
+          <p className="m-0 max-w-[56ch] leading-relaxed text-[#304d73]">
             Built for Shopify teams that need fast, defensible actions. Analyze
             behavior, rank opportunities, and launch segmented campaigns from
             the same workspace.
           </p>
-          <div className="ca-landing-pill-row">
-            <span className="ca-landing-pill">Predictive customer models</span>
-            <span className="ca-landing-pill">Audience activation</span>
-            <span className="ca-landing-pill">
+          <div className="flex flex-wrap gap-2">
+            <span className="rounded-full border border-[#0d3c7633] bg-white px-3 py-1 text-xs tracking-[0.05em] text-[#12345f]">
+              Predictive customer models
+            </span>
+            <span className="rounded-full border border-[#0d3c7633] bg-white px-3 py-1 text-xs tracking-[0.05em] text-[#12345f]">
+              Audience activation
+            </span>
+            <span className="rounded-full border border-[#0d3c7633] bg-white px-3 py-1 text-xs tracking-[0.05em] text-[#12345f]">
               Affiliate and payout controls
             </span>
           </div>
           <div
-            className="ca-hero-proof-row"
+            className="grid gap-2 sm:grid-cols-3"
             aria-label="Performance proof points"
           >
-            <article>
-              <strong>40%</strong>
-              <span>faster campaign planning</span>
+            <article className="rounded-xl border border-[#0c386e29] bg-white px-3 py-2">
+              <strong className="block text-base tracking-tight text-[#0b356d]">
+                40%
+              </strong>
+              <span className="mt-1 block text-[0.68rem] uppercase tracking-[0.08em] text-[#45658e]">
+                faster campaign planning
+              </span>
             </article>
-            <article>
-              <strong>$18.4k</strong>
-              <span>projected monthly lift</span>
+            <article className="rounded-xl border border-[#0c386e29] bg-white px-3 py-2">
+              <strong className="block text-base tracking-tight text-[#0b356d]">
+                $18.4k
+              </strong>
+              <span className="mt-1 block text-[0.68rem] uppercase tracking-[0.08em] text-[#45658e]">
+                projected monthly lift
+              </span>
             </article>
-            <article>
-              <strong>99.95%</strong>
-              <span>automation uptime</span>
+            <article className="rounded-xl border border-[#0c386e29] bg-white px-3 py-2">
+              <strong className="block text-base tracking-tight text-[#0b356d]">
+                99.95%
+              </strong>
+              <span className="mt-1 block text-[0.68rem] uppercase tracking-[0.08em] text-[#45658e]">
+                automation uptime
+              </span>
             </article>
           </div>
-          <div className="ca-landing-cta-row">
-            <Link href="/install" className="ca-landing-cta-primary">
+          <div className="flex flex-wrap items-center gap-3">
+            <Link
+              href="/install"
+              className="rounded-full bg-gradient-to-br from-[#0b3f84] to-[#0e2f62] px-4 py-2 text-sm font-semibold text-white no-underline shadow-[0_12px_24px_rgba(10,39,84,0.34)] transition hover:-translate-y-0.5"
+            >
               Install on Shopify
             </Link>
-            <Link href="/docs" className="ca-landing-cta-secondary">
+            <Link
+              href="/docs"
+              className="rounded-full border border-[#0d396f47] bg-white px-4 py-2 text-sm font-semibold text-[#0d2f5b] no-underline transition hover:-translate-y-0.5"
+            >
               Explore documentation
             </Link>
           </div>
         </div>
 
-        <div className="ca-landing-hero-panel">
-          <div className="ca-landing-logo-panel">
+        <div className="relative grid gap-3 overflow-hidden rounded-2xl border border-[#0b326938] bg-[#0b2f63] p-4 text-[#e6f0ff]">
+          <div className="absolute -right-8 -top-14 h-44 w-44 rounded-full bg-[radial-gradient(circle,rgba(168,204,255,0.38),rgba(168,204,255,0))]" />
+          <div className="flex items-center gap-3 rounded-xl border border-[#97c2ff4d] bg-[#0b2952cc] px-3 py-2">
             <BrandMark iconOnly size={74} />
             <div>
-              <p>Live workspace</p>
-              <strong>northstar-goods-lab.myshopify.com</strong>
+              <p className="m-0 text-[0.73rem] uppercase tracking-[0.07em] opacity-80">
+                Live workspace
+              </p>
+              <strong className="mt-1 block text-sm tracking-tight">
+                northstar-goods-lab.myshopify.com
+              </strong>
             </div>
           </div>
-          <div className="ca-landing-signal-grid">
-            <div>
-              <p>Churn-risk model</p>
-              <strong>94.1% confidence</strong>
+          <div className="grid gap-2 sm:grid-cols-2">
+            <div className="rounded-xl border border-[#a0c7ff42] bg-[#09244aa6] p-2">
+              <p className="m-0 text-[0.68rem] uppercase tracking-[0.08em] opacity-75">
+                Churn-risk model
+              </p>
+              <strong className="mt-1 block">94.1% confidence</strong>
             </div>
-            <div>
-              <p>Likely repeat buyers</p>
-              <strong>1,248 profiles</strong>
+            <div className="rounded-xl border border-[#a0c7ff42] bg-[#09244aa6] p-2">
+              <p className="m-0 text-[0.68rem] uppercase tracking-[0.08em] opacity-75">
+                Likely repeat buyers
+              </p>
+              <strong className="mt-1 block">1,248 profiles</strong>
             </div>
-            <div>
-              <p>Projected lift</p>
-              <strong>$18.4k / month</strong>
+            <div className="rounded-xl border border-[#a0c7ff42] bg-[#09244aa6] p-2">
+              <p className="m-0 text-[0.68rem] uppercase tracking-[0.08em] opacity-75">
+                Projected lift
+              </p>
+              <strong className="mt-1 block">$18.4k / month</strong>
             </div>
-            <div>
-              <p>Automation health</p>
-              <strong>All systems ready</strong>
+            <div className="rounded-xl border border-[#a0c7ff42] bg-[#09244aa6] p-2">
+              <p className="m-0 text-[0.68rem] uppercase tracking-[0.08em] opacity-75">
+                Automation health
+              </p>
+              <strong className="mt-1 block">All systems ready</strong>
             </div>
           </div>
         </div>
       </section>
 
       <section
-        className="ca-section ca-section-dark ca-fade-in ca-stagger-2"
+        className="ca-section ca-section-dark"
         id="models"
         aria-labelledby="models-title"
+        data-reveal
       >
         <div className="ca-section-heading-wrap">
           <p className="ca-section-kicker">Rotating Models</p>
@@ -173,9 +253,10 @@ export default function HomePage() {
       </section>
 
       <section
-        className="ca-section ca-section-showcase ca-fade-in ca-stagger-3"
+        className="ca-section ca-section-showcase"
         id="showcase"
         aria-labelledby="showcase-title"
+        data-reveal
       >
         <div className="ca-section-heading-wrap">
           <p className="ca-section-kicker">App Showcase</p>
@@ -216,9 +297,10 @@ export default function HomePage() {
       </section>
 
       <section
-        className="ca-section ca-section-dark ca-feature-section ca-fade-in ca-stagger-4"
+        className="ca-section ca-section-dark ca-feature-section"
         id="features"
         aria-labelledby="features-title"
+        data-reveal
       >
         <div className="ca-section-heading-wrap">
           <p className="ca-section-kicker">Core Platform</p>
@@ -253,9 +335,10 @@ export default function HomePage() {
       </section>
 
       <section
-        className="ca-section ca-fade-in ca-stagger-1"
+        className="ca-section"
         id="how-it-works"
         aria-labelledby="steps-title"
+        data-reveal
       >
         <div className="ca-section-heading-wrap">
           <p className="ca-section-kicker">How It Works</p>
@@ -288,9 +371,10 @@ export default function HomePage() {
       </section>
 
       <section
-        className="ca-section ca-section-dark ca-testimonial-section ca-fade-in ca-stagger-2"
+        className="ca-section ca-section-dark ca-testimonial-section"
         id="testimonials"
         aria-labelledby="testimonials-title"
+        data-reveal
       >
         <div className="ca-section-heading-wrap">
           <p className="ca-section-kicker">Social Proof</p>
@@ -327,9 +411,10 @@ export default function HomePage() {
       </section>
 
       <section
-        className="ca-section ca-pricing-section ca-fade-in ca-stagger-3"
+        className="ca-section ca-pricing-section"
         id="pricing"
         aria-labelledby="pricing-title"
+        data-reveal
       >
         <div className="ca-section-heading-wrap">
           <p className="ca-section-kicker">Pricing</p>
@@ -371,9 +456,10 @@ export default function HomePage() {
       </section>
 
       <section
-        className="ca-section ca-section-dark ca-fade-in ca-stagger-4"
+        className="ca-section ca-section-dark"
         id="faq"
         aria-labelledby="faq-title"
+        data-reveal
       >
         <div className="ca-section-heading-wrap">
           <p className="ca-section-kicker">FAQ</p>
@@ -404,9 +490,10 @@ export default function HomePage() {
       </section>
 
       <section
-        className="ca-section ca-final-cta ca-fade-in ca-stagger-1"
+        className="ca-section ca-final-cta"
         id="contact"
         aria-labelledby="contact-title"
+        data-reveal
       >
         <h2 id="contact-title">
           Ready to run growth on signal instead of guesswork?
@@ -425,7 +512,12 @@ export default function HomePage() {
         </div>
       </section>
 
-      <footer className="ca-site-footer" id="support" aria-label="Footer">
+      <footer
+        className="ca-site-footer"
+        id="support"
+        aria-label="Footer"
+        data-reveal
+      >
         <div>
           <BrandMark compact size={28} />
           <p>Revenue intelligence platform for modern Shopify operators.</p>
