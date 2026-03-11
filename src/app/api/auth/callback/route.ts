@@ -6,7 +6,7 @@ import { createAppSessionToken, getAppSessionCookieOptions } from "@/lib/auth-se
 import { readShopifyOAuthStateToken } from "@/lib/shopify-oauth-state";
 import { normalizeShopDomain } from "@/lib/shop";
 import { exchangeShopifyCodeForToken, registerWebhookSubscription, verifyShopifyOAuthCallback } from "@/lib/shopify";
-import { syncShopData } from "@/lib/sync";
+import { syncShopData } from "../../../../lib/sync";
 
 const WEBHOOK_TOPICS = [
   "orders/create",
