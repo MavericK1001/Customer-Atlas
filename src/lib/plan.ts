@@ -32,7 +32,11 @@ export async function getShopPlan(shopDomain: string): Promise<{
 }
 
 export function canUseFeature(input: {
-  feature: "custom_segment_crud";
+  feature:
+    | "custom_segment_crud"
+    | "automation_rules"
+    | "assistant"
+    | "customer_timeline";
   planTier: PlanTier;
   billingStatus: string;
 }): boolean {
@@ -41,6 +45,17 @@ export function canUseFeature(input: {
       input.planTier === "pro" &&
       (input.billingStatus === "active" || input.billingStatus === "trialing")
     );
+  }
+
+  if (input.feature === "automation_rules" || input.feature === "assistant") {
+    return (
+      input.planTier === "pro" &&
+      (input.billingStatus === "active" || input.billingStatus === "trialing")
+    );
+  }
+
+  if (input.feature === "customer_timeline") {
+    return true;
   }
 
   return false;

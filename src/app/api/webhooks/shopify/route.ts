@@ -50,6 +50,7 @@ function isProBillingStatus(status: string): boolean {
 }
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
+  const startedAt = Date.now();
   const topic = request.headers.get("x-shopify-topic");
   const shopDomain = request.headers.get("x-shopify-shop-domain");
   const hmac = request.headers.get("x-shopify-hmac-sha256");
@@ -63,6 +64,8 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
   if (!verifyShopifyWebhookHmac(payload, hmac)) {
     return NextResponse.json({ error: "Invalid webhook signature." }, { status: 401 });
   }
+
+  console.info(`[webhook] received topic=${topic} shop=${shopDomain}`);
 
   const install = await prisma.appInstall.findUnique({
     where: { shopDomain },
@@ -188,15 +191,17 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         return NextResponse.json({ ok: true });
       }
 
-      await prisma.appInstall.update({
-        where: { shopDomain },
-        data: {
-          billingStatus,
-          planTier: isProBillingStatus(billingStatus) ? "pro" : "free",
-          shopifySubscriptionId: isProBillingStatus(billingStatus)
-            ? subscriptionId ?? install.shopifySubscriptionId
-            : null,
-        },
+      await prisma.$transaction(async (tx) => {
+        await tx.appInstall.update({
+          where: { shopDomain },
+          data: {
+            billingStatus,
+            planTier: isProBillingStatus(billingStatus) ? "pro" : "free",
+            shopifySubscriptionId: isProBillingStatus(billingStatus)
+              ? subscriptionId ?? install.shopifySubscriptionId
+              : null,
+          },
+        });
       });
     }
 
@@ -262,8 +267,14 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       await prisma.appInstall.deleteMany({ where: { shopDomain } });
     }
 
+    console.info(
+      `[webhook] completed topic=${topic} shop=${shopDomain} durationMs=${Date.now() - startedAt}`,
+    );
     return NextResponse.json({ ok: true });
   } catch (error) {
+    console.warn(
+      `[webhook] failed topic=${topic} shop=${shopDomain} durationMs=${Date.now() - startedAt} error=${(error as Error).message}`,
+    );
     return NextResponse.json(
       {
         error: "Webhook processing failed",

@@ -1,3 +1,4 @@
+import type { Prisma } from "@prisma/client";
 import { enqueueMetricsRecompute } from "@/lib/queue";
 import { prisma } from "@/lib/prisma";
 
@@ -25,6 +26,17 @@ export type SyncShopDataResult = {
   ordersUpserted: number;
 };
 
+const CUSTOMER_CHUNK_SIZE = 200;
+const ORDER_CHUNK_SIZE = 100;
+
+function chunkArray<T>(items: T[], chunkSize: number): T[][] {
+  const chunks: T[][] = [];
+  for (let index = 0; index < items.length; index += chunkSize) {
+    chunks.push(items.slice(index, index + chunkSize));
+  }
+  return chunks;
+}
+
 async function fetchShopifyPage<T>(input: {
   shop: string;
   accessToken: string;
@@ -42,7 +54,6 @@ async function fetchShopifyPage<T>(input: {
   }
 
   const data = (await response.json()) as T;
-
   const linkHeader = response.headers.get("link");
   const nextPath = getNextPagePath(linkHeader);
 
@@ -130,6 +141,7 @@ export async function syncShopData(input: {
   shop: string;
   accessToken: string;
 }): Promise<SyncShopDataResult> {
+  const startedAt = Date.now();
   let customers: ShopifyCustomer[] = [];
   let customerSyncSkipped = false;
   let customersUpserted = 0;
@@ -141,33 +153,8 @@ export async function syncShopData(input: {
       accessToken: input.accessToken,
     });
   } catch (error) {
-    // Some stores/apps can be restricted from customer endpoints until approvals are granted.
     console.warn(`Skipping customer sync for ${input.shop}: ${(error as Error).message}`);
     customerSyncSkipped = true;
-  }
-
-  for (const customer of customers) {
-    await prisma.customer.upsert({
-      where: {
-        shopDomain_shopifyCustomerId: {
-          shopDomain: input.shop,
-          shopifyCustomerId: String(customer.id),
-        },
-      },
-      update: {
-        email: customer.email,
-      },
-      create: {
-        shopDomain: input.shop,
-        shopifyCustomerId: String(customer.id),
-        email: customer.email,
-        totalSpent: 0,
-        averageOrderValue: 0,
-        predictedLtv: 0,
-      },
-    });
-
-    customersUpserted += 1;
   }
 
   const orders = await fetchAllOrders({
@@ -175,67 +162,110 @@ export async function syncShopData(input: {
     accessToken: input.accessToken,
   });
 
-  for (const order of orders) {
-    const shopifyCustomerId = order.customer?.id ? String(order.customer.id) : null;
-    let customerId: number | null = null;
+  console.info(
+    `[sync] starting transactional write shop=${input.shop} customers=${customers.length} orders=${orders.length}`,
+  );
 
-    if (shopifyCustomerId) {
-      const customer = await prisma.customer.upsert({
-        where: {
-          shopDomain_shopifyCustomerId: {
-            shopDomain: input.shop,
-            shopifyCustomerId,
-          },
-        },
-        update: {
-          email: order.customer?.email,
-        },
-        create: {
-          shopDomain: input.shop,
-          shopifyCustomerId,
-          email: order.customer?.email,
-          totalSpent: 0,
-          averageOrderValue: 0,
-          predictedLtv: 0,
-        },
-      });
-
-      customerId = customer.id;
+  await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
+    for (const chunk of chunkArray(customers, CUSTOMER_CHUNK_SIZE)) {
+      await Promise.all(
+        chunk.map(async (customer) => {
+          await tx.customer.upsert({
+            where: {
+              shopDomain_shopifyCustomerId: {
+                shopDomain: input.shop,
+                shopifyCustomerId: String(customer.id),
+              },
+            },
+            update: {
+              email: customer.email,
+            },
+            create: {
+              shopDomain: input.shop,
+              shopifyCustomerId: String(customer.id),
+              email: customer.email,
+              totalSpent: 0,
+              averageOrderValue: 0,
+              predictedLtv: 0,
+            },
+          });
+          customersUpserted += 1;
+        }),
+      );
     }
 
-    const productTitles = (order.line_items ?? [])
-      .map((line) => line.title)
-      .filter((title): title is string => typeof title === "string");
+    for (const chunk of chunkArray(orders, ORDER_CHUNK_SIZE)) {
+      await Promise.all(
+        chunk.map(async (order) => {
+          const shopifyCustomerId = order.customer?.id
+            ? String(order.customer.id)
+            : null;
+          let customerId: number | null = null;
 
-    await prisma.order.upsert({
-      where: {
-        shopDomain_shopifyOrderId: {
-          shopDomain: input.shop,
-          shopifyOrderId: String(order.id),
-        },
-      },
-      update: {
-        customerId,
-        orderValue: Number(order.total_price ?? 0),
-        products: productTitles,
-        createdAt: new Date(order.created_at),
-      },
-      create: {
-        shopDomain: input.shop,
-        shopifyOrderId: String(order.id),
-        customerId,
-        orderValue: Number(order.total_price ?? 0),
-        products: productTitles,
-        createdAt: new Date(order.created_at),
-      },
-    });
+          if (shopifyCustomerId) {
+            const customer = await tx.customer.upsert({
+              where: {
+                shopDomain_shopifyCustomerId: {
+                  shopDomain: input.shop,
+                  shopifyCustomerId,
+                },
+              },
+              update: {
+                email: order.customer?.email,
+              },
+              create: {
+                shopDomain: input.shop,
+                shopifyCustomerId,
+                email: order.customer?.email,
+                totalSpent: 0,
+                averageOrderValue: 0,
+                predictedLtv: 0,
+              },
+            });
 
-    ordersUpserted += 1;
-  }
+            customerId = customer.id;
+          }
+
+          const productTitles = (order.line_items ?? [])
+            .map((line) => line.title)
+            .filter((title): title is string => typeof title === "string");
+
+          await tx.order.upsert({
+            where: {
+              shopDomain_shopifyOrderId: {
+                shopDomain: input.shop,
+                shopifyOrderId: String(order.id),
+              },
+            },
+            update: {
+              customerId,
+              orderValue: Number(order.total_price ?? 0),
+              products: productTitles,
+              createdAt: new Date(order.created_at),
+            },
+            create: {
+              shopDomain: input.shop,
+              shopifyOrderId: String(order.id),
+              customerId,
+              orderValue: Number(order.total_price ?? 0),
+              products: productTitles,
+              createdAt: new Date(order.created_at),
+            },
+          });
+
+          ordersUpserted += 1;
+        }),
+      );
+    }
+  });
 
   await enqueueMetricsRecompute({
     shopDomain: input.shop,
   });
+
+  console.info(
+    `[sync] completed shop=${input.shop} customersUpserted=${customersUpserted} ordersUpserted=${ordersUpserted} durationMs=${Date.now() - startedAt}`,
+  );
 
   return {
     customersFetched: customers.length,

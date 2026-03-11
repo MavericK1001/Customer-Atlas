@@ -23,6 +23,7 @@ export async function reconcileInstallBilling(install: InstallRecord): Promise<{
   planTier: "free" | "pro";
   billingStatus: string;
 }> {
+  const startedAt = Date.now();
   const subscriptions = await getActiveSubscriptions({
     shop: install.shopDomain,
     accessToken: install.accessToken,
@@ -30,14 +31,20 @@ export async function reconcileInstallBilling(install: InstallRecord): Promise<{
 
   if (subscriptions.length === 0) {
     const billingStatus = "inactive";
-    await prisma.appInstall.update({
-      where: { shopDomain: install.shopDomain },
-      data: {
-        planTier: "free",
-        billingStatus,
-        shopifySubscriptionId: null,
-      },
+    await prisma.$transaction(async (tx) => {
+      await tx.appInstall.update({
+        where: { shopDomain: install.shopDomain },
+        data: {
+          planTier: "free",
+          billingStatus,
+          shopifySubscriptionId: null,
+        },
+      });
     });
+
+    console.info(
+      `[billing:reconcile] shop=${install.shopDomain} planTier=free status=${billingStatus} durationMs=${Date.now() - startedAt}`,
+    );
 
     return {
       shopDomain: install.shopDomain,
@@ -50,14 +57,20 @@ export async function reconcileInstallBilling(install: InstallRecord): Promise<{
   const billingStatus = normalizeBillingStatus(active.status);
   const planTier = isProBillingStatus(billingStatus) ? "pro" : "free";
 
-  await prisma.appInstall.update({
-    where: { shopDomain: install.shopDomain },
-    data: {
-      planTier,
-      billingStatus,
-      shopifySubscriptionId: planTier === "pro" ? active.id : null,
-    },
+  await prisma.$transaction(async (tx) => {
+    await tx.appInstall.update({
+      where: { shopDomain: install.shopDomain },
+      data: {
+        planTier,
+        billingStatus,
+        shopifySubscriptionId: planTier === "pro" ? active.id : null,
+      },
+    });
   });
+
+  console.info(
+    `[billing:reconcile] shop=${install.shopDomain} planTier=${planTier} status=${billingStatus} durationMs=${Date.now() - startedAt}`,
+  );
 
   return {
     shopDomain: install.shopDomain,

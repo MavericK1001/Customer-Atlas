@@ -1,5 +1,6 @@
 import dayjs from "dayjs";
 import { prisma } from "@/lib/prisma";
+import { toNumber } from "@/lib/serializers/number";
 
 const SEGMENT_DEFINITIONS = {
   vip: {
@@ -16,13 +17,15 @@ const SEGMENT_DEFINITIONS = {
   },
 } as const;
 
-function toNumber(value: unknown): number {
-  if (typeof value === "number") return value;
-  if (typeof value === "string") return Number(value);
-  if (value && typeof value === "object" && "toString" in value) {
-    return Number((value as { toString(): string }).toString());
+const CUSTOMER_BATCH_SIZE = 500;
+const MEMBERSHIP_BATCH_SIZE = 1000;
+
+function chunkArray<T>(items: T[], chunkSize: number): T[][] {
+  const chunks: T[][] = [];
+  for (let index = 0; index < items.length; index += chunkSize) {
+    chunks.push(items.slice(index, index + chunkSize));
   }
-  return 0;
+  return chunks;
 }
 
 export function calculatePredictedLtv(input: {
@@ -82,9 +85,35 @@ export async function recomputeCustomerMetrics(shopDomain: string, customerId: n
 }
 
 export async function rebuildSegmentsForShop(shopDomain: string): Promise<void> {
-  const customers = await prisma.customer.findMany({
-    where: { shopDomain },
-  });
+  const customers: Array<{
+    id: number;
+    totalSpent: unknown;
+    totalOrders: number;
+    lastOrderDate: Date | null;
+  }> = [];
+
+  let cursor: number | undefined;
+  while (true) {
+    const page = await prisma.customer.findMany({
+      where: { shopDomain },
+      select: {
+        id: true,
+        totalSpent: true,
+        totalOrders: true,
+        lastOrderDate: true,
+      },
+      orderBy: { id: "asc" },
+      take: CUSTOMER_BATCH_SIZE,
+      ...(cursor ? { cursor: { id: cursor }, skip: 1 } : {}),
+    });
+
+    if (page.length === 0) {
+      break;
+    }
+
+    customers.push(...page);
+    cursor = page[page.length - 1].id;
+  }
 
   const [vipSegment, churnRiskSegment, oneTimeSegment] = await Promise.all([
     prisma.segment.upsert({
@@ -160,10 +189,12 @@ export async function rebuildSegmentsForShop(shopDomain: string): Promise<void> 
   ];
 
   if (membershipPayload.length > 0) {
-    await prisma.segmentMembership.createMany({
-      data: membershipPayload,
-      skipDuplicates: true,
-    });
+    for (const chunk of chunkArray(membershipPayload, MEMBERSHIP_BATCH_SIZE)) {
+      await prisma.segmentMembership.createMany({
+        data: chunk,
+        skipDuplicates: true,
+      });
+    }
   }
 
   await Promise.all([

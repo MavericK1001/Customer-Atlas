@@ -148,6 +148,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
   }
 
   const shop = resolved.shopDomain;
+  const startedAt = Date.now();
 
   const install = await prisma.appInstall.findUnique({
     where: { shopDomain: shop },
@@ -166,6 +167,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
   });
 
   try {
+    console.info(`[sync:route] started shop=${shop}`);
     const result = await syncShopData({
       shop,
       accessToken: install.accessToken,
@@ -193,6 +195,9 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       syncHealth: formatSyncHealth(syncHealthRecord),
     });
   } catch (error) {
+    console.warn(
+      `[sync:route] failed shop=${shop} durationMs=${Date.now() - startedAt} error=${(error as Error).message}`,
+    );
     await prisma.appInstall.update({
       where: { shopDomain: shop },
       data: {
@@ -208,5 +213,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       },
       { status: 500 },
     );
+  } finally {
+    console.info(`[sync:route] finished shop=${shop} durationMs=${Date.now() - startedAt}`);
   }
 }

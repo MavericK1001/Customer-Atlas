@@ -30,9 +30,17 @@ export async function GET(): Promise<NextResponse> {
   const status: HealthStatus =
     missingEnv.length === 0 && databaseOk ? "ok" : "degraded";
 
+  const degradedReason =
+    status === "ok"
+      ? null
+      : missingEnv.length > 0
+        ? "missing-required-env"
+        : "database-unavailable";
+
   return NextResponse.json(
     {
       status,
+      degradedReason,
       checks: {
         env: {
           ok: missingEnv.length === 0,
@@ -45,6 +53,11 @@ export async function GET(): Promise<NextResponse> {
       },
       timestamp: new Date().toISOString(),
     },
-    { status: status === "ok" ? 200 : 503 },
+    {
+      status: status === "ok" ? 200 : 503,
+      headers: {
+        "Cache-Control": "public, max-age=60",
+      },
+    },
   );
 }

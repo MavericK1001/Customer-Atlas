@@ -9,6 +9,19 @@ type MetricsJob = {
 };
 
 const queueName = "customer-metrics";
+const ENQUEUE_MAX_ATTEMPTS = 3;
+
+function buildJobId(job: MetricsJob): string {
+  return job.customerId
+    ? `${job.shopDomain}:customer:${job.customerId}`
+    : `${job.shopDomain}:shop:all`;
+}
+
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => {
+    setTimeout(resolve, ms);
+  });
+}
 
 function getRedisConnectionOptions(): {
   host: string;
@@ -58,16 +71,31 @@ export async function enqueueMetricsRecompute(job: MetricsJob): Promise<void> {
     return;
   }
 
-  try {
-    await metricsQueue.add("recompute", job, {
-      removeOnComplete: 100,
-      removeOnFail: 100,
-    });
-  } catch (error) {
-    console.warn(
-      `Unable to enqueue metrics job (${(error as Error).message}). Running inline fallback.`,
-    );
-    await processMetricsJob(job);
+  for (let attempt = 1; attempt <= ENQUEUE_MAX_ATTEMPTS; attempt += 1) {
+    try {
+      await metricsQueue.add("recompute", job, {
+        jobId: buildJobId(job),
+        attempts: 3,
+        backoff: {
+          type: "exponential",
+          delay: 1000,
+        },
+        removeOnComplete: 100,
+        removeOnFail: 100,
+      });
+      return;
+    } catch (error) {
+      if (attempt === ENQUEUE_MAX_ATTEMPTS) {
+        console.warn(
+          `Unable to enqueue metrics job (${(error as Error).message}). Running inline fallback.`,
+        );
+        await processMetricsJob(job);
+        return;
+      }
+
+      // Retry queue writes briefly for transient connection issues.
+      await sleep(attempt * 500);
+    }
   }
 }
 

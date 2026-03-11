@@ -1,14 +1,28 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { resolveShopDomain } from "@/lib/shop-context";
+import { toNumber } from "@/lib/serializers/number";
 
-function toNumber(value: unknown): number {
-  if (typeof value === "number") return value;
-  if (typeof value === "string") return Number(value);
-  if (value && typeof value === "object" && "toString" in value) {
-    return Number((value as { toString(): string }).toString());
-  }
-  return 0;
+type Pagination = {
+  limit: number | null;
+  offset: number;
+};
+
+function parsePagination(request: NextRequest): Pagination {
+  const limitRaw = request.nextUrl.searchParams.get("limit");
+  const offsetRaw = request.nextUrl.searchParams.get("offset");
+
+  const limitParsed = limitRaw ? Number.parseInt(limitRaw, 10) : Number.NaN;
+  const offsetParsed = offsetRaw ? Number.parseInt(offsetRaw, 10) : Number.NaN;
+
+  return {
+    limit:
+      Number.isFinite(limitParsed) && limitParsed > 0
+        ? Math.min(limitParsed, 250)
+        : null,
+    offset:
+      Number.isFinite(offsetParsed) && offsetParsed >= 0 ? offsetParsed : 0,
+  };
 }
 
 export async function GET(request: NextRequest): Promise<NextResponse> {
@@ -20,13 +34,30 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 
   const { shopDomain } = resolved;
   const includeArchived = request.nextUrl.searchParams.get("includeArchived") === "true";
+  const pagination = parsePagination(request);
 
-  const insights = await prisma.insight.findMany({
-    where: includeArchived
-      ? { shopDomain, archivedAt: { not: null } }
-      : { shopDomain, archivedAt: null },
-    orderBy: { createdAt: "desc" },
-  });
+  const where = includeArchived
+    ? { shopDomain, archivedAt: { not: null } }
+    : { shopDomain, archivedAt: null };
+
+  const [insights, total] = await Promise.all([
+    prisma.insight.findMany({
+      where,
+      orderBy: { createdAt: "desc" },
+      ...(typeof pagination.limit === "number"
+        ? {
+            take: pagination.limit,
+            skip: pagination.offset,
+          }
+        : {}),
+    }),
+    prisma.insight.count({ where }),
+  ]);
+
+  const returnedCount = insights.length;
+  const offset = pagination.limit === null ? 0 : pagination.offset;
+  const hasMore =
+    pagination.limit === null ? false : offset + returnedCount < total;
 
   return NextResponse.json({
     insights: insights.map((insight: (typeof insights)[number]) => ({
@@ -36,6 +67,14 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       potentialRevenue: toNumber(insight.potentialRevenue),
       createdAt: insight.createdAt,
     })),
+    meta: {
+      total,
+      returnedCount,
+      limit: pagination.limit,
+      offset,
+      hasMore,
+      paginationEnabled: pagination.limit !== null,
+    },
   });
 }
 

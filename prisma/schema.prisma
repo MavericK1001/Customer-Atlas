@@ -29,6 +29,7 @@ model AppInstall {
   updatedAt      DateTime @updatedAt
 
   @@index([merchantUserId])
+  @@index([shopDomain, billingStatus])
 }
 
 model MerchantUser {
@@ -74,6 +75,7 @@ model Order {
   @@unique([shopDomain, shopifyOrderId])
   @@index([shopDomain])
   @@index([customerId])
+  @@index([shopDomain, createdAt])
 }
 
 model Segment {
