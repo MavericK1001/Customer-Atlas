@@ -53,6 +53,23 @@ export default function HomePage() {
               Affiliate and payout controls
             </span>
           </div>
+          <div
+            className="ca-hero-proof-row"
+            aria-label="Performance proof points"
+          >
+            <article>
+              <strong>40%</strong>
+              <span>faster campaign planning</span>
+            </article>
+            <article>
+              <strong>$18.4k</strong>
+              <span>projected monthly lift</span>
+            </article>
+            <article>
+              <strong>99.95%</strong>
+              <span>automation uptime</span>
+            </article>
+          </div>
           <div className="ca-landing-cta-row">
             <Link href="/install" className="ca-landing-cta-primary">
               Install on Shopify
@@ -147,6 +164,12 @@ export default function HomePage() {
             </article>
           </div>
         </div>
+        <div className="ca-model-meta" aria-hidden="true">
+          <span className="ca-model-dot ca-model-dot-active" />
+          <span className="ca-model-dot" />
+          <span className="ca-model-dot" />
+          <span className="ca-model-dot" />
+        </div>
       </section>
 
       <section
@@ -176,6 +199,20 @@ export default function HomePage() {
             your product capture. Recommended export: 1400x880 PNG or WebP.
           </p>
         </div>
+        <div className="ca-showcase-detail-grid">
+          <article>
+            <h3>Operator-first workspace</h3>
+            <p>
+              Every major action is measurable, attributable, and review-ready.
+            </p>
+          </article>
+          <article>
+            <h3>Built for team velocity</h3>
+            <p>
+              From model signals to execution in minutes, not reporting cycles.
+            </p>
+          </article>
+        </div>
       </section>
 
       <section
@@ -191,20 +228,24 @@ export default function HomePage() {
         </div>
         <div className="ca-feature-grid-modern">
           <article className="ca-feature-card-modern">
+            <span className="ca-feature-eyebrow">Priority</span>
             <h3>Decision Priority Engine</h3>
             <p>Ranks growth tasks by predicted return and execution effort.</p>
           </article>
           <article className="ca-feature-card-modern">
+            <span className="ca-feature-eyebrow">Audiences</span>
             <h3>Segment Builder</h3>
             <p>
               Compose campaign audiences with instant preview and clear logic.
             </p>
           </article>
           <article className="ca-feature-card-modern">
+            <span className="ca-feature-eyebrow">Partnerships</span>
             <h3>Affiliate Intelligence</h3>
             <p>Track referrals, payouts, and key activity from one place.</p>
           </article>
           <article className="ca-feature-card-modern">
+            <span className="ca-feature-eyebrow">Reliability</span>
             <h3>Reliability Controls</h3>
             <p>Keep sync, billing, and automations visible and healthy.</p>
           </article>
@@ -259,6 +300,7 @@ export default function HomePage() {
         </div>
         <div className="ca-testimonial-grid">
           <article>
+            <span className="ca-testimonial-avatar">NG</span>
             <p>
               &ldquo;We cut campaign planning time by 40% and had clearer
               priority queues in week one.&rdquo;
@@ -266,6 +308,7 @@ export default function HomePage() {
             <strong>Head of Growth, Northstar Goods</strong>
           </article>
           <article>
+            <span className="ca-testimonial-avatar">HS</span>
             <p>
               &ldquo;The model stream made it obvious where revenue was leaking.
               We fixed churn before it showed up in reports.&rdquo;
@@ -273,6 +316,7 @@ export default function HomePage() {
             <strong>Lifecycle Manager, Harbor Supply</strong>
           </article>
           <article>
+            <span className="ca-testimonial-avatar">UB</span>
             <p>
               &ldquo;Affiliate payout ops and key controls are finally
               centralized. No more spreadsheet handoffs.&rdquo;
@@ -307,6 +351,7 @@ export default function HomePage() {
             </Link>
           </article>
           <article className="ca-pricing-card-modern ca-pricing-card-featured">
+            <span className="ca-pricing-badge">Most popular</span>
             <h3>Pro</h3>
             <p className="ca-price">$49</p>
             <ul>
@@ -319,6 +364,10 @@ export default function HomePage() {
             </Link>
           </article>
         </div>
+        <p className="ca-pricing-footnote">
+          All plans include onboarding support. Upgrade or downgrade anytime
+          from your billing panel.
+        </p>
       </section>
 
       <section
