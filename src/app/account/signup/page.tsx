@@ -39,6 +39,7 @@ export default function AccountSignupPage() {
   const shop = params.get("shop") ?? "";
   const host = params.get("host") ?? "";
   const returnTo = params.get("returnTo") ?? "/dashboard";
+  const canSubmit = email.trim().length > 0 && password.length >= 8;
   const externalAuthEnabled = isExternalAccountAuthEnabled();
   const [isMounted, setIsMounted] = useState(false);
   const shouldExternalRedirect =
@@ -131,9 +132,15 @@ export default function AccountSignupPage() {
         <Layout>
           <Layout.Section>
             <div className="ca-auth-hero ca-fade-in">
-              <BrandMark subtitle="Shopify intelligence operating system" size={36} />
+              <BrandMark
+                subtitle="Shopify intelligence operating system"
+                size={36}
+              />
               <h2>Create your account.</h2>
-              <p>Set up secure access once and manage all connected stores in one workspace.</p>
+              <p>
+                Set up secure access once and manage all connected stores in one
+                workspace.
+              </p>
             </div>
           </Layout.Section>
           <Layout.Section>
@@ -164,6 +171,7 @@ export default function AccountSignupPage() {
                   <Button
                     variant="primary"
                     loading={isSubmitting}
+                    disabled={!canSubmit || isSubmitting}
                     onClick={() => {
                       handleSignup().catch(() => undefined);
                     }}

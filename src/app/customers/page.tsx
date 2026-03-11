@@ -65,14 +65,17 @@ export default function CustomersPage() {
     maximumFractionDigits: 0,
   });
 
-  const filteredCustomers = customers.filter((customer) => {
-    const customerEmail = (customer.email ?? "").toLowerCase();
-    const normalizedSearch = searchTerm.trim().toLowerCase();
-    const matchesSearch =
-      normalizedSearch.length === 0 || customerEmail.includes(normalizedSearch);
-    const matchesValue = !highValueOnly || customer.predictedLtv >= 500;
-    return matchesSearch && matchesValue;
-  });
+  const filteredCustomers = customers
+    .filter((customer) => {
+      const customerEmail = (customer.email ?? "").toLowerCase();
+      const normalizedSearch = searchTerm.trim().toLowerCase();
+      const matchesSearch =
+        normalizedSearch.length === 0 ||
+        customerEmail.includes(normalizedSearch);
+      const matchesValue = !highValueOnly || customer.predictedLtv >= 500;
+      return matchesSearch && matchesValue;
+    })
+    .sort((a, b) => b.predictedLtv - a.predictedLtv);
 
   const highValueCount = customers.filter(
     (customer) => customer.predictedLtv >= 500,
@@ -90,8 +93,8 @@ export default function CustomersPage() {
           <p className="ca-dashboard-kicker">Customer Portfolio</p>
           <h2>Turn your customer list into action-ready segments.</h2>
           <p>
-            Scan revenue potential, recency, and order depth without digging into
-            raw rows.
+            Scan revenue potential, recency, and order depth without digging
+            into raw rows.
           </p>
           <div className="ca-hero-metrics">
             <div className="ca-hero-metric-pill">
@@ -180,7 +183,9 @@ export default function CustomersPage() {
                       <div className="ca-customer-metrics">
                         <div>
                           <p>Total spent</p>
-                          <strong>{currency.format(customer.totalSpent)}</strong>
+                          <strong>
+                            {currency.format(customer.totalSpent)}
+                          </strong>
                         </div>
                         <div>
                           <p>Orders</p>
@@ -188,11 +193,15 @@ export default function CustomersPage() {
                         </div>
                         <div>
                           <p>Predicted LTV</p>
-                          <strong>{currency.format(customer.predictedLtv)}</strong>
+                          <strong>
+                            {currency.format(customer.predictedLtv)}
+                          </strong>
                         </div>
                         <div>
                           <p>AOV</p>
-                          <strong>{currency.format(customer.averageOrderValue)}</strong>
+                          <strong>
+                            {currency.format(customer.averageOrderValue)}
+                          </strong>
                         </div>
                       </div>
                       <div className="ca-muted">

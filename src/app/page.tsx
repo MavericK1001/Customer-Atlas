@@ -145,7 +145,10 @@ export default function HomePage() {
       <footer className="ca-site-footer" id="support">
         <div>
           <BrandMark compact size={28} />
-          <p>Built for Shopify operators who want clearer priorities and faster wins.</p>
+          <p>
+            Built for Shopify operators who want clearer priorities and faster
+            wins.
+          </p>
         </div>
         <div>
           <h4>Product</h4>

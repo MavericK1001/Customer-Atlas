@@ -46,6 +46,7 @@ type SyncHealthResponse = {
 
 export default function DashboardPage() {
   const [data, setData] = useState<DashboardResponse | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [syncHealth, setSyncHealth] = useState<
     SyncHealthResponse["syncHealth"] | null
@@ -61,6 +62,8 @@ export default function DashboardPage() {
 
   useEffect(() => {
     async function loadDashboard() {
+      setIsLoading(true);
+      setError(null);
       const query = shop ? `?shop=${encodeURIComponent(shop)}` : "";
 
       const response = await fetch(`/api/dashboard${query}`);
@@ -79,9 +82,14 @@ export default function DashboardPage() {
           setSyncHealth(syncJson.syncHealth);
         }
       }
+
+      setIsLoading(false);
     }
 
-    loadDashboard().catch(() => setError("Unable to load dashboard data."));
+    loadDashboard().catch(() => {
+      setError("Unable to load dashboard data.");
+      setIsLoading(false);
+    });
   }, [shop]);
 
   async function handleDismissPriority(insightId: number): Promise<void> {
@@ -164,25 +172,37 @@ export default function DashboardPage() {
                   <div className="ca-kpi-card">
                     <div className="ca-kpi-label">Total Customers</div>
                     <div className="ca-kpi-value">
-                      {data?.customerOverview.totalCustomers ?? 0}
+                      {isLoading
+                        ? "..."
+                        : (data?.customerOverview.totalCustomers ?? 0)}
                     </div>
                   </div>
                   <div className="ca-kpi-card">
                     <div className="ca-kpi-label">Repeat Purchase Rate</div>
                     <div className="ca-kpi-value">
-                      {data?.customerOverview.repeatPurchaseRate ?? 0}%
+                      {isLoading
+                        ? "..."
+                        : `${data?.customerOverview.repeatPurchaseRate ?? 0}%`}
                     </div>
                   </div>
                   <div className="ca-kpi-card">
                     <div className="ca-kpi-label">Average Order Value</div>
                     <div className="ca-kpi-value">
-                      {currency.format(data?.customerOverview.averageOrderValue ?? 0)}
+                      {isLoading
+                        ? "..."
+                        : currency.format(
+                            data?.customerOverview.averageOrderValue ?? 0,
+                          )}
                     </div>
                   </div>
                   <div className="ca-kpi-card">
                     <div className="ca-kpi-label">Predicted LTV</div>
                     <div className="ca-kpi-value">
-                      {currency.format(data?.customerOverview.predictedLtv ?? 0)}
+                      {isLoading
+                        ? "..."
+                        : currency.format(
+                            data?.customerOverview.predictedLtv ?? 0,
+                          )}
                     </div>
                   </div>
                 </div>
@@ -264,7 +284,8 @@ export default function DashboardPage() {
                     </div>
                     <div className="ca-priority-revenue">
                       <Text as="p">
-                        Potential Revenue: {currency.format(item.potentialRevenue)}
+                        Potential Revenue:{" "}
+                        {currency.format(item.potentialRevenue)}
                       </Text>
                     </div>
                     <div className="ca-muted">

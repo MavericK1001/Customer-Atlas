@@ -54,9 +54,17 @@ export default function DocsPage() {
         <article className="ca-docs-card">
           <h3>Reference</h3>
           <ul>
-            <li>Route aliases: <code>/login</code> and <code>/signup</code></li>
-            <li>App routes: <code>/dashboard</code>, <code>/customers</code>, <code>/segments</code></li>
-            <li>API routes under <code>/api/*</code> for auth, sync, insights, and segments</li>
+            <li>
+              Route aliases: <code>/login</code> and <code>/signup</code>
+            </li>
+            <li>
+              App routes: <code>/dashboard</code>, <code>/customers</code>,{" "}
+              <code>/segments</code>
+            </li>
+            <li>
+              API routes under <code>/api/*</code> for auth, sync, insights, and
+              segments
+            </li>
             <li>Plan gating: custom segment actions require Pro plan</li>
           </ul>
         </article>
@@ -70,7 +78,9 @@ export default function DocsPage() {
         <h3>Production Checklist</h3>
         <ul>
           <li>Set Shopify app URL and callback domain correctly</li>
-          <li>Run migrations during release: <code>prisma migrate deploy</code></li>
+          <li>
+            Run migrations during release: <code>prisma migrate deploy</code>
+          </li>
           <li>Confirm webhook registration and sync health after deploy</li>
         </ul>
       </section>

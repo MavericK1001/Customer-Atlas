@@ -38,6 +38,7 @@ export default function AccountLoginPage() {
   const shop = params.get("shop") ?? "";
   const host = params.get("host") ?? "";
   const returnTo = params.get("returnTo") ?? "/dashboard";
+  const canSubmit = email.trim().length > 0 && password.length > 0;
   const externalAuthEnabled = isExternalAccountAuthEnabled();
   const [isMounted, setIsMounted] = useState(false);
   const shouldExternalRedirect =
@@ -130,9 +131,15 @@ export default function AccountLoginPage() {
         <Layout>
           <Layout.Section>
             <div className="ca-auth-hero ca-fade-in">
-              <BrandMark subtitle="Shopify intelligence operating system" size={36} />
+              <BrandMark
+                subtitle="Shopify intelligence operating system"
+                size={36}
+              />
               <h2>Welcome back.</h2>
-              <p>Sign in to continue with store claims, dashboards, and campaigns.</p>
+              <p>
+                Sign in to continue with store claims, dashboards, and
+                campaigns.
+              </p>
             </div>
           </Layout.Section>
           <Layout.Section>
@@ -156,6 +163,7 @@ export default function AccountLoginPage() {
                   <Button
                     variant="primary"
                     loading={isSubmitting}
+                    disabled={!canSubmit || isSubmitting}
                     onClick={() => {
                       handleLogin().catch(() => undefined);
                     }}

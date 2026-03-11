@@ -61,6 +61,10 @@ export default function SegmentsPage() {
     string | null
   >(null);
   const [billing, setBilling] = useState<BillingState | null>(null);
+  const hasInvalidRuleInput =
+    Number(minTotalSpent) < 0 ||
+    Number(minOrders) < 0 ||
+    Number(inactiveDays) < 0;
 
   const shop = useMemo(() => {
     if (typeof window === "undefined") return "";
@@ -500,6 +504,7 @@ export default function SegmentsPage() {
                   <Button
                     variant="primary"
                     loading={isPreviewing}
+                    disabled={hasInvalidRuleInput}
                     onClick={handlePreview}
                   >
                     Preview segment match count
@@ -507,7 +512,9 @@ export default function SegmentsPage() {
                   <Button
                     tone="success"
                     loading={isCreating}
-                    disabled={billing?.planTier !== "pro"}
+                    disabled={
+                      billing?.planTier !== "pro" || hasInvalidRuleInput
+                    }
                     onClick={() => {
                       handleCreateSegment().catch(() => undefined);
                     }}
@@ -515,6 +522,11 @@ export default function SegmentsPage() {
                     Create segment
                   </Button>
                 </FormLayout>
+                {hasInvalidRuleInput ? (
+                  <Banner tone="critical">
+                    Rule values cannot be negative. Please correct the inputs.
+                  </Banner>
+                ) : null}
                 {typeof previewCount === "number" ? (
                   <Banner tone="info">
                     Estimated matching customers: {previewCount}
@@ -567,7 +579,10 @@ export default function SegmentsPage() {
               ) : null}
               <div className="ca-priority-list">
                 {segments.map((segment) => (
-                  <div key={segment.id} className="ca-priority-card ca-segment-card">
+                  <div
+                    key={segment.id}
+                    className="ca-priority-card ca-segment-card"
+                  >
                     {editingSegmentId === segment.id ? (
                       <BlockStack gap="300">
                         <FormLayout>
@@ -634,7 +649,10 @@ export default function SegmentsPage() {
                         </div>
                         <div className="ca-segment-rule-grid">
                           {getRuleSummary(segment.rules).map((rule) => (
-                            <span key={`${segment.id}-${rule}`} className="ca-rule-chip">
+                            <span
+                              key={`${segment.id}-${rule}`}
+                              className="ca-rule-chip"
+                            >
                               {rule}
                             </span>
                           ))}
