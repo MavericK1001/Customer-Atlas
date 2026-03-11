@@ -70,6 +70,10 @@ function getFreshnessTone(
 
 export default function SettingsPage() {
   const [shopDomain, setShopDomain] = useState("");
+  const [isLoadingSettings, setIsLoadingSettings] = useState(true);
+  const [settingsLoadError, setSettingsLoadError] = useState<string | null>(
+    null,
+  );
   const [isSyncing, setIsSyncing] = useState(false);
   const [syncResult, setSyncResult] = useState<SyncResult | null>(null);
   const [syncError, setSyncError] = useState<string | null>(null);
@@ -81,6 +85,9 @@ export default function SettingsPage() {
   const [billingReturnState, setBillingReturnState] = useState<
     "upgraded" | "not-active" | null
   >(null);
+  const normalizedShop = normalizeShopDomain(shopDomain);
+  const hasInvalidShopInput =
+    shopDomain.trim().length > 0 && !normalizedShop.endsWith(".myshopify.com");
 
   useEffect(() => {
     const searchParams = new URLSearchParams(window.location.search);
@@ -100,7 +107,9 @@ export default function SettingsPage() {
 
   useEffect(() => {
     async function loadSettingsData(): Promise<void> {
-      const normalizedShop = normalizeShopDomain(shopDomain);
+      setIsLoadingSettings(true);
+      setSettingsLoadError(null);
+
       const query = normalizedShop
         ? `?shop=${encodeURIComponent(normalizedShop)}`
         : "";
@@ -130,10 +139,15 @@ export default function SettingsPage() {
           setBilling(payload.billing);
         }
       }
+
+      setIsLoadingSettings(false);
     }
 
-    loadSettingsData().catch(() => undefined);
-  }, [shopDomain]);
+    loadSettingsData().catch(() => {
+      setSettingsLoadError("Unable to load settings data right now.");
+      setIsLoadingSettings(false);
+    });
+  }, [normalizedShop]);
 
   const helperText = useMemo(() => {
     if (!syncResult) {
@@ -154,6 +168,11 @@ export default function SettingsPage() {
     const query = normalizedShop
       ? `?shop=${encodeURIComponent(normalizedShop)}`
       : "";
+
+    if (hasInvalidShopInput) {
+      setSyncError("Please enter a valid .myshopify.com domain.");
+      return;
+    }
 
     try {
       setIsSyncing(true);
@@ -333,6 +352,12 @@ export default function SettingsPage() {
                 {billingError ? (
                   <Banner tone="critical">{billingError}</Banner>
                 ) : null}
+                {isLoadingSettings ? (
+                  <Banner tone="info">Loading billing and sync health...</Banner>
+                ) : null}
+                {settingsLoadError ? (
+                  <Banner tone="critical">{settingsLoadError}</Banner>
+                ) : null}
               </BlockStack>
             </Card>
           </Layout.Section>
@@ -350,10 +375,16 @@ export default function SettingsPage() {
                     autoComplete="off"
                     placeholder="mystore.myshopify.com"
                     helpText="Optional for single-store installs. Leave blank and CustomerAtlas auto-resolves the installed shop."
+                    error={
+                      hasInvalidShopInput
+                        ? "Shop domain must end with .myshopify.com"
+                        : undefined
+                    }
                   />
                   <Button
                     variant="primary"
                     loading={isSyncing}
+                    disabled={isSyncing || hasInvalidShopInput}
                     onClick={handleSyncNow}
                   >
                     Sync now

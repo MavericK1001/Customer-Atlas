@@ -3,6 +3,7 @@
 import { useState } from "react";
 import {
   BlockStack,
+  Banner,
   Button,
   Card,
   FormLayout,
@@ -32,10 +33,6 @@ export default function InstallPage() {
   const normalizedShop = normalizeShopDomain(shop);
   const isValidShop = normalizedShop.endsWith(".myshopify.com");
 
-  const installUrl = isValidShop
-    ? `/api/auth/shopify?shop=${encodeURIComponent(normalizedShop)}`
-    : "#";
-
   return (
     <PolarisProvider>
       <Page title="Install CustomerAtlas">
@@ -63,12 +60,31 @@ export default function InstallPage() {
                     value={shop}
                     onChange={setShop}
                     helpText="Example: your-store.myshopify.com"
+                    error={
+                      shop.trim().length > 0 && !isValidShop
+                        ? "Shop domain must end with .myshopify.com"
+                        : undefined
+                    }
                   />
-                  <a className="ca-link" href={installUrl}>
-                    <Button variant="primary" disabled={!isValidShop}>
-                      Connect Shopify Store
-                    </Button>
-                  </a>
+                  <Button
+                    variant="primary"
+                    disabled={!isValidShop}
+                    onClick={() => {
+                      if (!isValidShop) {
+                        return;
+                      }
+
+                      const installUrl = `/api/auth/shopify?shop=${encodeURIComponent(normalizedShop)}`;
+                      window.location.href = installUrl;
+                    }}
+                  >
+                    Connect Shopify Store
+                  </Button>
+                  {shop.trim().length > 0 && !isValidShop ? (
+                    <Banner tone="critical">
+                      Enter a valid Shopify domain before continuing.
+                    </Banner>
+                  ) : null}
                 </FormLayout>
               </BlockStack>
             </Card>
