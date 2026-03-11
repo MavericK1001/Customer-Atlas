@@ -57,6 +57,11 @@ export default function AffiliatePayoutsPage() {
   const [createPeriodEnd, setCreatePeriodEnd] = useState("");
   const [createNotes, setCreateNotes] = useState("");
   const [isCreating, setIsCreating] = useState(false);
+  const [automationStart, setAutomationStart] = useState("");
+  const [automationEnd, setAutomationEnd] = useState("");
+  const [automationMinAmount, setAutomationMinAmount] = useState("10");
+  const [automationDryRun, setAutomationDryRun] = useState("true");
+  const [isAutomationRunning, setIsAutomationRunning] = useState(false);
 
   async function fetchPayouts(nextStatus: string): Promise<PayoutListResponse> {
     const response = await fetch(
@@ -173,6 +178,56 @@ export default function AffiliatePayoutsPage() {
     setSuccessMessage("Payout created in calculated status.");
   }
 
+  async function runAutomation(): Promise<void> {
+    setError(null);
+    setSuccessMessage(null);
+
+    if (!automationStart || !automationEnd) {
+      throw new Error("Set both automation period start and period end.");
+    }
+
+    const minAmountUsd = Number.parseFloat(automationMinAmount);
+    if (!Number.isFinite(minAmountUsd) || minAmountUsd < 0) {
+      throw new Error("Minimum payout must be zero or greater.");
+    }
+
+    setIsAutomationRunning(true);
+
+    const response = await fetch("/api/admin/affiliate-payouts/automation", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        periodStart: new Date(automationStart).toISOString(),
+        periodEnd: new Date(automationEnd).toISOString(),
+        minAmountUsd,
+        dryRun: automationDryRun === "true",
+      }),
+    });
+
+    const payload = (await response.json()) as {
+      ok?: boolean;
+      error?: string;
+      createdCount?: number;
+      skippedCount?: number;
+      dryRun?: boolean;
+    };
+
+    if (!response.ok || !payload.ok) {
+      setIsAutomationRunning(false);
+      throw new Error(payload.error ?? "Unable to run payout automation.");
+    }
+
+    await loadData();
+    setIsAutomationRunning(false);
+
+    const mode = payload.dryRun ? "Dry run" : "Automation";
+    setSuccessMessage(
+      `${mode} complete: ${payload.createdCount ?? 0} created, ${payload.skippedCount ?? 0} skipped.`,
+    );
+  }
+
   return (
     <AppShell>
       <Page
@@ -183,6 +238,54 @@ export default function AffiliatePayoutsPage() {
           <Layout.Section>
             <Card>
               <BlockStack gap="300">
+                <Text as="h3" variant="headingMd">
+                  Automation
+                </Text>
+                <FormLayout>
+                  <TextField
+                    label="Automation period start"
+                    type="date"
+                    autoComplete="off"
+                    value={automationStart}
+                    onChange={setAutomationStart}
+                  />
+                  <TextField
+                    label="Automation period end"
+                    type="date"
+                    autoComplete="off"
+                    value={automationEnd}
+                    onChange={setAutomationEnd}
+                  />
+                  <TextField
+                    label="Minimum payout (USD)"
+                    type="number"
+                    autoComplete="off"
+                    value={automationMinAmount}
+                    onChange={setAutomationMinAmount}
+                  />
+                  <Select
+                    label="Mode"
+                    options={[
+                      { label: "Dry run (preview only)", value: "true" },
+                      { label: "Create payouts", value: "false" },
+                    ]}
+                    value={automationDryRun}
+                    onChange={setAutomationDryRun}
+                  />
+                  <Button
+                    variant="primary"
+                    loading={isAutomationRunning}
+                    onClick={() => {
+                      runAutomation().catch((automationError) => {
+                        setIsAutomationRunning(false);
+                        setError((automationError as Error).message);
+                      });
+                    }}
+                  >
+                    Run payout automation
+                  </Button>
+                </FormLayout>
+
                 <Text as="h3" variant="headingMd">
                   Create payout
                 </Text>
@@ -256,7 +359,9 @@ export default function AffiliatePayoutsPage() {
                   onChange={setStatus}
                 />
                 {error ? <Banner tone="critical">{error}</Banner> : null}
-                {successMessage ? <Banner tone="success">{successMessage}</Banner> : null}
+                {successMessage ? (
+                  <Banner tone="success">{successMessage}</Banner>
+                ) : null}
                 {payouts.length === 0 ? (
                   <Text as="p">No payouts in this status.</Text>
                 ) : null}

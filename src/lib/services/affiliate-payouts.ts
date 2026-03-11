@@ -51,3 +51,96 @@ export async function updateAffiliatePayoutStatus(input: {
 
   return { ok: true };
 }
+
+export async function generateAffiliatePayouts(input: {
+  periodStart: Date;
+  periodEnd: Date;
+  minAmountUsd?: number;
+  dryRun?: boolean;
+}): Promise<{
+  createdCount: number;
+  skippedCount: number;
+  created: Array<{ affiliateId: number; amount: number }>;
+  skipped: Array<{ affiliateId: number; reason: string }>;
+}> {
+  const minAmountUsd = input.minAmountUsd ?? 10;
+  const dryRun = input.dryRun ?? false;
+
+  const grouped = await prisma.affiliateReferral.groupBy({
+    by: ["affiliateId"],
+    where: {
+      attributedAt: {
+        gte: input.periodStart,
+        lte: input.periodEnd,
+      },
+      commissionAmount: {
+        gt: 0,
+      },
+      affiliate: {
+        status: "active",
+      },
+    },
+    _sum: {
+      commissionAmount: true,
+    },
+  });
+
+  const created: Array<{ affiliateId: number; amount: number }> = [];
+  const skipped: Array<{ affiliateId: number; reason: string }> = [];
+
+  for (const row of grouped) {
+    const amount = Number(row._sum.commissionAmount ?? 0);
+
+    if (!Number.isFinite(amount) || amount < minAmountUsd) {
+      skipped.push({
+        affiliateId: row.affiliateId,
+        reason: `below-minimum-${minAmountUsd.toFixed(2)}`,
+      });
+      continue;
+    }
+
+    const existing = await prisma.affiliatePayout.findFirst({
+      where: {
+        affiliateId: row.affiliateId,
+        periodStart: input.periodStart,
+        periodEnd: input.periodEnd,
+      },
+      select: {
+        id: true,
+      },
+    });
+
+    if (existing) {
+      skipped.push({
+        affiliateId: row.affiliateId,
+        reason: "period-already-generated",
+      });
+      continue;
+    }
+
+    if (!dryRun) {
+      await prisma.affiliatePayout.create({
+        data: {
+          affiliateId: row.affiliateId,
+          amount,
+          periodStart: input.periodStart,
+          periodEnd: input.periodEnd,
+          status: "calculated",
+          notes: "Auto-generated from affiliate referral commissions.",
+        },
+      });
+    }
+
+    created.push({
+      affiliateId: row.affiliateId,
+      amount,
+    });
+  }
+
+  return {
+    createdCount: created.length,
+    skippedCount: skipped.length,
+    created,
+    skipped,
+  };
+}

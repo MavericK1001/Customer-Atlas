@@ -25,6 +25,7 @@ const PUBLIC_API_PREFIXES = [
   "/api/account/claim-status",
   "/api/affiliate/apply",
   "/api/affiliate/key-access",
+  "/api/admin/affiliate-payouts/automation",
   "/api/health",
   "/api/billing/confirm",
   "/api/billing/reconcile",
