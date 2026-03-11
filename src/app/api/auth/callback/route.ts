@@ -161,18 +161,43 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
           affiliate: {
             select: {
               commissionRate: true,
+              merchantUserId: true,
             },
           },
         },
       });
 
       if (referralLink) {
+        // Anti-abuse: prevent self-referrals from affiliate-owned accounts/stores.
+        const isSelfReferral =
+          (accountSession?.merchantUserId != null &&
+            referralLink.affiliate.merchantUserId === accountSession.merchantUserId) ||
+          (existingInstall?.merchantUserId != null &&
+            referralLink.affiliate.merchantUserId === existingInstall.merchantUserId);
+
+        if (isSelfReferral) {
+          console.warn(`Skipping self-referral attribution for shop=${shop}`);
+        }
+
         const existingReferral = await prisma.affiliateReferral.findUnique({
           where: { appInstallId: installId },
           select: { id: true },
         });
 
-        if (!existingReferral) {
+        const installCreatedAt = existingInstall
+          ? await prisma.appInstall
+              .findUnique({
+                where: { id: installId },
+                select: { createdAt: true },
+              })
+              .then((install) => install?.createdAt ?? null)
+          : null;
+
+        const isAttributionLocked =
+          installCreatedAt != null &&
+          Date.now() - installCreatedAt.getTime() > 30 * 24 * 60 * 60 * 1000;
+
+        if (!existingReferral && !isSelfReferral && !isAttributionLocked) {
           await prisma.affiliateReferral.create({
             data: {
               affiliateId: referralLink.affiliateId,
@@ -183,6 +208,8 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
               source: "install-ref",
             },
           });
+        } else if (isAttributionLocked) {
+          console.warn(`Skipping referral attribution for shop=${shop}: attribution window locked.`);
         }
       }
     }

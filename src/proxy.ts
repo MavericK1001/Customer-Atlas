@@ -8,6 +8,8 @@ const PROTECTED_PAGE_PREFIXES = [
   "/segments",
   "/insights",
   "/settings",
+  "/affiliate",
+  "/admin",
 ];
 
 const PUBLIC_API_PREFIXES = [
@@ -22,6 +24,7 @@ const PUBLIC_API_PREFIXES = [
   "/api/account/auth-return",
   "/api/account/claim-status",
   "/api/affiliate/apply",
+  "/api/affiliate/key-access",
   "/api/health",
   "/api/billing/confirm",
   "/api/billing/reconcile",

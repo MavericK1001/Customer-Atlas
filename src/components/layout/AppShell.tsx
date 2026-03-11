@@ -274,6 +274,10 @@ function AppShellInner({ children }: { children: React.ReactNode }) {
       label: "Affiliate Review",
       path: "/admin/affiliate-applications",
     });
+    navItems.push({
+      label: "Affiliate Payouts",
+      path: "/admin/affiliate-payouts",
+    });
   }
 
   return (
