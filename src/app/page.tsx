@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { BrandMark } from "@/components/brand/BrandMark";
 
 export default function HomePage() {
@@ -6,13 +7,14 @@ export default function HomePage() {
     <main className="ca-landing-root">
       <header className="ca-site-header ca-fade-in">
         <Link href="/" className="ca-site-brand">
-          <BrandMark subtitle="Shopify Intelligence Platform" size={34} />
+          <BrandMark subtitle="Revenue Intelligence for Shopify" size={34} />
         </Link>
         <nav className="ca-site-nav">
-          <a href="#product">Product</a>
+          <a href="#models">Models</a>
+          <a href="#showcase">Showcase</a>
           <a href="#pricing">Pricing</a>
-          <Link href="/docs">Docs</Link>
-          <a href="#support">Support</a>
+          <a href="#faq">FAQ</a>
+          <a href="#contact">Contact</a>
         </nav>
         <div className="ca-site-cta">
           <Link href="/login" className="ca-site-link">
@@ -24,148 +26,351 @@ export default function HomePage() {
         </div>
       </header>
 
-      <section className="ca-landing-hero ca-fade-in" id="product">
+      <section className="ca-landing-hero ca-fade-in ca-stagger-1" id="hero">
         <div className="ca-landing-hero-left">
-          <p className="ca-landing-kicker">CustomerAtlas Growth OS</p>
+          <p className="ca-landing-kicker">CustomerAtlas Intelligence Stack</p>
           <h1 className="ca-landing-title">
-            Your Shopify customer intelligence command center.
+            One command center for customer signals, growth decisions, and
+            execution.
           </h1>
           <p className="ca-landing-subtitle">
-            Convert customer data into ranked actions, campaign-ready segments,
-            and measurable revenue lifts from one interface built for operators.
+            Built for Shopify teams that need fast, defensible actions. Analyze
+            behavior, rank opportunities, and launch segmented campaigns from
+            the same workspace.
           </p>
           <div className="ca-landing-pill-row">
-            <span className="ca-landing-pill">Action-ranked priorities</span>
-            <span className="ca-landing-pill">Live audience builder</span>
-            <span className="ca-landing-pill">Reliable sync health</span>
+            <span className="ca-landing-pill">Predictive customer models</span>
+            <span className="ca-landing-pill">Audience activation</span>
+            <span className="ca-landing-pill">
+              Affiliate and payout controls
+            </span>
           </div>
           <div className="ca-landing-cta-row">
             <Link href="/install" className="ca-landing-cta-primary">
               Install on Shopify
             </Link>
             <Link href="/docs" className="ca-landing-cta-secondary">
-              Read documentation
+              Explore documentation
             </Link>
           </div>
         </div>
 
-        <div className="ca-landing-signal-card">
+        <div className="ca-landing-hero-panel">
           <div className="ca-landing-logo-panel">
-            <BrandMark iconOnly size={78} />
+            <BrandMark iconOnly size={74} />
             <div>
-              <p>Primary workspace</p>
+              <p>Live workspace</p>
               <strong>northstar-goods-lab.myshopify.com</strong>
             </div>
           </div>
           <div className="ca-landing-signal-grid">
             <div>
-              <p>Opportunity score</p>
-              <strong>86 / 100</strong>
+              <p>Churn-risk model</p>
+              <strong>94.1% confidence</strong>
             </div>
             <div>
-              <p>At-risk customers</p>
-              <strong>142 profiles</strong>
+              <p>Likely repeat buyers</p>
+              <strong>1,248 profiles</strong>
             </div>
             <div>
-              <p>Projected monthly lift</p>
-              <strong>$12.8k</strong>
+              <p>Projected lift</p>
+              <strong>$18.4k / month</strong>
             </div>
             <div>
-              <p>Sync freshness</p>
-              <strong>Healthy</strong>
+              <p>Automation health</p>
+              <strong>All systems ready</strong>
             </div>
           </div>
         </div>
       </section>
 
-      <section className="ca-landing-feature-grid" id="features">
-        <article className="ca-landing-feature-card ca-fade-in">
-          <h2>Priority Engine</h2>
-          <p>
-            CustomerAtlas scores tasks by expected impact, confidence, and time
-            to value, so your team moves from list view to action quickly.
-          </p>
-        </article>
-        <article className="ca-landing-feature-card ca-fade-in">
-          <h2>Segment Workbench</h2>
-          <p>
-            Build audience logic in minutes, preview matches instantly, and
-            activate campaigns without spreadsheet detours.
-          </p>
-        </article>
-        <article className="ca-landing-feature-card ca-fade-in">
-          <h2>Reliability Layer</h2>
-          <p>
-            Monitor sync health, ownership status, and freshness so teams trust
-            every number before they launch changes.
-          </p>
-        </article>
+      <section
+        className="ca-section ca-section-dark ca-fade-in ca-stagger-2"
+        id="models"
+      >
+        <div className="ca-section-heading-wrap">
+          <p className="ca-section-kicker">Rotating Models</p>
+          <h2>Always-on model stream for high-signal decisions.</h2>
+        </div>
+        <div className="ca-model-rotator" aria-live="polite">
+          <div className="ca-model-track">
+            <article className="ca-model-card">
+              <h3>Churn Prediction</h3>
+              <p>Flags customers likely to drop off in the next 30 days.</p>
+              <span>Refresh cadence: hourly</span>
+            </article>
+            <article className="ca-model-card">
+              <h3>High-LTV Discovery</h3>
+              <p>Finds profiles with underutilized repeat potential.</p>
+              <span>Refresh cadence: every 2 hours</span>
+            </article>
+            <article className="ca-model-card">
+              <h3>Offer Affinity</h3>
+              <p>Ranks incentives by likelihood of conversion per segment.</p>
+              <span>Refresh cadence: daily</span>
+            </article>
+            <article className="ca-model-card">
+              <h3>Campaign Readiness</h3>
+              <p>Scores whether a segment is ready for activation right now.</p>
+              <span>Refresh cadence: every 30 minutes</span>
+            </article>
+            <article className="ca-model-card" aria-hidden="true">
+              <h3>Churn Prediction</h3>
+              <p>Flags customers likely to drop off in the next 30 days.</p>
+              <span>Refresh cadence: hourly</span>
+            </article>
+            <article className="ca-model-card" aria-hidden="true">
+              <h3>High-LTV Discovery</h3>
+              <p>Finds profiles with underutilized repeat potential.</p>
+              <span>Refresh cadence: every 2 hours</span>
+            </article>
+            <article className="ca-model-card" aria-hidden="true">
+              <h3>Offer Affinity</h3>
+              <p>Ranks incentives by likelihood of conversion per segment.</p>
+              <span>Refresh cadence: daily</span>
+            </article>
+            <article className="ca-model-card" aria-hidden="true">
+              <h3>Campaign Readiness</h3>
+              <p>Scores whether a segment is ready for activation right now.</p>
+              <span>Refresh cadence: every 30 minutes</span>
+            </article>
+          </div>
+        </div>
       </section>
 
-      <section className="ca-landing-docs-strip ca-fade-in">
-        <div>
-          <p className="ca-dashboard-kicker">Documentation</p>
-          <h2>Implementation guides your team can use today.</h2>
+      <section
+        className="ca-section ca-section-showcase ca-fade-in ca-stagger-3"
+        id="showcase"
+      >
+        <div className="ca-section-heading-wrap">
+          <p className="ca-section-kicker">App Showcase</p>
+          <h2>Your dashboard at a glance.</h2>
           <p>
-            Setup checklists, route references, and operator playbooks for
-            install, sync, segmentation, and troubleshooting.
+            This frame is pre-wired for your product screenshot. Replace the
+            image path below to publish your final marketing visual.
           </p>
         </div>
-        <div className="ca-landing-docs-actions">
-          <Link href="/docs" className="ca-landing-cta-primary">
-            Open docs
-          </Link>
-          <Link href="/signup" className="ca-site-link">
-            Create account
-          </Link>
+        <div className="ca-screenshot-frame">
+          <Image
+            src="/images/landing/app-screenshot.svg"
+            alt="CustomerAtlas app screenshot"
+            width={1400}
+            height={880}
+            unoptimized
+          />
+          <p className="ca-screenshot-caption">
+            Screenshot slot: replace /images/landing/app-screenshot.svg with
+            your product capture.
+          </p>
         </div>
       </section>
 
-      <section className="ca-landing-pricing" id="pricing">
-        <article className="ca-landing-pricing-card ca-fade-in">
-          <h3>Starter</h3>
-          <p className="ca-price">$0</p>
-          <ul>
-            <li>Dashboard and customer overview</li>
-            <li>Basic sync health</li>
-            <li>Standard insights</li>
-          </ul>
-        </article>
-        <article className="ca-landing-pricing-card ca-fade-in">
-          <h3>Pro</h3>
-          <p className="ca-price">$49</p>
-          <ul>
-            <li>Advanced segment create/edit/delete</li>
-            <li>CSV export and email copy workflows</li>
-            <li>Priority automation playbooks</li>
-          </ul>
-        </article>
+      <section
+        className="ca-section ca-feature-section ca-fade-in ca-stagger-4"
+        id="features"
+      >
+        <div className="ca-section-heading-wrap">
+          <p className="ca-section-kicker">Core Platform</p>
+          <h2>
+            Designed for operators, not dashboards for dashboard&apos;s sake.
+          </h2>
+        </div>
+        <div className="ca-feature-grid-modern">
+          <article className="ca-feature-card-modern">
+            <h3>Decision Priority Engine</h3>
+            <p>Ranks growth tasks by predicted return and execution effort.</p>
+          </article>
+          <article className="ca-feature-card-modern">
+            <h3>Segment Builder</h3>
+            <p>
+              Compose campaign audiences with instant preview and clear logic.
+            </p>
+          </article>
+          <article className="ca-feature-card-modern">
+            <h3>Affiliate Intelligence</h3>
+            <p>Track referrals, payouts, and key activity from one place.</p>
+          </article>
+          <article className="ca-feature-card-modern">
+            <h3>Reliability Controls</h3>
+            <p>Keep sync, billing, and automations visible and healthy.</p>
+          </article>
+        </div>
+      </section>
+
+      <section
+        className="ca-section ca-section-dark ca-fade-in ca-stagger-1"
+        id="how-it-works"
+      >
+        <div className="ca-section-heading-wrap">
+          <p className="ca-section-kicker">How It Works</p>
+          <h2>From install to measurable lift in three steps.</h2>
+        </div>
+        <div className="ca-steps-grid">
+          <article>
+            <span>01</span>
+            <h3>Connect Store</h3>
+            <p>Install once and sync customer, order, and behavior history.</p>
+          </article>
+          <article>
+            <span>02</span>
+            <h3>Model and Segment</h3>
+            <p>
+              CustomerAtlas rotates model insights and builds target audiences.
+            </p>
+          </article>
+          <article>
+            <span>03</span>
+            <h3>Activate and Track</h3>
+            <p>
+              Launch actions and monitor conversion, payout, and health
+              outcomes.
+            </p>
+          </article>
+        </div>
+      </section>
+
+      <section
+        className="ca-section ca-testimonial-section ca-fade-in ca-stagger-2"
+        id="testimonials"
+      >
+        <div className="ca-section-heading-wrap">
+          <p className="ca-section-kicker">Social Proof</p>
+          <h2>Teams use CustomerAtlas to move faster with confidence.</h2>
+        </div>
+        <div className="ca-testimonial-grid">
+          <article>
+            <p>
+              &ldquo;We cut campaign planning time by 40% and had clearer
+              priority queues in week one.&rdquo;
+            </p>
+            <strong>Head of Growth, Northstar Goods</strong>
+          </article>
+          <article>
+            <p>
+              &ldquo;The model stream made it obvious where revenue was leaking.
+              We fixed churn before it showed up in reports.&rdquo;
+            </p>
+            <strong>Lifecycle Manager, Harbor Supply</strong>
+          </article>
+          <article>
+            <p>
+              &ldquo;Affiliate payout ops and key controls are finally
+              centralized. No more spreadsheet handoffs.&rdquo;
+            </p>
+            <strong>Partnership Lead, Urban Bloom</strong>
+          </article>
+        </div>
+      </section>
+
+      <section
+        className="ca-section ca-pricing-section ca-fade-in ca-stagger-3"
+        id="pricing"
+      >
+        <div className="ca-section-heading-wrap">
+          <p className="ca-section-kicker">Pricing</p>
+          <h2>Start free. Scale with Pro when your team is ready.</h2>
+        </div>
+        <div className="ca-pricing-grid-modern">
+          <article className="ca-pricing-card-modern">
+            <h3>Starter</h3>
+            <p className="ca-price">$0</p>
+            <ul>
+              <li>Dashboard and customer timeline</li>
+              <li>Core insights and sync monitoring</li>
+              <li>Install and onboarding support</li>
+            </ul>
+            <Link href="/install" className="ca-landing-cta-secondary">
+              Start free
+            </Link>
+          </article>
+          <article className="ca-pricing-card-modern ca-pricing-card-featured">
+            <h3>Pro</h3>
+            <p className="ca-price">$49</p>
+            <ul>
+              <li>Advanced segmentation and exports</li>
+              <li>Affiliate portal and API key controls</li>
+              <li>Automation and model-driven priorities</li>
+            </ul>
+            <Link href="/install" className="ca-landing-cta-primary">
+              Upgrade to Pro
+            </Link>
+          </article>
+        </div>
+      </section>
+
+      <section
+        className="ca-section ca-section-dark ca-fade-in ca-stagger-4"
+        id="faq"
+      >
+        <div className="ca-section-heading-wrap">
+          <p className="ca-section-kicker">FAQ</p>
+          <h2>Common questions from Shopify teams.</h2>
+        </div>
+        <div className="ca-faq-list">
+          <article>
+            <h3>How long does setup take?</h3>
+            <p>
+              Most stores complete setup and first sync in under 15 minutes.
+            </p>
+          </article>
+          <article>
+            <h3>Can we use it with existing campaign tools?</h3>
+            <p>
+              Yes. CustomerAtlas is built to feed audience and priority
+              decisions into your existing workflows.
+            </p>
+          </article>
+          <article>
+            <h3>Do you support affiliates and payouts?</h3>
+            <p>
+              Yes. You can manage applications, referral links, API keys, and
+              payout lifecycle tracking in-app.
+            </p>
+          </article>
+        </div>
+      </section>
+
+      <section
+        className="ca-section ca-final-cta ca-fade-in ca-stagger-1"
+        id="contact"
+      >
+        <h2>Ready to run growth on signal instead of guesswork?</h2>
+        <p>
+          Install CustomerAtlas and give your team one workspace for insight,
+          activation, and measurable lift.
+        </p>
+        <div className="ca-landing-cta-row">
+          <Link href="/install" className="ca-landing-cta-primary">
+            Install now
+          </Link>
+          <Link href="/docs" className="ca-landing-cta-secondary">
+            View docs
+          </Link>
+        </div>
       </section>
 
       <footer className="ca-site-footer" id="support">
         <div>
           <BrandMark compact size={28} />
-          <p>
-            Built for Shopify operators who want clearer priorities and faster
-            wins.
-          </p>
+          <p>Revenue intelligence platform for modern Shopify operators.</p>
         </div>
         <div>
           <h4>Product</h4>
-          <Link href="/dashboard">Dashboard</Link>
-          <Link href="/customers">Customers</Link>
-          <Link href="/segments">Segments</Link>
+          <a href="#models">Models</a>
+          <a href="#showcase">Showcase</a>
+          <a href="#pricing">Pricing</a>
         </div>
         <div>
           <h4>Resources</h4>
           <Link href="/docs">Documentation</Link>
           <Link href="/install">Install guide</Link>
-          <Link href="/settings">Sync settings</Link>
+          <Link href="/account">Account</Link>
         </div>
         <div>
-          <h4>Account</h4>
+          <h4>Company</h4>
+          <a href="#faq">FAQ</a>
+          <a href="#contact">Contact</a>
           <Link href="/login">Sign in</Link>
-          <Link href="/signup">Create account</Link>
         </div>
       </footer>
     </main>
