@@ -24,11 +24,7 @@
 }
 
 body {
-  background:
-    radial-gradient(circle at 5% 6%, rgba(95, 163, 255, 0.45), rgba(95, 163, 255, 0) 34%),
-    radial-gradient(circle at 94% 14%, rgba(127, 210, 255, 0.4), rgba(127, 210, 255, 0) 35%),
-    radial-gradient(circle at 30% 94%, rgba(13, 124, 236, 0.15), rgba(13, 124, 236, 0) 42%),
-    linear-gradient(145deg, #ecf4ff 0%, #e7f1ff 42%, #f4f8ff 100%);
+  background: #ffffff;
   color: var(--foreground);
   font-family: var(--font-space-grotesk), sans-serif;
   min-height: 100vh;
@@ -471,6 +467,24 @@ select:focus-visible {
   padding: 20px 20px 56px;
 }
 
+.ca-skip-link {
+  position: absolute;
+  top: -44px;
+  left: 20px;
+  z-index: 100;
+  border-radius: 10px;
+  border: 1px solid rgba(13, 57, 111, 0.3);
+  background: #ffffff;
+  color: #0c315f;
+  font-weight: 650;
+  padding: 8px 12px;
+  text-decoration: none;
+}
+
+.ca-skip-link:focus-visible {
+  top: 14px;
+}
+
 .ca-site-header {
   position: sticky;
   top: 12px;
@@ -479,12 +493,12 @@ select:focus-visible {
   align-items: center;
   justify-content: space-between;
   gap: 14px;
-  border: 1px solid rgba(13, 52, 108, 0.18);
-  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid rgba(11, 49, 103, 0.16);
+  background: #ffffff;
   backdrop-filter: blur(12px);
-  border-radius: 16px;
-  padding: 12px 14px;
-  box-shadow: 0 14px 28px rgba(10, 34, 75, 0.1);
+  border-radius: 20px;
+  padding: 12px 16px;
+  box-shadow: 0 16px 30px rgba(8, 30, 69, 0.08);
   margin-bottom: 14px;
 }
 
@@ -505,11 +519,11 @@ select:focus-visible {
   font-size: 0.88rem;
   font-weight: 650;
   padding: 6px 8px;
-  border-radius: 9px;
+  border-radius: 999px;
 }
 
 .ca-site-nav a:hover {
-  background: rgba(18, 74, 149, 0.12);
+  background: rgba(18, 74, 149, 0.1);
 }
 
 .ca-site-cta {
@@ -525,7 +539,7 @@ select:focus-visible {
   font-weight: 640;
   padding: 6px 10px;
   border-radius: 999px;
-  border: 1px solid rgba(13, 60, 119, 0.22);
+  border: 1px solid rgba(13, 60, 119, 0.2);
   background: rgba(255, 255, 255, 0.92);
 }
 
@@ -707,7 +721,7 @@ select:focus-visible {
 }
 
 .ca-section-dark {
-  background: #092a58;
+  background: #082a58;
   border-color: rgba(139, 178, 231, 0.3);
   color: #e8f1ff;
 }
@@ -717,6 +731,22 @@ select:focus-visible {
 .ca-section-dark p,
 .ca-section-dark span {
   color: inherit;
+}
+
+.ca-section-dark .ca-feature-card-modern,
+.ca-section-dark .ca-testimonial-grid article {
+  background: #ffffff;
+  border-color: rgba(180, 209, 246, 0.7);
+}
+
+.ca-section-dark .ca-feature-card-modern h3,
+.ca-section-dark .ca-testimonial-grid strong {
+  color: #0a2f61;
+}
+
+.ca-section-dark .ca-feature-card-modern p,
+.ca-section-dark .ca-testimonial-grid p {
+  color: #345476;
 }
 
 .ca-section-heading-wrap {
@@ -955,16 +985,22 @@ select:focus-visible {
   gap: 10px;
 }
 
-.ca-faq-list article {
+.ca-faq-list details {
   border-radius: 12px;
   border: 1px solid rgba(160, 202, 255, 0.36);
   background: rgba(8, 42, 84, 0.74);
   padding: 12px;
 }
 
-.ca-faq-list h3 {
-  margin: 0;
+.ca-faq-list summary {
+  cursor: pointer;
   font-size: 0.98rem;
+  font-weight: 650;
+  list-style: none;
+}
+
+.ca-faq-list summary::-webkit-details-marker {
+  display: none;
 }
 
 .ca-faq-list p {
@@ -993,11 +1029,11 @@ select:focus-visible {
   display: grid;
   grid-template-columns: 1.4fr repeat(3, 1fr);
   gap: 12px;
-  border: 1px solid rgba(13, 58, 116, 0.16);
-  border-radius: 18px;
-  background: #ffffff;
-  padding: 16px;
-  box-shadow: 0 14px 28px rgba(10, 39, 84, 0.09);
+  border: 1px solid rgba(139, 178, 231, 0.3);
+  border-radius: 22px;
+  background: #082a58;
+  padding: 22px;
+  box-shadow: 0 18px 34px rgba(8, 27, 58, 0.18);
 }
 
 .ca-site-footer h4 {
@@ -1005,19 +1041,19 @@ select:focus-visible {
   font-size: 0.86rem;
   letter-spacing: 0.05em;
   text-transform: uppercase;
-  color: #224f86;
+  color: #b9d8ff;
 }
 
 .ca-site-footer a {
   display: block;
   margin-top: 6px;
   text-decoration: none;
-  color: #1c4470;
+  color: #e5f0ff;
 }
 
 .ca-site-footer p {
   margin: 8px 0 0;
-  color: #365779;
+  color: #c7ddfb;
 }
 
 @keyframes caModelScroll {
@@ -1132,5 +1168,13 @@ select:focus-visible {
     animation: none;
     grid-auto-flow: row;
     grid-template-columns: 1fr;
+  }
+
+  .ca-screenshot-frame {
+    padding: 10px;
+  }
+
+  .ca-screenshot-caption {
+    font-size: 0.76rem;
   }
 }

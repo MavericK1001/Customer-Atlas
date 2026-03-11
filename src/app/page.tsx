@@ -5,11 +5,15 @@ import { BrandMark } from "@/components/brand/BrandMark";
 export default function HomePage() {
   return (
     <main className="ca-landing-root">
+      <a href="#hero" className="ca-skip-link">
+        Skip to main content
+      </a>
+
       <header className="ca-site-header ca-fade-in">
         <Link href="/" className="ca-site-brand">
           <BrandMark subtitle="Revenue Intelligence for Shopify" size={34} />
         </Link>
-        <nav className="ca-site-nav">
+        <nav className="ca-site-nav" aria-label="Primary">
           <a href="#models">Models</a>
           <a href="#showcase">Showcase</a>
           <a href="#pricing">Pricing</a>
@@ -26,10 +30,14 @@ export default function HomePage() {
         </div>
       </header>
 
-      <section className="ca-landing-hero ca-fade-in ca-stagger-1" id="hero">
+      <section
+        className="ca-landing-hero ca-fade-in ca-stagger-1"
+        id="hero"
+        aria-labelledby="hero-title"
+      >
         <div className="ca-landing-hero-left">
           <p className="ca-landing-kicker">CustomerAtlas Intelligence Stack</p>
-          <h1 className="ca-landing-title">
+          <h1 className="ca-landing-title" id="hero-title">
             One command center for customer signals, growth decisions, and
             execution.
           </h1>
@@ -87,10 +95,13 @@ export default function HomePage() {
       <section
         className="ca-section ca-section-dark ca-fade-in ca-stagger-2"
         id="models"
+        aria-labelledby="models-title"
       >
         <div className="ca-section-heading-wrap">
           <p className="ca-section-kicker">Rotating Models</p>
-          <h2>Always-on model stream for high-signal decisions.</h2>
+          <h2 id="models-title">
+            Always-on model stream for high-signal decisions.
+          </h2>
         </div>
         <div className="ca-model-rotator" aria-live="polite">
           <div className="ca-model-track">
@@ -141,10 +152,11 @@ export default function HomePage() {
       <section
         className="ca-section ca-section-showcase ca-fade-in ca-stagger-3"
         id="showcase"
+        aria-labelledby="showcase-title"
       >
         <div className="ca-section-heading-wrap">
           <p className="ca-section-kicker">App Showcase</p>
-          <h2>Your dashboard at a glance.</h2>
+          <h2 id="showcase-title">Your dashboard at a glance.</h2>
           <p>
             This frame is pre-wired for your product screenshot. Replace the
             image path below to publish your final marketing visual.
@@ -157,21 +169,23 @@ export default function HomePage() {
             width={1400}
             height={880}
             unoptimized
+            priority
           />
           <p className="ca-screenshot-caption">
             Screenshot slot: replace /images/landing/app-screenshot.svg with
-            your product capture.
+            your product capture. Recommended export: 1400x880 PNG or WebP.
           </p>
         </div>
       </section>
 
       <section
-        className="ca-section ca-feature-section ca-fade-in ca-stagger-4"
+        className="ca-section ca-section-dark ca-feature-section ca-fade-in ca-stagger-4"
         id="features"
+        aria-labelledby="features-title"
       >
         <div className="ca-section-heading-wrap">
           <p className="ca-section-kicker">Core Platform</p>
-          <h2>
+          <h2 id="features-title">
             Designed for operators, not dashboards for dashboard&apos;s sake.
           </h2>
         </div>
@@ -198,12 +212,15 @@ export default function HomePage() {
       </section>
 
       <section
-        className="ca-section ca-section-dark ca-fade-in ca-stagger-1"
+        className="ca-section ca-fade-in ca-stagger-1"
         id="how-it-works"
+        aria-labelledby="steps-title"
       >
         <div className="ca-section-heading-wrap">
           <p className="ca-section-kicker">How It Works</p>
-          <h2>From install to measurable lift in three steps.</h2>
+          <h2 id="steps-title">
+            From install to measurable lift in three steps.
+          </h2>
         </div>
         <div className="ca-steps-grid">
           <article>
@@ -230,12 +247,15 @@ export default function HomePage() {
       </section>
 
       <section
-        className="ca-section ca-testimonial-section ca-fade-in ca-stagger-2"
+        className="ca-section ca-section-dark ca-testimonial-section ca-fade-in ca-stagger-2"
         id="testimonials"
+        aria-labelledby="testimonials-title"
       >
         <div className="ca-section-heading-wrap">
           <p className="ca-section-kicker">Social Proof</p>
-          <h2>Teams use CustomerAtlas to move faster with confidence.</h2>
+          <h2 id="testimonials-title">
+            Teams use CustomerAtlas to move faster with confidence.
+          </h2>
         </div>
         <div className="ca-testimonial-grid">
           <article>
@@ -265,10 +285,13 @@ export default function HomePage() {
       <section
         className="ca-section ca-pricing-section ca-fade-in ca-stagger-3"
         id="pricing"
+        aria-labelledby="pricing-title"
       >
         <div className="ca-section-heading-wrap">
           <p className="ca-section-kicker">Pricing</p>
-          <h2>Start free. Scale with Pro when your team is ready.</h2>
+          <h2 id="pricing-title">
+            Start free. Scale with Pro when your team is ready.
+          </h2>
         </div>
         <div className="ca-pricing-grid-modern">
           <article className="ca-pricing-card-modern">
@@ -301,40 +324,44 @@ export default function HomePage() {
       <section
         className="ca-section ca-section-dark ca-fade-in ca-stagger-4"
         id="faq"
+        aria-labelledby="faq-title"
       >
         <div className="ca-section-heading-wrap">
           <p className="ca-section-kicker">FAQ</p>
-          <h2>Common questions from Shopify teams.</h2>
+          <h2 id="faq-title">Common questions from Shopify teams.</h2>
         </div>
         <div className="ca-faq-list">
-          <article>
-            <h3>How long does setup take?</h3>
+          <details open>
+            <summary>How long does setup take?</summary>
             <p>
               Most stores complete setup and first sync in under 15 minutes.
             </p>
-          </article>
-          <article>
-            <h3>Can we use it with existing campaign tools?</h3>
+          </details>
+          <details>
+            <summary>Can we use it with existing campaign tools?</summary>
             <p>
               Yes. CustomerAtlas is built to feed audience and priority
               decisions into your existing workflows.
             </p>
-          </article>
-          <article>
-            <h3>Do you support affiliates and payouts?</h3>
+          </details>
+          <details>
+            <summary>Do you support affiliates and payouts?</summary>
             <p>
               Yes. You can manage applications, referral links, API keys, and
               payout lifecycle tracking in-app.
             </p>
-          </article>
+          </details>
         </div>
       </section>
 
       <section
         className="ca-section ca-final-cta ca-fade-in ca-stagger-1"
         id="contact"
+        aria-labelledby="contact-title"
       >
-        <h2>Ready to run growth on signal instead of guesswork?</h2>
+        <h2 id="contact-title">
+          Ready to run growth on signal instead of guesswork?
+        </h2>
         <p>
           Install CustomerAtlas and give your team one workspace for insight,
           activation, and measurable lift.
@@ -349,7 +376,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      <footer className="ca-site-footer" id="support">
+      <footer className="ca-site-footer" id="support" aria-label="Footer">
         <div>
           <BrandMark compact size={28} />
           <p>Revenue intelligence platform for modern Shopify operators.</p>
