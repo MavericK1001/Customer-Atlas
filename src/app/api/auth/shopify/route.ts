@@ -30,6 +30,7 @@ function normalizeShopDomain(input: string | null): string | null {
 
 export async function GET(request: NextRequest): Promise<NextResponse> {
   const shop = normalizeShopDomain(request.nextUrl.searchParams.get("shop"));
+  const referralCode = (request.nextUrl.searchParams.get("ref") ?? "").trim();
 
   if (!shop) {
     return NextResponse.json({ error: "Valid shop parameter is required." }, { status: 400 });
@@ -50,6 +51,16 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     path: "/",
     maxAge: 600,
   });
+
+  if (/^[a-zA-Z0-9_-]{4,64}$/.test(referralCode)) {
+    response.cookies.set("affiliate_ref_code", referralCode, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      path: "/",
+      maxAge: 60 * 60 * 24,
+    });
+  }
 
   return response;
 }

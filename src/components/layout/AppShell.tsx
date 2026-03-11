@@ -23,6 +23,7 @@ const NAV_ITEMS = [
   { label: "Segments", path: "/segments" },
   { label: "Insights", path: "/insights" },
   { label: "Settings", path: "/settings" },
+  { label: "Affiliate", path: "/affiliate" },
 ];
 
 function AppShellInner({ children }: { children: React.ReactNode }) {
@@ -44,6 +45,8 @@ function AppShellInner({ children }: { children: React.ReactNode }) {
   } | null>(null);
   const [isClaimingStore, setIsClaimingStore] = useState(false);
   const [claimError, setClaimError] = useState<string | null>(null);
+  const [showAffiliateNav, setShowAffiliateNav] = useState(false);
+  const [showAdminAffiliateNav, setShowAdminAffiliateNav] = useState(false);
 
   const normalizedSwitchShop = normalizeShopDomain(switchShopInput);
   const canSwitchShop = normalizedSwitchShop.endsWith(".myshopify.com");
@@ -213,13 +216,73 @@ function AppShellInner({ children }: { children: React.ReactNode }) {
     refreshClaimStatus().catch(() => undefined);
   }, [refreshClaimStatus]);
 
+  useEffect(() => {
+    const query = queryString ? `?${queryString}` : "";
+
+    async function refreshNavGates(): Promise<void> {
+      const [billingResponse, accountResponse] = await Promise.all([
+        fetch(`/api/billing${query}`).catch(() => null),
+        fetch("/api/account/session").catch(() => null),
+      ]);
+
+      if (billingResponse?.ok) {
+        const billingPayload = (await billingResponse.json()) as {
+          billing?: {
+            planTier?: "free" | "pro";
+            billingStatus?: string;
+          };
+        };
+
+        const tier = billingPayload.billing?.planTier;
+        const status = billingPayload.billing?.billingStatus;
+        setShowAffiliateNav(
+          tier === "pro" && (status === "active" || status === "trialing"),
+        );
+      } else {
+        setShowAffiliateNav(false);
+      }
+
+      if (accountResponse?.ok) {
+        const accountPayload = (await accountResponse.json()) as {
+          ok?: boolean;
+          account?: {
+            role?: string;
+          } | null;
+        };
+        setShowAdminAffiliateNav(accountPayload.account?.role === "admin");
+      } else {
+        setShowAdminAffiliateNav(false);
+      }
+    }
+
+    refreshNavGates().catch(() => {
+      setShowAffiliateNav(false);
+      setShowAdminAffiliateNav(false);
+    });
+  }, [queryString]);
+
+  const navItems = NAV_ITEMS.filter((item) => {
+    if (item.path === "/affiliate") {
+      return showAffiliateNav;
+    }
+
+    return true;
+  });
+
+  if (showAdminAffiliateNav) {
+    navItems.push({
+      label: "Affiliate Review",
+      path: "/admin/affiliate-applications",
+    });
+  }
+
   return (
     <PolarisProvider>
       <Frame
         navigation={
           <Navigation location={pathname}>
             <Navigation.Section
-              items={NAV_ITEMS.map((item) => ({
+              items={navItems.map((item) => ({
                 label: item.label,
                 url: queryString ? `${item.path}?${queryString}` : item.path,
               }))}

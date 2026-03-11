@@ -30,6 +30,7 @@ function normalizeShopDomain(input: string): string {
 
 export default function InstallPage() {
   const [shop, setShop] = useState("");
+  const [referralCode, setReferralCode] = useState("");
   const normalizedShop = normalizeShopDomain(shop);
   const isValidShop = normalizedShop.endsWith(".myshopify.com");
 
@@ -66,6 +67,12 @@ export default function InstallPage() {
                         : undefined
                     }
                   />
+                  <TextField
+                    label="Affiliate referral code (optional)"
+                    autoComplete="off"
+                    value={referralCode}
+                    onChange={setReferralCode}
+                  />
                   <Button
                     variant="primary"
                     disabled={!isValidShop}
@@ -74,7 +81,13 @@ export default function InstallPage() {
                         return;
                       }
 
-                      const installUrl = `/api/auth/shopify?shop=${encodeURIComponent(normalizedShop)}`;
+                      const params = new URLSearchParams();
+                      params.set("shop", normalizedShop);
+                      if (referralCode.trim()) {
+                        params.set("ref", referralCode.trim());
+                      }
+
+                      const installUrl = `/api/auth/shopify?${params.toString()}`;
                       window.location.href = installUrl;
                     }}
                   >

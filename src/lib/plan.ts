@@ -36,7 +36,10 @@ export function canUseFeature(input: {
     | "custom_segment_crud"
     | "automation_rules"
     | "assistant"
-    | "customer_timeline";
+    | "customer_timeline"
+    | "affiliate_portal"
+    | "affiliate_api_keys"
+    | "affiliate_admin_review";
   planTier: PlanTier;
   billingStatus: string;
 }): boolean {
@@ -55,6 +58,20 @@ export function canUseFeature(input: {
   }
 
   if (input.feature === "customer_timeline") {
+    return true;
+  }
+
+  if (
+    input.feature === "affiliate_portal" ||
+    input.feature === "affiliate_api_keys"
+  ) {
+    return (
+      input.planTier === "pro" &&
+      (input.billingStatus === "active" || input.billingStatus === "trialing")
+    );
+  }
+
+  if (input.feature === "affiliate_admin_review") {
     return true;
   }
 

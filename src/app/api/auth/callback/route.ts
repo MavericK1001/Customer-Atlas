@@ -83,6 +83,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 
     const response = NextResponse.redirect(dashboardUrl.toString());
     response.cookies.delete("shopify_oauth_state");
+    response.cookies.delete("affiliate_ref_code");
     response.cookies.set(
       APP_SESSION_COOKIE_NAME,
       createAppSessionToken(targetShop),
@@ -105,10 +106,13 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     const existingInstall = await prisma.appInstall.findUnique({
       where: { shopDomain: shop },
       select: {
+        id: true,
         shopDomain: true,
         merchantUserId: true,
       },
     });
+
+    let installId: number;
 
     if (existingInstall) {
       const shouldLinkToCurrentAccount =
@@ -116,7 +120,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
         (!existingInstall.merchantUserId ||
           existingInstall.merchantUserId === accountSession.merchantUserId);
 
-      await prisma.appInstall.update({
+      const updated = await prisma.appInstall.update({
         where: { shopDomain: shop },
         data: {
           accessToken,
@@ -124,15 +128,63 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
             ? { merchantUserId: accountSession.merchantUserId }
             : {}),
         },
+        select: {
+          id: true,
+        },
       });
+      installId = updated.id;
     } else {
-      await prisma.appInstall.create({
+      const created = await prisma.appInstall.create({
         data: {
           shopDomain: shop,
           accessToken,
           merchantUserId: accountSession?.merchantUserId ?? null,
         },
+        select: {
+          id: true,
+        },
       });
+      installId = created.id;
+    }
+
+    const referralCode = request.cookies.get("affiliate_ref_code")?.value;
+    if (referralCode) {
+      const referralLink = await prisma.affiliateReferralLink.findFirst({
+        where: {
+          code: referralCode,
+          isActive: true,
+          affiliate: { status: "active" },
+        },
+        select: {
+          id: true,
+          affiliateId: true,
+          affiliate: {
+            select: {
+              commissionRate: true,
+            },
+          },
+        },
+      });
+
+      if (referralLink) {
+        const existingReferral = await prisma.affiliateReferral.findUnique({
+          where: { appInstallId: installId },
+          select: { id: true },
+        });
+
+        if (!existingReferral) {
+          await prisma.affiliateReferral.create({
+            data: {
+              affiliateId: referralLink.affiliateId,
+              referralLinkId: referralLink.id,
+              appInstallId: installId,
+              referredShopDomain: shop,
+              commissionRate: referralLink.affiliate.commissionRate,
+              source: "install-ref",
+            },
+          });
+        }
+      }
     }
 
     const setupTasks = [

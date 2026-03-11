@@ -27,6 +27,7 @@ model AppInstall {
   lastSyncError  String?
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
+  affiliateReferrals AffiliateReferral[]
 
   @@index([merchantUserId])
   @@index([shopDomain, billingStatus])
@@ -37,7 +38,11 @@ model MerchantUser {
   email        String      @unique
   passwordHash String
   name         String?
+  role         String      @default("merchant")
   installs     AppInstall[]
+  affiliateProfile AffiliateProfile?
+  affiliateApplications AffiliateApplication[]
+  reviewedAffiliateApplications AffiliateApplication[] @relation("AffiliateApplicationReviewer")
   createdAt    DateTime    @default(now())
   updatedAt    DateTime    @updatedAt
 }
@@ -115,4 +120,116 @@ model Insight {
 
   @@index([shopDomain])
   @@index([shopDomain, archivedAt])
+}
+
+model AffiliateApplication {
+  id            Int      @id @default(autoincrement())
+  email         String
+  contactName   String
+  companyName   String?
+  websiteUrl    String?
+  audienceNotes String?
+  status        String   @default("pending")
+  reviewerNotes String?
+  merchantUserId Int?
+  merchantUser  MerchantUser? @relation(fields: [merchantUserId], references: [id], onDelete: SetNull)
+  reviewedById  Int?
+  reviewedBy    MerchantUser? @relation("AffiliateApplicationReviewer", fields: [reviewedById], references: [id], onDelete: SetNull)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  reviewedAt    DateTime?
+
+  @@index([email])
+  @@index([status])
+  @@index([merchantUserId])
+}
+
+model AffiliateProfile {
+  id             Int      @id @default(autoincrement())
+  merchantUserId Int      @unique
+  merchantUser   MerchantUser @relation(fields: [merchantUserId], references: [id], onDelete: Cascade)
+  status         String   @default("pending")
+  commissionRate Decimal  @db.Decimal(5, 2) @default(10.00)
+  approvedAt     DateTime?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  links          AffiliateReferralLink[]
+  referrals      AffiliateReferral[]
+  apiKeys        AffiliateApiKey[]
+  payouts        AffiliatePayout[]
+
+  @@index([status])
+}
+
+model AffiliateReferralLink {
+  id          Int      @id @default(autoincrement())
+  affiliateId Int
+  affiliate   AffiliateProfile @relation(fields: [affiliateId], references: [id], onDelete: Cascade)
+  code        String   @unique
+  label       String?
+  isDefault   Boolean  @default(false)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  expiresAt   DateTime?
+  referrals   AffiliateReferral[]
+
+  @@index([affiliateId])
+  @@index([affiliateId, isActive])
+}
+
+model AffiliateReferral {
+  id             Int      @id @default(autoincrement())
+  affiliateId    Int
+  affiliate      AffiliateProfile @relation(fields: [affiliateId], references: [id], onDelete: Cascade)
+  referralLinkId Int?
+  referralLink   AffiliateReferralLink? @relation(fields: [referralLinkId], references: [id], onDelete: SetNull)
+  appInstallId   Int      @unique
+  appInstall     AppInstall @relation(fields: [appInstallId], references: [id], onDelete: Cascade)
+  referredShopDomain String
+  commissionRate Decimal  @db.Decimal(5, 2)
+  commissionAmount Decimal @db.Decimal(12, 2) @default(0)
+  status         String   @default("pending")
+  source         String   @default("install-ref")
+  attributedAt   DateTime @default(now())
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@unique([affiliateId, referredShopDomain])
+  @@index([affiliateId])
+  @@index([referredShopDomain])
+}
+
+model AffiliateApiKey {
+  id          Int      @id @default(autoincrement())
+  affiliateId Int
+  affiliate   AffiliateProfile @relation(fields: [affiliateId], references: [id], onDelete: Cascade)
+  name        String
+  keyPrefix   String
+  keyHash     String
+  lastUsedAt  DateTime?
+  revokedAt   DateTime?
+  expiresAt   DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([affiliateId])
+  @@index([affiliateId, revokedAt])
+}
+
+model AffiliatePayout {
+  id          Int      @id @default(autoincrement())
+  affiliateId Int
+  affiliate   AffiliateProfile @relation(fields: [affiliateId], references: [id], onDelete: Cascade)
+  periodStart DateTime
+  periodEnd   DateTime
+  amount      Decimal  @db.Decimal(12, 2)
+  status      String   @default("calculated")
+  notes       String?
+  paidAt      DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([affiliateId])
+  @@index([affiliateId, status])
 }
