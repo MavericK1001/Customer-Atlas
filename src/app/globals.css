@@ -1306,9 +1306,13 @@ select:focus-visible {
 
 .ca-marketing-root {
   min-height: 100vh;
+  --ca-accent-rgb: 194, 139, 42;
+  --ca-accent-strong: #ab7418;
+  --ca-accent-text: #8d6018;
   background:
-    radial-gradient(circle at top, rgba(96, 166, 255, 0.12), transparent 32%),
-    linear-gradient(180deg, #fbfcff 0%, #f4f8ff 44%, #ffffff 100%);
+    radial-gradient(circle at top, rgba(56, 128, 245, 0.14), transparent 34%),
+    radial-gradient(circle at 18% 12%, rgba(145, 206, 255, 0.12), transparent 24%),
+    linear-gradient(180deg, #fcfdff 0%, #f3f7fe 42%, #ffffff 100%);
   color: #081b36;
 }
 
@@ -1330,7 +1334,7 @@ select:focus-visible {
   top: 40px;
   height: 280px;
   width: 280px;
-  background: radial-gradient(circle, rgba(90, 162, 255, 0.35), rgba(90, 162, 255, 0));
+  background: radial-gradient(circle, rgba(58, 127, 244, 0.32), rgba(58, 127, 244, 0));
 }
 
 .ca-marketing-orb-left {
@@ -1338,7 +1342,7 @@ select:focus-visible {
   top: 420px;
   height: 340px;
   width: 340px;
-  background: radial-gradient(circle, rgba(10, 80, 188, 0.18), rgba(10, 80, 188, 0));
+  background: radial-gradient(circle, rgba(8, 66, 162, 0.2), rgba(8, 66, 162, 0));
 }
 
 .ca-marketing-orb-right {
@@ -1346,15 +1350,16 @@ select:focus-visible {
   top: 280px;
   height: 340px;
   width: 340px;
-  background: radial-gradient(circle, rgba(140, 199, 255, 0.28), rgba(140, 199, 255, 0));
+  background: radial-gradient(circle, rgba(122, 197, 255, 0.24), rgba(122, 197, 255, 0));
 }
 
 .ca-eyebrow {
   display: inline-flex;
   align-items: center;
   border-radius: 999px;
-  background: rgba(17, 91, 214, 0.08);
-  color: #0d58c9;
+  border: 1px solid rgba(19, 91, 205, 0.08);
+  background: rgba(24, 96, 212, 0.07);
+  color: #0f57bf;
   padding: 0.45rem 0.8rem;
   font-size: 0.73rem;
   font-weight: 700;
@@ -1363,9 +1368,9 @@ select:focus-visible {
 }
 
 .ca-eyebrow-muted {
-  background: rgba(255, 255, 255, 0.72);
-  color: #5a7191;
-  border: 1px solid rgba(11, 48, 103, 0.08);
+  background: rgba(var(--ca-accent-rgb), 0.08);
+  color: var(--ca-accent-text);
+  border: 1px solid rgba(var(--ca-accent-rgb), 0.14);
 }
 
 .ca-eyebrow-dark {
@@ -1399,16 +1404,16 @@ select:focus-visible {
 }
 
 .ca-button-primary {
-  background: linear-gradient(135deg, #0d60da 0%, #0a3776 100%);
+  background: linear-gradient(135deg, #0f67e6 0%, #114cae 52%, #0b2f67 100%);
   color: #ffffff;
-  box-shadow: 0 18px 40px rgba(10, 56, 121, 0.28);
+  box-shadow: 0 20px 44px rgba(9, 52, 118, 0.24);
 }
 
 .ca-button-secondary {
-  border: 1px solid rgba(11, 49, 102, 0.12);
-  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(16, 62, 125, 0.1);
+  background: rgba(255, 255, 255, 0.94);
   color: #123b74;
-  box-shadow: 0 14px 32px rgba(8, 29, 58, 0.06);
+  box-shadow: 0 16px 36px rgba(8, 29, 58, 0.05);
 }
 
 .ca-button-dark-secondary {
@@ -1421,10 +1426,10 @@ select:focus-visible {
   display: grid;
   gap: 0.35rem;
   border-radius: 24px;
-  border: 1px solid rgba(11, 49, 102, 0.08);
-  background: rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(12, 54, 109, 0.08);
+  background: rgba(255, 255, 255, 0.86);
   padding: 1rem 1.05rem;
-  box-shadow: 0 18px 40px rgba(9, 26, 54, 0.05);
+  box-shadow: 0 18px 40px rgba(9, 26, 54, 0.045);
 }
 
 .ca-stat-card strong {
@@ -1443,15 +1448,28 @@ select:focus-visible {
 }
 
 .ca-hero-panel {
+  position: relative;
+  overflow: hidden;
   display: grid;
   gap: 1rem;
   border-radius: 34px;
-  border: 1px solid rgba(8, 32, 70, 0.08);
+  border: 1px solid rgba(9, 41, 84, 0.08);
   background:
-    radial-gradient(circle at top right, rgba(103, 181, 255, 0.16), rgba(103, 181, 255, 0) 35%),
-    linear-gradient(180deg, #ffffff 0%, #eef5ff 100%);
+    radial-gradient(circle at top right, rgba(83, 163, 255, 0.15), rgba(83, 163, 255, 0) 36%),
+    linear-gradient(180deg, #ffffff 0%, #f2f7ff 64%, #edf4ff 100%);
   padding: 1rem;
-  box-shadow: 0 28px 90px rgba(7, 20, 44, 0.12);
+  box-shadow: 0 30px 100px rgba(7, 20, 44, 0.11);
+}
+
+.ca-hero-panel::after {
+  content: "";
+  position: absolute;
+  inset: auto -24px -36px auto;
+  height: 160px;
+  width: 160px;
+  border-radius: 999px;
+  background: radial-gradient(circle, rgba(var(--ca-accent-rgb), 0.14), rgba(var(--ca-accent-rgb), 0));
+  pointer-events: none;
 }
 
 .ca-hero-panel-top {
@@ -1494,14 +1512,14 @@ select:focus-visible {
   display: grid;
   gap: 0.45rem;
   border-radius: 24px;
-  border: 1px solid rgba(132, 174, 229, 0.26);
-  background: rgba(255, 255, 255, 0.78);
+  border: 1px solid rgba(122, 168, 229, 0.22);
+  background: rgba(255, 255, 255, 0.82);
   padding: 1rem;
 }
 
 .ca-panel-card-light {
-  background: rgba(255, 255, 255, 0.92);
-  box-shadow: 0 16px 36px rgba(10, 36, 74, 0.06);
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: 0 18px 40px rgba(10, 36, 74, 0.055);
 }
 
 .ca-panel-card span {
@@ -1528,9 +1546,9 @@ select:focus-visible {
 .ca-surface-card {
   border-radius: 30px;
   border: 1px solid rgba(9, 34, 72, 0.08);
-  background: rgba(255, 255, 255, 0.88);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.94), rgba(246, 250, 255, 0.92));
   padding: 1.45rem;
-  box-shadow: 0 24px 80px rgba(7, 20, 44, 0.07);
+  box-shadow: 0 24px 80px rgba(7, 20, 44, 0.06);
 }
 
 .ca-surface-card-tight {
@@ -1548,9 +1566,9 @@ select:focus-visible {
 .ca-marketing-band {
   border-radius: 30px;
   border: 1px solid rgba(14, 52, 98, 0.08);
-  background: rgba(255, 255, 255, 0.82);
+  background: rgba(255, 255, 255, 0.88);
   padding: 1rem;
-  box-shadow: 0 20px 60px rgba(7, 20, 44, 0.05);
+  box-shadow: 0 22px 64px rgba(7, 20, 44, 0.045);
 }
 
 .ca-marquee {
@@ -1570,7 +1588,7 @@ select:focus-visible {
   align-items: center;
   border-radius: 999px;
   border: 1px solid rgba(9, 37, 74, 0.08);
-  background: linear-gradient(180deg, #ffffff, #f2f7ff);
+  background: linear-gradient(180deg, #ffffff, #f4f8ff);
   padding: 0.8rem 1rem;
   white-space: nowrap;
   font-size: 0.84rem;
@@ -1581,8 +1599,8 @@ select:focus-visible {
 .ca-dark-section {
   position: relative;
   background:
-    radial-gradient(circle at top right, rgba(102, 176, 255, 0.2), rgba(102, 176, 255, 0) 28%),
-    linear-gradient(180deg, #07172f 0%, #0c2850 100%);
+    radial-gradient(circle at top right, rgba(86, 165, 255, 0.2), rgba(86, 165, 255, 0) 28%),
+    linear-gradient(180deg, #07152b 0%, #0b2346 54%, #0c2b56 100%);
 }
 
 .ca-dark-card,
@@ -1590,8 +1608,8 @@ select:focus-visible {
   display: grid;
   gap: 0.7rem;
   border-radius: 28px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.05);
   padding: 1.2rem;
   backdrop-filter: blur(12px);
 }
@@ -1621,13 +1639,36 @@ select:focus-visible {
 }
 
 .ca-screenshot-stage {
+  position: relative;
+  overflow: hidden;
   border-radius: 32px;
   border: 1px solid rgba(10, 44, 86, 0.1);
   background:
-    radial-gradient(circle at top left, rgba(134, 193, 255, 0.26), rgba(134, 193, 255, 0) 30%),
-    linear-gradient(180deg, #ffffff 0%, #eef5ff 100%);
+    radial-gradient(circle at top left, rgba(119, 188, 255, 0.24), rgba(119, 188, 255, 0) 32%),
+    linear-gradient(180deg, #ffffff 0%, #f2f7ff 100%);
   padding: 1rem;
-  box-shadow: 0 28px 90px rgba(7, 20, 44, 0.08);
+  box-shadow: 0 28px 90px rgba(7, 20, 44, 0.07);
+}
+
+.ca-screenshot-stage::after {
+  content: "";
+  position: absolute;
+  right: -28px;
+  bottom: -34px;
+  height: 180px;
+  width: 180px;
+  border-radius: 999px;
+  background: radial-gradient(circle, rgba(var(--ca-accent-rgb), 0.12), rgba(var(--ca-accent-rgb), 0));
+  pointer-events: none;
+}
+
+.ca-inline-callout {
+  border-radius: 24px;
+  border: 1px solid rgba(12, 77, 163, 0.1);
+  background:
+    radial-gradient(circle at top right, rgba(var(--ca-accent-rgb), 0.08), rgba(var(--ca-accent-rgb), 0) 34%),
+    linear-gradient(180deg, #fbfcff, #eef5ff);
+  padding: 1.25rem;
 }
 
 .ca-metric-tile {
@@ -1655,23 +1696,33 @@ select:focus-visible {
   position: relative;
   border-radius: 30px;
   border: 1px solid rgba(9, 34, 72, 0.08);
-  background: rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.94);
   padding: 1.45rem;
-  box-shadow: 0 24px 80px rgba(7, 20, 44, 0.06);
+  box-shadow: 0 24px 80px rgba(7, 20, 44, 0.055);
 }
 
 .ca-pricing-preview-card-featured {
-  background: linear-gradient(180deg, #fdfefe 0%, #eef5ff 100%);
-  border-color: rgba(13, 96, 218, 0.18);
-  box-shadow: 0 28px 80px rgba(10, 56, 121, 0.12);
+  background: linear-gradient(180deg, #ffffff 0%, #f1f7ff 100%);
+  border-color: rgba(15, 103, 230, 0.18);
+  box-shadow: 0 30px 84px rgba(10, 56, 121, 0.1);
+}
+
+.ca-pricing-preview-card-featured::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(circle at top right, rgba(var(--ca-accent-rgb), 0.12), rgba(var(--ca-accent-rgb), 0) 34%);
+  pointer-events: none;
 }
 
 .ca-featured-badge {
   display: inline-flex;
   margin-bottom: 1rem;
   border-radius: 999px;
-  background: rgba(12, 96, 218, 0.11);
-  color: #0d58c9;
+  border: 1px solid rgba(var(--ca-accent-rgb), 0.18);
+  background: rgba(var(--ca-accent-rgb), 0.1);
+  color: var(--ca-accent-strong);
   padding: 0.4rem 0.7rem;
   font-size: 0.72rem;
   font-weight: 700;
@@ -1724,9 +1775,9 @@ select:focus-visible {
 .ca-faq-card {
   border-radius: 24px;
   border: 1px solid rgba(12, 44, 86, 0.08);
-  background: rgba(255, 255, 255, 0.88);
+  background: rgba(255, 255, 255, 0.92);
   padding: 1rem 1.15rem;
-  box-shadow: 0 16px 44px rgba(7, 20, 44, 0.05);
+  box-shadow: 0 18px 48px rgba(7, 20, 44, 0.045);
 }
 
 .ca-faq-card summary {
@@ -1754,10 +1805,10 @@ select:focus-visible {
   gap: 1.25rem;
   border-radius: 34px;
   background:
-    radial-gradient(circle at top right, rgba(102, 176, 255, 0.2), rgba(102, 176, 255, 0) 28%),
-    linear-gradient(180deg, #08182f 0%, #0c2850 100%);
+    radial-gradient(circle at top right, rgba(86, 165, 255, 0.2), rgba(86, 165, 255, 0) 28%),
+    linear-gradient(180deg, #07152b 0%, #0b2346 54%, #0c2b56 100%);
   padding: 1.5rem;
-  box-shadow: 0 34px 90px rgba(7, 20, 44, 0.18);
+  box-shadow: 0 34px 90px rgba(7, 20, 44, 0.16);
 }
 
 .ca-pricing-table {

@@ -88,7 +88,7 @@ export default function ProductPage() {
                 </div>
                 <div className="grid gap-4 text-base leading-7 text-[#58708d]">
                   <p>{module.description}</p>
-                  <div className="rounded-[24px] border border-[#0c4da31a] bg-[linear-gradient(180deg,#f9fbff,#eef5ff)] p-5">
+                  <div className="ca-inline-callout">
                     <p className="text-sm uppercase tracking-[0.16em] text-[#6b84a7]">
                       What this means in practice
                     </p>

@@ -90,7 +90,7 @@ export default function DocsPage() {
               <h2 className="mt-4 text-2xl font-semibold tracking-[-0.04em] text-[#0b2143]">
                 Build checks
               </h2>
-              <div className="mt-4 rounded-[22px] border border-[#0c4da31a] bg-[linear-gradient(180deg,#f9fbff,#eef5ff)] p-4">
+              <div className="ca-inline-callout mt-4 rounded-[22px] p-4">
                 <pre className="overflow-x-auto text-sm leading-7 text-[#183b63]">{`npm install\nnpm run dev\n\nnpm run lint\nnpm run build`}</pre>
               </div>
             </article>
