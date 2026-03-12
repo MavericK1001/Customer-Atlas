@@ -1,4 +1,8 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { BrandMark } from "@/components/brand/BrandMark";
 import { LandingScrollSystem } from "@/components/landing/LandingScrollSystem";
 
@@ -60,6 +64,8 @@ export function MarketingPageFrame({
 }
 
 export function MarketingHeader({ dark = false }: MarketingHeaderProps) {
+  const pathname = usePathname();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const shellClassName = dark
     ? "ca-marketing-header-shell ca-marketing-header-shell-dark"
     : "ca-marketing-header-shell";
@@ -70,6 +76,26 @@ export function MarketingHeader({ dark = false }: MarketingHeaderProps) {
     ? "ca-marketing-signin ca-marketing-signin-dark"
     : "ca-marketing-signin";
 
+  useEffect(() => {
+    setMobileMenuOpen(false);
+  }, [pathname]);
+
+  function getNavLinkClassName(href: string): string {
+    const isActive = href === pathname;
+
+    if (!isActive) {
+      return navLinkClassName;
+    }
+
+    return dark
+      ? `${navLinkClassName} ca-marketing-nav-link-active-dark`
+      : `${navLinkClassName} ca-marketing-nav-link-active`;
+  }
+
+  function closeMobileMenu() {
+    setMobileMenuOpen(false);
+  }
+
   return (
     <header className="sticky top-4 z-40 px-4 sm:px-6 lg:px-8" data-reveal>
       <div className={`ca-marketing-shell ${shellClassName}`}>
@@ -77,37 +103,88 @@ export function MarketingHeader({ dark = false }: MarketingHeaderProps) {
           <Link href="/" className="no-underline">
             <BrandMark subtitle="Shopify Revenue Intelligence" size={34} />
           </Link>
-          <span className="ca-header-badge">Built for Shopify operators</span>
+          <div className="ca-header-meta">
+            <span className="ca-header-badge">Built for Shopify operators</span>
+            <span className="ca-header-microcopy">
+              Revenue signal, segmentation, and partner ops in one surface.
+            </span>
+          </div>
         </div>
 
-        <nav className="ca-marketing-nav" aria-label="Primary">
-          <Link href="/#platform" className={navLinkClassName}>
-            Platform
-          </Link>
-          <Link href="/#proof" className={navLinkClassName}>
-            Proof
-          </Link>
-          {NAV_ITEMS.map((item) => (
-            <Link key={item.href} href={item.href} className={navLinkClassName}>
-              {item.label}
-            </Link>
-          ))}
-        </nav>
-
-        <div className="ca-marketing-header-actions">
-          <span className="ca-header-microcopy">
-            Signals, segments, and partner ops in one surface.
-          </span>
-          <Link
-            href="/login"
-            className={signInClassName}
+        <div
+          className={`ca-marketing-header-panel ${
+            mobileMenuOpen ? "ca-marketing-header-panel-open" : ""
+          }`}
+        >
+          <nav
+            id="marketing-primary-nav"
+            className="ca-marketing-nav"
+            aria-label="Primary"
           >
-            Sign in
-          </Link>
-          <Link href="/install" className="ca-button-primary">
-            Install app
-          </Link>
+            <Link
+              href="/#platform"
+              className={navLinkClassName}
+              onClick={closeMobileMenu}
+            >
+              Platform
+            </Link>
+            <Link
+              href="/#proof"
+              className={navLinkClassName}
+              onClick={closeMobileMenu}
+            >
+              Proof
+            </Link>
+            {NAV_ITEMS.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={getNavLinkClassName(item.href)}
+                onClick={closeMobileMenu}
+                aria-current={item.href === pathname ? "page" : undefined}
+              >
+                {item.label}
+              </Link>
+            ))}
+          </nav>
+
+          <div className="ca-marketing-header-actions">
+            <Link
+              href="/login"
+              className={signInClassName}
+              onClick={closeMobileMenu}
+            >
+              Sign in
+            </Link>
+            <Link
+              href="/install"
+              className="ca-button-primary"
+              onClick={closeMobileMenu}
+            >
+              Install app
+            </Link>
+          </div>
         </div>
+
+        <button
+          type="button"
+          className="ca-marketing-menu-button"
+          aria-expanded={mobileMenuOpen}
+          aria-controls="marketing-primary-nav"
+          aria-label={
+            mobileMenuOpen ? "Close navigation menu" : "Open navigation menu"
+          }
+          onClick={() => setMobileMenuOpen((open) => !open)}
+        >
+          <span className="ca-marketing-menu-button-label">
+            {mobileMenuOpen ? "Close" : "Menu"}
+          </span>
+          <span className="ca-marketing-menu-icon" aria-hidden="true">
+            <span />
+            <span />
+            <span />
+          </span>
+        </button>
       </div>
     </header>
   );
@@ -156,10 +233,17 @@ export function MarketingFooter(): JSX.Element {
           </div>
 
           {FOOTER_SECTIONS.map((section) => (
-            <div key={section.title} className="grid gap-2 text-sm text-[#16345f]">
+            <div
+              key={section.title}
+              className="grid gap-2 text-sm text-[#16345f]"
+            >
               <h4 className="ca-footer-heading">{section.title}</h4>
               {section.links.map((item) => (
-                <Link key={item.href} href={item.href} className="ca-footer-link">
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className="ca-footer-link"
+                >
                   {item.label}
                 </Link>
               ))}
@@ -169,7 +253,8 @@ export function MarketingFooter(): JSX.Element {
 
         <div className="ca-marketing-footer-bottom">
           <p className="text-sm leading-6 text-[#5b7291]">
-            © {currentYear} CustomerAtlas. Premium revenue intelligence for Shopify teams.
+            © {currentYear} CustomerAtlas. Premium revenue intelligence for
+            Shopify teams.
           </p>
           <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-sm">
             <Link href="/login" className="ca-footer-link">
