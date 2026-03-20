@@ -11,6 +11,7 @@ import {
   User,
   Shield,
   ArrowLeft,
+  Zap,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -21,10 +22,16 @@ export function AccountSettings({
   email,
   userId,
   createdAt,
+  planName,
+  usedThisMonth,
+  analysesPerMonth,
 }: {
   email: string;
   userId: string;
   createdAt: string;
+  planName: string;
+  usedThisMonth: number;
+  analysesPerMonth: number;
 }) {
   const router = useRouter();
   const [newPassword, setNewPassword] = useState("");
@@ -121,7 +128,7 @@ export function AccountSettings({
             </p>
             <p className="mt-1 text-sm text-white">{email}</p>
           </div>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-3 gap-4">
             <div className="rounded-xl border border-white/[0.04] bg-white/[0.02] p-4">
               <p className="text-xs font-medium uppercase tracking-wider text-white/30">
                 User ID
@@ -136,7 +143,52 @@ export function AccountSettings({
               </p>
               <p className="mt-1 text-sm text-white/60">{memberSince}</p>
             </div>
+            <div className="rounded-xl border border-white/[0.04] bg-white/[0.02] p-4">
+              <p className="text-xs font-medium uppercase tracking-wider text-white/30">
+                Plan &amp; Usage
+              </p>
+              <p className="mt-1 text-sm text-white/60">
+                {planName} &middot;{" "}
+                {analysesPerMonth === -1
+                  ? `${usedThisMonth} used`
+                  : `${usedThisMonth}/${analysesPerMonth} used`}
+              </p>
+            </div>
           </div>
+        </div>
+      </div>
+
+      {/* Plan section */}
+      <div className="rounded-2xl border border-white/[0.06] bg-white/[0.03] p-6 backdrop-blur-xl">
+        <div className="mb-4 flex items-center gap-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-violet-500/20">
+            <Zap className="h-5 w-5 text-violet-400" />
+          </div>
+          <div>
+            <h2 className="font-display text-lg font-semibold text-white">
+              Plan
+            </h2>
+            <p className="text-sm text-white/40">Your current subscription</p>
+          </div>
+        </div>
+
+        <div className="flex items-center justify-between rounded-xl border border-white/[0.04] bg-white/[0.02] p-4">
+          <div>
+            <p className="text-sm font-medium text-white">{planName} plan</p>
+            <p className="text-xs text-white/30">
+              {analysesPerMonth === -1
+                ? "Unlimited analyses per month"
+                : `${analysesPerMonth} analyses per month`}
+            </p>
+          </div>
+          {planName === "Free" && (
+            <Link
+              href="/#pricing"
+              className="rounded-full bg-gradient-to-r from-violet-600 to-violet-500 px-4 py-1.5 text-xs font-medium text-white transition-opacity hover:opacity-90"
+            >
+              Upgrade
+            </Link>
+          )}
         </div>
       </div>
 

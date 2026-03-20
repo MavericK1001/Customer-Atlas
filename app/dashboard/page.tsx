@@ -1,9 +1,11 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { getCurrentUser } from "@/lib/supabase";
+import { getUserUsage } from "@/lib/usage";
 import { getRecentAnalyses } from "@/services/analysisService";
 import { RecentAnalyses } from "@/components/dashboard/recent-analyses";
 import { ScoreBadge } from "@/components/dashboard/score-badge";
+import { UsageMeter } from "@/components/dashboard/usage-meter";
 import { URLInput } from "@/components/dashboard/url-input";
 import { UserNav } from "@/components/dashboard/user-nav";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -15,7 +17,10 @@ export default async function DashboardPage() {
     redirect("/login?redirect=/dashboard");
   }
 
-  const analyses = await getRecentAnalyses(user.id);
+  const [analyses, usage] = await Promise.all([
+    getRecentAnalyses(user.id),
+    getUserUsage(user.id),
+  ]);
 
   const averageScores = analyses.length
     ? {
@@ -83,22 +88,26 @@ export default async function DashboardPage() {
           </CardContent>
         </Card>
 
-        <Card className="border-violet-500/20 bg-gradient-to-b from-violet-500/[0.08] to-transparent">
-          <CardHeader className="space-y-4">
-            <p className="text-sm font-medium uppercase tracking-widest text-violet-300">
-              Score summary
-            </p>
-            <CardTitle className="text-3xl">Recent analysis averages</CardTitle>
-            <p className="text-sm leading-relaxed text-white/40">
-              Based on your latest stored reports.
-            </p>
-          </CardHeader>
-          <CardContent className="flex flex-wrap gap-3">
-            <ScoreBadge label="Trust" score={averageScores.trust} />
-            <ScoreBadge label="Clarity" score={averageScores.clarity} />
-            <ScoreBadge label="Conversion" score={averageScores.conversion} />
-          </CardContent>
-        </Card>
+        <div className="space-y-6">
+          <UsageMeter usage={usage} />
+
+          <Card className="border-violet-500/20 bg-gradient-to-b from-violet-500/[0.08] to-transparent">
+            <CardHeader className="space-y-4">
+              <p className="text-sm font-medium uppercase tracking-widest text-violet-300">
+                Score summary
+              </p>
+              <CardTitle className="text-3xl">Recent analysis averages</CardTitle>
+              <p className="text-sm leading-relaxed text-white/40">
+                Based on your latest stored reports.
+              </p>
+            </CardHeader>
+            <CardContent className="flex flex-wrap gap-3">
+              <ScoreBadge label="Trust" score={averageScores.trust} />
+              <ScoreBadge label="Clarity" score={averageScores.clarity} />
+              <ScoreBadge label="Conversion" score={averageScores.conversion} />
+            </CardContent>
+          </Card>
+        </div>
       </div>
 
       <section className="mt-12 space-y-6">

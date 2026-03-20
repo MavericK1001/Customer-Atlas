@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/supabase";
+import { getUserUsage } from "@/lib/usage";
 import { AccountSettings } from "@/components/account/account-settings";
 
 export default async function AccountPage() {
@@ -8,6 +9,8 @@ export default async function AccountPage() {
   if (!user) {
     redirect("/login?redirect=/account");
   }
+
+  const usage = await getUserUsage(user.id);
 
   return (
     <main className="section-shell py-10 sm:py-14">
@@ -25,6 +28,9 @@ export default async function AccountPage() {
         email={user.email ?? ""}
         userId={user.id}
         createdAt={user.created_at}
+        planName={usage.plan.planName}
+        usedThisMonth={usage.usedThisMonth}
+        analysesPerMonth={usage.plan.analysesPerMonth}
       />
     </main>
   );
