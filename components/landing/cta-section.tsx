@@ -29,15 +29,13 @@ export function CtaSection() {
               before their visitors do.
             </p>
             <div className="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
-              <Link href="/dashboard">
+              <Link href="/signup">
                 <Button size="lg" className="group">
                   Start your free analysis
                   <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-0.5" />
                 </Button>
               </Link>
-              <p className="text-sm text-white/30">
-                No credit card required
-              </p>
+              <p className="text-sm text-white/30">No credit card required</p>
             </div>
           </div>
         </div>

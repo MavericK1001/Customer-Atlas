@@ -48,9 +48,14 @@ export default function LandingPage() {
             >
               Pricing
             </Link>
-            <Link href="/dashboard">
-              <Button variant="outline" size="sm">
-                Dashboard
+            <Link href="/login">
+              <Button variant="ghost" size="sm">
+                Log in
+              </Button>
+            </Link>
+            <Link href="/signup">
+              <Button size="sm">
+                Get started
                 <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
               </Button>
             </Link>

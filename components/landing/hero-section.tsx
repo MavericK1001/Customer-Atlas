@@ -53,7 +53,7 @@ export function HeroSection() {
             delay={320}
             className="mt-10 flex flex-col gap-4 sm:flex-row sm:items-center"
           >
-            <Link href="/dashboard">
+            <Link href="/signup">
               <Button size="lg" className="group w-full sm:w-auto">
                 Analyze your website free
                 <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-0.5" />
